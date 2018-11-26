@@ -1,0 +1,5 @@
+{
+  "name": "fzj.xg.iv-plugin-template",
+  "template": "http://localhost:3001/template.html",
+  "script" : "http://localhost:3001/script.js"
+}
