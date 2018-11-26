@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs'
+
 interface InteractiveViewer {
 
   metadata : {
@@ -41,8 +43,45 @@ interface InteractiveViewer {
   pluginControl : {
     loadExternalLibraries : (libraries:string[])=>Promise<void>
     unloadExternalLibraries : (libraries:string[])=>void
-    [key:string] : PluginControl
+    [key:string] : PluginControl | ((l:string[]) => Promise<void>) | ((l:string[]) => void)
   }
+}
+
+interface NGLayerObj{
+
+}
+
+interface UserLandmark{
+  name : string
+  position : [number, number, number]
+  id : string /* probably use the it to track and remove user landmarks */
+  highlight : boolean
+}
+
+interface ModalHandler{
+
+  hide : () => void
+  show : () => void
+  // onHide : (callback: () => void) => void
+  // onHidden : (callback : () => void) => void
+  // onShow : (callback : () => void) => void
+  // onShown : (callback : () => void) => void
+  title : string
+  body : string
+  footer : String
+  
+  /**
+   * @default true
+   */
+  dismissable?: boolean 
+}
+
+interface ToastHandler{
+  message? : string
+  timeout? : number
+  dismissable? : boolean
+  show : () => void
+  hide : () => void
 }
 
 interface PluginControl{
