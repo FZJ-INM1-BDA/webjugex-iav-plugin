@@ -8,9 +8,14 @@ import App from './components/App'
  */
 window.interactiveViewer.pluginControl.loadExternalLibraries(['vue@2.5.16'])
   .then(() => {
-    new Vue({
-      el: '#fzj-xg-vue-template-container',
+    const app = new Vue({
+      el: '#fzj-xg-webjugex-container',
       render: h => h(App)
+    })
+
+    window.interactiveViewer.pluginControl[PLUGIN_NAME].onShutdown(() => {
+      app.$destroy()
+      window.interactiveViewer.pluginControl.unloadExternalLibraries(['vue@2.5.16'])
     })
   })
   .catch(console.error)
