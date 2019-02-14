@@ -24,7 +24,7 @@ module.exports = {
   plugins: [
     new VueLoaderPlugin(),
     new DefinePlugin({
-      BACKEND_URL: JSON.stringify(process.env.BACKEND_URL || 'http://localhost:8003'),
+      VUE_APP_BACKEND_URL: JSON.stringify(process.env.VUE_APP_BACKEND_URL || 'http://localhost:8003'),
       PLUGIN_NAME: JSON.stringify(process.env.PLUGINAME || 'fzj.xg.webjugex-frontend')
     })
   ],

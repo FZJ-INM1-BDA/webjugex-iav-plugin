@@ -325,7 +325,7 @@ export default {
         })
     )
 
-    fetch(BACKEND_URL)
+    fetch(VUE_APP_BACKEND_URL)
       .then(res => res.json())
       .then(arr => this.allgenes = arr)
       .catch(this.catchError)

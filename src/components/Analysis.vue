@@ -96,7 +96,7 @@ export default {
       threshold: 0.2,
       mode: false
     }
-    fetch(`${BACKEND_URL}/jugex`, {
+    fetch(`${VUE_APP_BACKEND_URL}/jugex`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
