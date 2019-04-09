@@ -3,6 +3,7 @@ const DefinePlugin = require('webpack').DefinePlugin
 
 module.exports = {
   entry: './src/main.js',
+  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   resolve: {
     extensions: ['.vue', '.js', '.css']
   },
