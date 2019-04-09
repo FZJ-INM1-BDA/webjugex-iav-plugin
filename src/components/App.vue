@@ -4,7 +4,33 @@
     id = "fzj-xg-webjugex-container">
 
     <!-- description -->
-    <readmore :collapsed-height = "40">
+    <div class="fzj-xg-webjugex-truncate">
+      <small v-if="descReadmore">
+        <p>
+          Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
+        </p>
+        <p>
+          The tool downloads expression values of user specified sets of genes from Allen Brain API<sup>[1]</sup>.
+        </p>
+        <p>
+          Then, it uses zscores to find which genes are expressed differentially between the user specified regions of interests.
+        </p>
+        <p>
+          After the analysis is finished, the genes and their calculated p values are displayed. There is also an option of downloading the gene names and their p values and the roi coordinates used in the analysis.
+        </p>
+        <p>
+          <sup>[1]</sup> &copy; 2015 Allen Institute for Brain Science. Allen Brain Atlas API. Available from: <a target = "_blank" href = "brain-map.org/api/index.html">brain-map.org/api/index.html</a>
+        </p>
+        <a @click="$event.preventDefault(); descReadmore = false" href="#"> readless </a>
+      </small>
+      <small v-else>
+        <p>
+          Find a set of differentially expressed genes between two user defined volumes of interest ... 
+          <a @click="$event.preventDefault(); descReadmore = true" href="#"> readmore </a>
+        </p>
+      </small>
+    </div>
+    <readmore v-if="false" :collapsed-height = "40">
       <template slot = "readmoreContent">
         <small>
           <p>
@@ -40,10 +66,12 @@
     </div>
     
     <!-- simple mode -->
-    <div class="input-group">
-      <span class="input-group-addon">
-        Simple mode
-      </span>
+    <div v-if="false" class="input-group">
+      <div class="input-group-prepend">
+        <span class="input-group-te">
+          Simple mode
+        </span>
+      </div>
       <check-box
         class = "fzj.xg.webjugex.checkbox"
         @togglecheckbox = "simpleMode = !simpleMode"
@@ -54,102 +82,110 @@
     </div>
 
     <!-- roi1 -->
-    <div style = "z-index: 5" class="input-group">
-      <div class="input-group-addon">
-        ROI1
-      </div>
-      <auto-complete
-        ref = "roi1"
-        :warning = "roi1Warning"
-        class = "form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
-        @selectslice = "selectSlice($event, null, true)"
-        :rawarray = "autocompleteRawArray"
-        :placeholder = "autocomplete1Placeholder"/>
-      <div class="input-group-btn">
-        <div
-          webjugex-tooltip = "toggle scan mode for ROI1"
-          @click.stop.prevent = "toggleScanMode(1)"
-          :class = "scanMode === 1 ? 'btn-active' : 'btn-inactive'"
-          class="btn btn-default">
-          <i class="glyphicon glyphicon-screenshot"></i>
+    <div class="p-1 bg-dark mb-2">
+      <div style = "z-index: 5" class="input-group">
+        <div class="input-group-prepend">
+          <div class="input-group-text">
+            ROI1
+          </div>
+        </div>
+        <auto-complete
+          ref="roi1"
+          :warning="roi1Warning"
+          class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
+          @selectslice="selectSlice($event, null, true)"
+          :rawarray="autocompleteRawArray"
+          :placeholder="autocomplete1Placeholder"/>
+        <div class="input-group-append">
+          <div
+            webjugex-tooltip="toggle scan mode for ROI1"
+            @click.stop.prevent="toggleScanMode(1)"
+            :class="scanMode === 1 ? 'btn-active' : 'btn-inactive'"
+            class="btn btn-secondary">
+            <i class="fas fa-satellite-dish"></i>
+          </div>
         </div>
       </div>
-    </div>
-    <div>
-      <pill
-        class = "pill"
-        @remove-pill = "removeRoi(1, roi)"
-        :name = "roi"
-        :key = "roi"
-        v-for = "roi in roi1s" />
+      <div>
+        <pill
+          class="pill mt-1 mb-0"
+          @remove-pill="removeRoi(1, roi)"
+          :name="roi"
+          :key="roi"
+          v-for="roi in roi1s" />
+      </div>
     </div>
 
     <!-- roi2 -->
-    <div style = "z-index: 4" class="input-group">
-      <div class="input-group-addon">
-        ROI2
-      </div>
-      <auto-complete
-        ref = "roi2"
-        :warning = "roi2Warning"
-        class = "form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
-        @selectslice = "selectSlice(null, $event, true)"
-        :rawarray = "autocompleteRawArray"
-        :placeholder = "autocomplete2Placeholder"/>
-      <div class="input-group-btn">
-        <div
-          webjugex-tooltip = "toggle scan mode for ROI2"
-          @click.stop.prevent = "toggleScanMode(2)"
-          :class = "scanMode === 2 ? 'btn-active' : 'btn-inactive'"
-          class="btn btn-default">
-          <i class="glyphicon glyphicon-screenshot"></i>
+    <div class="p-1 bg-dark mb-2">
+      <div style = "z-index: 4" class="input-group">
+        <div class="input-group-prepend">
+          <div class="input-group-text">
+            ROI2
+          </div>
+        </div>
+        <auto-complete
+          ref="roi2"
+          :warning="roi2Warning"
+          class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
+          @selectslice="selectSlice(null, $event, true)"
+          :rawarray="autocompleteRawArray"
+          :placeholder="autocomplete2Placeholder"/>
+        <div class="input-group-append">
+          <div
+            webjugex-tooltip="toggle scan mode for ROI2"
+            @click.stop.prevent="toggleScanMode(2)"
+            :class="scanMode === 2 ? 'btn-active' : 'btn-inactive'"
+            class="btn btn-default">
+            <i class="fas fa-satellite-dish"></i>
+          </div>
         </div>
       </div>
+      <div>
+        <pill
+          class="pill mt-1 mb-0"
+          @remove-pill = "removeRoi(2, roi)"
+          :name = "roi"
+          :key = "roi"
+          v-for = "roi in roi2s" />
+      </div>
     </div>
-    <div>
-      <pill
-        class = "pill"
-        @remove-pill = "removeRoi(2, roi)"
-        :name = "roi"
-        :key = "roi"
-        v-for = "roi in roi2s" />
-    </div>
-
     <div class = "fzj.xg.webjugex.divider">
     </div>
 
     <!-- genelist -->
-    <div style = "z-index: 3" class="input-group">
-      <auto-complete
-        :warning = "selectedgenesWarning"
-        class = "form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
-        ref = "genelist"
-        :rawarray = "allgenes"
-        @selectslice = "selectgene"/>
-      <div class="input-group-btn">
-        <div
-          webjugex-tooltip = "accepts a comma delimited utf-8 encoded file"
-          class="btn btn-default">
-          Import
+    <div class="p-1 bg-dark mb-2">
+      <div style = "z-index: 3" class="input-group">
+        <auto-complete
+          :warning = "selectedgenesWarning"
+          class = "form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
+          ref = "genelist"
+          :rawarray = "allgenes"
+          @selectslice = "selectgene"/>
+        <div class="input-group-btn">
+          <div
+            webjugex-tooltip = "accepts a comma delimited utf-8 encoded file"
+            class="btn btn-default">
+            Import
+          </div>
+        </div>
+        <div class="input-group-btn">
+          <div
+            webjugex-tooltip = "saves the gene list as a comma delimited, utf8 encoded csv file" 
+            class="btn btn-default">
+            Export
+          </div>
         </div>
       </div>
-      <div class="input-group-btn">
-        <div
-          webjugex-tooltip = "saves the gene list as a comma delimited, utf8 encoded csv file" 
-          class="btn btn-default">
-          Export
-        </div>
+      <div>
+        <pill
+          class = "pill"
+          @remove-pill = "removeRoi(3, gene)"
+          :name = "gene"
+          :key = "gene"
+          v-for = "gene in selectedgenes" />
       </div>
     </div>
-    <div>
-      <pill
-        class = "pill"
-        @remove-pill = "removeRoi(3, gene)"
-        :name = "gene"
-        :key = "gene"
-        v-for = "gene in selectedgenes" />
-    </div>
-
     <div class="fzj.xg.webjugex.divider"></div>
 
     <!-- complex mode -->
@@ -202,9 +238,9 @@
       
         <div class="input-group">
           <span class="input-group-addon">
-            Number of permutations
+            <small>No. of Perm</small>
           </span>
-          <input v-model = "nPermutations" type="text" class="form-control">
+          <input v-model = "nPermutations" type="number" class="form-control">
         </div>
       
         <div class="fzj.xg.webjugex.divider"></div>  
@@ -214,18 +250,104 @@
     <div class="fzj.xg.webjugex.divider"></div>
 
     <!-- analysis GO -->
-    <div 
-      @click = "startAnalysis"
-      class="btn btn-default btn-block">
-      Start Differential Analysis
+    <div class="btn-group w-100">
+      <div 
+        @click = "startAnalysis"
+        class="btn btn-secondary">
+        Start Differential Analysis
+        <span
+          v-if="!isDefault"
+          class="badge badge-alert">
+          !
+        </span>
+      </div>
+      <div
+        @click="showAdvancedMenu = !showAdvancedMenu"
+        class="btn btn-secondary dropdown-toggle dropdown-toggle-split fg-0"
+        data-toggle="dropdown">
+        <span class="sr-only">
+          Toggle Dropdown
+        </span>
+      </div>
+
+      <!-- advanced menu -->
+      <div
+        class="bg-dark p-3 fzj-xg-webjugex-advanced-menu"
+        v-if="showAdvancedMenu">
+
+        <div class="input-group">
+          <span class="input-group-prepend">
+            <span class="input-group-text">
+              Single probe mode
+            </span>
+          </span>
+          <check-box
+            :flag = "singleProbeMode"
+            @togglecheckbox = "singleProbeMode = !singleProbeMode" />
+        </div>
+      
+        <div class="input-group">
+          <span class="input-group-prepend">
+            <span class="input-group-text">
+              Ignore custom probe
+            </span>
+          </span>
+          <check-box
+            :flag = "ignoreCustomProbe"
+            @togglecheckbox = "ignoreCustomProbe = !ignoreCustomProbe" />
+        </div>
+        
+        <div class="fzj.xg.webjugex.divider"></div>
+      
+        <div class="input-group">
+          <span class="input-group-prepend">
+            <span class="input-group-text">
+              Hemisphere
+            </span>
+          </span>
+          <div
+            style = "display:inline-block"
+            :warning = "hemisphereWarning">
+            <div 
+              @click = "lefthemisphere = !lefthemisphere"
+              :class = " lefthemisphere == true ? 'btn-active' : 'btn-inactive'"
+              class="btn btn-default">
+              Left
+            </div>
+            <div 
+              @click = "righthemisphere = !righthemisphere"
+              :class = " righthemisphere == true ? 'btn-active' : 'btn-inactive'"
+              class="btn btn-default">
+              Right
+            </div>
+          </div>
+        </div>
+      
+        <div class="fzj.xg.webjugex.divider"></div>
+      
+        <div class="input-group">
+          <span class="input-group-prepend">
+            <span class="input-group-text">
+              <small>No. of Perm</small>
+            </span>
+          </span>
+          <input
+            :value="nPermutations"
+            @change="nPermChange"
+            @keyup="nPermChange"
+            type="number"
+            class="form-control">
+        </div>
+
+      </div>
     </div>
     
     <!-- warning -->
-    <transition name = "fzj-xg-webjugex-fade">
-      <div style = "margin-top:0.5em" class = "alert alert-danger" v-if = "warning.length > 0">
+    <transition name="fzj-xg-webjugex-fade">
+      <div style="margin-top:0.5em" class="alert alert-danger" v-if="warning.length > 0">
         <i class="glyphicon glyphicon-alert"></i> WARNING: 
         <ul>
-          <li :key = "w" v-for = "w in warning">
+          <li :key="w" v-for="w in warning">
             {{ getWarning(w) }}
           </li>
         </ul>
@@ -258,6 +380,18 @@ export default {
   },
   data: function () {
     return {
+      desc: `Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
+
+        The tool downloads expression values of user specified sets of genes from Allen Brain API[1].
+
+        Then, it uses zscores to find which genes are expressed differentially between the user specified regions of interests.
+
+        After the analysis is finished, the genes and their calculated p values are displayed. There is also an option of downloading the gene names and their p values and the roi coordinates used in the analysis.
+        
+        [1] &copy; 2015 Allen Institute for Brain Science. Allen Brain Atlas API. Available from: <a target = "_blank" href = "brain-map.org/api/index.html">brain-map.org/api/index.html</a>`,
+      descTruncate: 100,
+      descReadmore: false,
+
       subscriptions: [],
       regionNamesUrlArray: [],
       roi1s: [],
@@ -276,6 +410,7 @@ export default {
       /**
        * complex mode
        */
+      showAdvancedMenu: false,
       simpleMode: true,
       singleProbeMode: true,
       ignoreCustomProbe:false,
@@ -294,15 +429,13 @@ export default {
       window.interactiveViewer.metadata.datasetsBSubject
         .subscribe(array => {
           this.regionNamesUrlArray = array
-            .filter(item => item.type === 'Probabilistic cytoarchitectonic map'
-              && typeof item.regionName !== 'undefined' 
-              && item.regionName.constructor === Array 
-              && item.regionName.length > 0
-              && typeof item.files !== 'undefined'
-              && item.files.constructor === Array
-              && item.files.length > 0
-              && typeof item.files[0].url !== 'undefined')
-            .map(item => [item.regionName[0].regionName, item.files[0].url])
+            .filter(item => /Probabilistic\ cytoarchitectonic\ map/.test(item.name)
+              && item.parcellationRegion
+              && item.parcellationRegion.length
+              && item.parcellationRegion[0].name
+              && item.files
+              && item.files.length)
+            .map(item => [item.parcellationRegion[0].name, item.files.find(file => !/mnicolin27\.nii/.test(file.name)).absolutePath])
         })
     )
 
@@ -383,6 +516,11 @@ export default {
       }
       this.warning = warning
       return false
+    },
+    nPermChange: function (ev) {
+      const value = ev && ev.target && ev.target.value
+      if (value && !isNaN(value))
+        this.nPermutations = Number(ev.target.value)
     },
     startAnalysis: function () {
       if(!this.validation()){
@@ -476,10 +614,22 @@ export default {
     },
     autocompleteRawArray: function () {
       return this.regionNamesUrlArray.map(v => v[0])
+    },
+    isDefault: function () {
+      return this.lefthemisphere && this.righthemisphere && this.nPermutations === 1000 && this.singleProbeMode && !this.ignoreCustomProbe
     }
   },
   beforeDestroy: function () {
     this.subscriptions.forEach(s => s.unsubscribe())
+  },
+  filters: {
+    truncate: function (text, length = 50, clamp = '...') {
+      return length >= 0
+        ? text.length > length
+          ? text.slice(0, length) + clamp
+          : text
+        : text
+    }
   }
 }
 </script>
@@ -487,7 +637,6 @@ export default {
 #fzj-xg-webjugex-container
 {
   padding: 0.5em;
-  padding-bottom: 5em;
 }
 .fzj\.xg\.webjugex\.divider
 {
@@ -583,6 +732,12 @@ export default {
     0 -1px 0 rgba(0, 255, 0, 0.15);
 }
 
+[darktheme="true"] .input-group-text
+{
+  border:none;
+  background-color: rgba(50, 50, 50, 0.8);
+  color:white;
+}
 
 [darktheme="true"] #fzj-xg-webjugex-container .checkbox-dial
 {
@@ -614,5 +769,15 @@ export default {
 .fzj-xg-webjugex-analysis-container > *
 {
   margin-bottom: 0;
+}
+.fzj-xg-webjugex-advanced-menu
+{
+  position:absolute;
+  margin-top:2.5em;
+  width:100%;
+}
+.fg-0
+{
+  flex-grow: 0!important;
 }
 </style>

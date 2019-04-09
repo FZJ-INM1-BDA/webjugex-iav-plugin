@@ -1,5 +1,5 @@
-[{
+{
   "name": "fzj.xg.webjugex-frontend",
   "templateURL": "http://localhost:3002/template.html",
   "scriptURL": "http://localhost:3002/vue-script.js"
-}]
+}
