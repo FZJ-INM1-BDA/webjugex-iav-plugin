@@ -4,7 +4,7 @@
     id = "fzj-xg-webjugex-container">
 
     <!-- description -->
-    <div class="fzj-xg-webjugex-truncate">
+    <div class="fzj-xg-webjugex-truncate bg-dark p-2">
       <small v-if="descReadmore">
         <p>
           Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
@@ -93,6 +93,7 @@
           ref="roi1"
           :warning="roi1Warning"
           class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
+          @focusin.native="focusAutocomplete(1)"
           @selectslice="selectSlice($event, null, true)"
           :rawarray="autocompleteRawArray"
           :placeholder="autocomplete1Placeholder"/>
@@ -128,6 +129,7 @@
           ref="roi2"
           :warning="roi2Warning"
           class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
+          @focusin.native="focusAutocomplete(2)"
           @selectslice="selectSlice(null, $event, true)"
           :rawarray="autocompleteRawArray"
           :placeholder="autocomplete2Placeholder"/>
@@ -155,42 +157,49 @@
 
     <!-- genelist -->
     <div class="p-1 bg-dark mb-2">
-      <div style = "z-index: 3" class="input-group">
+      <div style="z-index: 3" class="input-group">
         <auto-complete
-          :warning = "selectedgenesWarning"
-          class = "form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
-          ref = "genelist"
-          :rawarray = "allgenes"
-          @selectslice = "selectgene"/>
-        <div class="input-group-btn">
+          :warning="selectedgenesWarning"
+          class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
+          ref="genelist"
+          :rawarray="allgenes"
+          @selectslice="selectgene"/>
+        <div
+          webjugex-tooltip='accepts a stringified list of gene names. e.g, ["MAOA", "TAC1"]'
+          class="input-group-btn">
           <div
-            webjugex-tooltip = "accepts a comma delimited utf-8 encoded file"
+            @click="importGeneCsv"
             class="btn btn-default">
             Import
           </div>
         </div>
-        <div class="input-group-btn">
+        <div
+          :webjugex-tooltip="selectedgenes.length === 0 ? 'you need to have at least 1 gene selected to export' : 'saves the gene list as a comma separated, utf8 encoded csv file'" 
+          class="input-group-btn">
           <div
-            webjugex-tooltip = "saves the gene list as a comma delimited, utf8 encoded csv file" 
+            :disabled="selectedgenes.length === 0"
+            @click="exportGeneCsv"
+            :class="selectedgenes.length === 0 ? 'fzj-xg-webjugex-pointer-events text-muted' : ''"
             class="btn btn-default">
             Export
+            <a class="hidden" hidden download="genelist.json" ref="exportAnchor" :href="geneListJSON">Export Genelist as JSON</a>
           </div>
         </div>
       </div>
       <div>
         <pill
-          class = "pill"
-          @remove-pill = "removeRoi(3, gene)"
-          :name = "gene"
-          :key = "gene"
-          v-for = "gene in selectedgenes" />
+          class="pill"
+          @remove-pill="removeRoi(3, gene)"
+          :name="gene"
+          :key="gene"
+          v-for="gene in selectedgenes" />
       </div>
     </div>
     <div class="fzj.xg.webjugex.divider"></div>
 
     <!-- complex mode -->
-    <transition name = "fzj-xg-webjugex-fade">
-      <div v-if = "!simpleMode">
+    <transition name="fzj-xg-webjugex-fade">
+      <div v-if="!simpleMode">
 
         <div class="input-group">
           <span class="input-group-addon">
@@ -257,13 +266,13 @@
         Start Differential Analysis
         <span
           v-if="!isDefault"
-          class="badge badge-alert">
-          !
+          class="text-warning">
+          <i class="fas fa-exclamation-triangle"></i>
         </span>
       </div>
       <div
         @click="showAdvancedMenu = !showAdvancedMenu"
-        class="btn btn-secondary dropdown-toggle dropdown-toggle-split fg-0"
+        class="btn btn-secondary dropdown-toggle dropdown-toggle-split fzj-xg-webjugex-fg-0"
         data-toggle="dropdown">
         <span class="sr-only">
           Toggle Dropdown
@@ -274,6 +283,14 @@
       <div
         class="bg-dark p-3 fzj-xg-webjugex-advanced-menu"
         v-if="showAdvancedMenu">
+
+        <a
+          class="fzj-xg-webjugex-hover-default"
+          @click="reset"
+          :class="isDefault ? 'text-muted disabled' : ''"
+          href="#">
+          reset to default
+        </a>
 
         <div class="input-group">
           <span class="input-group-prepend">
@@ -378,6 +395,9 @@ export default {
     CheckBox,
     AnalysisCard
   },
+  nonReactive: {
+    toastHandler: null
+  },
   data: function () {
     return {
       desc: `Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
@@ -421,10 +441,20 @@ export default {
       /**
        * analysis
        */
-      analyses: []
+      analyses: [],
+
+      /**
+       * import and export
+       */
+      geneListJSON: '',
+
     }
   },
   mounted: function () {
+    this.$options.nonReactive.toastHandler = interactiveViewer.uiHandle.getToastHandler()
+    this.$options.nonReactive.toastHandler.dismissable = false
+    this.$options.nonReactive.toastHandler.timeout = -1
+
     this.subscriptions.push(
       window.interactiveViewer.metadata.datasetsBSubject
         .subscribe(array => {
@@ -463,9 +493,44 @@ export default {
       .then(arr => this.allgenes = arr)
       .catch(this.catchError)
   },
+  watch:{
+    scanMode: function (val) {
+      this.$options.nonReactive.toastHandler.hide()
+      if (val) {
+
+        this.$options.nonReactive.toastHandler.message = val === 1
+          ? `Hover and click on the viewer to add region to ROI1`
+          : `Hover and click on the viewer to add region to ROI2`
+        this.$options.nonReactive.toastHandler.show()
+
+      }
+    }
+  },
   methods: {
+    focusAutocomplete: function (idx) {
+      this.scanMode = idx
+    },
     catchError: function (e) {
       console.log(e)
+    },
+    importGeneCsv: function () {
+
+    },
+    exportGeneCsv: function () {
+      /**
+       * TODO this method breaks if gene names contain spaces, comma etc. 
+       * need a more permanent solution
+       * perhaps use csv?
+       */
+      this.geneListJSON = `data:text/plain;charset=utf-8,${JSON.stringify(this.selectedgenes)}`
+    },
+    reset: function (event) {
+      event.preventDefault()
+      this.lefthemisphere = true
+      this.righthemisphere = true
+      this.nPermutations = 1000
+      this.singleProbeMode = true
+      this.ignoreCustomProbe = false
     },
     scanCaptureRegion: function () {
       if (this.mouseOverRegion !== null) {
@@ -693,6 +758,8 @@ export default {
   pointer-events: none;
   transition: all 0.2s;
   opacity: 0;
+
+  padding: 0.5em;
 }
 
 #fzj-xg-webjugex-container [webjugex-tooltip]:hover:after
@@ -776,8 +843,19 @@ export default {
   margin-top:2.5em;
   width:100%;
 }
-.fg-0
+.fzj-xg-webjugex-fg-0
 {
   flex-grow: 0!important;
 }
+
+.fzj-xg-webjugex-hover-default:hover
+{
+  cursor: default;
+}
+
+.fzj-xg-webjugex-pointer-events
+{
+  pointer-events:none
+}
+
 </style>
