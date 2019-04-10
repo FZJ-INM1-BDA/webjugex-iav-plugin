@@ -1,30 +1,30 @@
 <template>
   <div class="panel panel-default">
     <div
-      @click = "showBody = !showBody"
+      @click="showBody = !showBody"
       class="panel-header btn btn-default btn-block">
-      <span v-if = "analysisComplete">
-        {{ id }} analysis completed at {{ completionTimeString }}
+      <span v-if="analysisComplete">
+        analysis id:{{ id }} completed at {{ completionTimeString }}
       </span>
-      <span v-if = "!analysisComplete">
-        analysing <div class = "spinner">&bull;</div>
+      <span v-if="!analysisComplete">
+        analysing <div class="spinner">&bull;</div>
       </span>
       <span
-        @click.prevent.stop = "$emit('close')"
+        @click.prevent.stop="$emit('close')"
         class="pull-right close">
         &times;
       </span>
     </div>
     <div
-      v-if = "showBody"
-      class="panel-body">
+      v-if="showBody"
+      class="panel-body p-2">
 
-      <div v-if = "error">
+      <div v-if="error">
         {{ error }}
       </div>
-      <div v-else-if = "pvaldata && coorddata">
-        <a download = "pval.csv" :href = "'data:text/csv;charset=utf-8,' + pvaldata">download pvals</a><br />
-        <a download = "coord.csv" :href = "'data:text/csv;charset=utf-8,' + coorddata">download coord data</a>
+      <div v-else-if="pvaldata && coorddata">
+        <a download="pval.csv" :href="'data:text/csv;charset=utf-8,' + pvaldata">download pvals</a><br />
+        <a download="coord.csv" :href="'data:text/csv;charset=utf-8,' + coorddata">download coord data</a>
       </div>
       <div v-else>
         We are still working on on analysing your data ...
@@ -106,6 +106,7 @@ export default {
       .then(res => res.json())
       .then(this.parseFetchedData)
       .then(rjson => {
+        this.completionTime = new Date().toString()
         this.analysisComplete = true
         this.pvaldata = rjson.pval
         this.coorddata = rjson.coord

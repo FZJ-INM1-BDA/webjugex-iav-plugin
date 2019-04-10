@@ -160,6 +160,7 @@
       <div style="z-index: 3" class="input-group">
         <auto-complete
           :warning="selectedgenesWarning"
+          @focusin.native="focusAutocomplete(null)"
           class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
           ref="genelist"
           :rawarray="allgenes"
@@ -168,9 +169,15 @@
           webjugex-tooltip='accepts a stringified list of gene names. e.g, ["MAOA", "TAC1"]'
           class="input-group-btn">
           <div
-            @click="importGeneCsv"
+            @click="importGeneJSON"
             class="btn btn-default">
             Import
+            <input
+              @change="fileChosen"
+              class="hidden"
+              hidden="hidden"
+              type="file"
+              ref="importGeneRef" />
           </div>
         </div>
         <div
@@ -178,7 +185,7 @@
           class="input-group-btn">
           <div
             :disabled="selectedgenes.length === 0"
-            @click="exportGeneCsv"
+            @click="exportGeneJSON"
             :class="selectedgenes.length === 0 ? 'fzj-xg-webjugex-pointer-events text-muted' : ''"
             class="btn btn-default">
             Export
@@ -386,6 +393,7 @@
 
 import { Readmore, AutoComplete, Pill, CheckBox } from 'vue-components'
 import AnalysisCard from './Analysis'
+import Vue from 'vue'
 
 export default {
   components: {
@@ -442,11 +450,6 @@ export default {
        * analysis
        */
       analyses: [],
-
-      /**
-       * import and export
-       */
-      geneListJSON: '',
 
     }
   },
@@ -513,16 +516,57 @@ export default {
     catchError: function (e) {
       console.log(e)
     },
-    importGeneCsv: function () {
-
+    importGeneJSON: function () {
+      const importInput = this.$refs.importGeneRef
+      if (importInput)
+        importInput.click()
     },
-    exportGeneCsv: function () {
+    exportGeneJSON: function () {
       /**
        * TODO this method breaks if gene names contain spaces, comma etc. 
        * need a more permanent solution
        * perhaps use csv?
        */
-      this.geneListJSON = `data:text/plain;charset=utf-8,${JSON.stringify(this.selectedgenes)}`
+
+      const anchor = this.$refs.exportAnchor
+      if (anchor)
+        anchor.click()
+    },
+    fileChosen: function (ev) {
+      
+      const file = ev.target && ev.target.files && ev.target.files[0]
+      if (file) {
+        this.readFile(file)
+          .then(text => JSON.parse(text))
+          .then(arr => {
+            const validate = arr && Array.isArray(arr) && arr.every(item => typeof item === 'string')
+            if (validate) return arr
+            else throw new Error('file was not validated')  
+          })
+          .then(arr => this.selectedgenes = arr)
+          .then(() => {
+            /**
+             * TODO
+             * reset file input
+             */
+          })
+          .catch(console.error)
+      }
+    },
+    readFile: function (file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = (evt) => {
+          const result = evt && evt.target && evt.target.result
+          if (result) {
+            resolve(result)
+          } else {
+            reject('result undefined')
+          }
+        }
+        reader.onerror = reject
+        reader.readAsText(file)
+      })
     },
     reset: function (event) {
       event.preventDefault()
@@ -659,6 +703,9 @@ export default {
     }
   },
   computed: {
+    geneListJSON: function () {
+      return `data:text/plain;charset=utf-8,${JSON.stringify(this.selectedgenes)}`
+    },
     hemisphereWarning : function(){
       return this.warning.findIndex(v => v === 'hemisphere') >= 0
     },
