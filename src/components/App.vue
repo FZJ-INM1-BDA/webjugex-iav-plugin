@@ -380,6 +380,19 @@
 
     <div class="fzj.xg.webjugex.divider"></div>
 
+    <!-- past analysis -->
+    <div v-if="listAnalysis.length > 0">
+      Past analysis:
+    </div>
+    <pill
+      class="pill mt-1 mb-0"
+      @click.native="openOldAnalysis(a)"
+      @remove-pill="deleteAnalysis(a)"
+      :name="a"
+      :key="a"
+      v-for="a in listAnalysis">
+    </pill>
+
     <!-- results -->
     <div class="fzj-xg-webjugex-analysis-container">
       <AnalysisCard
@@ -450,10 +463,12 @@ export default {
        * analysis
        */
       analyses: [],
+      listAnalysis: []
 
     }
   },
   mounted: function () {
+    
     this.$options.nonReactive.toastHandler = interactiveViewer.uiHandle.getToastHandler()
     this.$options.nonReactive.toastHandler.dismissable = false
     this.$options.nonReactive.toastHandler.timeout = -1
@@ -491,10 +506,12 @@ export default {
         })
     )
 
-    fetch(VUE_APP_BACKEND_URL)
+    fetch(`${VUE_APP_HOSTNAME}/genelist`)
       .then(res => res.json())
       .then(arr => this.allgenes = arr)
       .catch(this.catchError)
+
+    this.getListAnalysisResults()
   },
   watch:{
     scanMode: function (val) {
@@ -510,6 +527,27 @@ export default {
     }
   },
   methods: {
+    openOldAnalysis: function (id) {
+      this.launchResultPanel(id)
+        .catch(this.catchError)
+    },
+    launchResultPanel: function (id) {
+      return fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}`)
+        .then(res => res.json())
+        .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
+    },
+    deleteAnalysis: function (id) {
+      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}`, {
+        method: 'DELETE'
+      }).then(this.getListAnalysisResults)
+        .catch(this.getListAnalysisResults)
+    },
+    getListAnalysisResults: function () {
+      fetch(`${VUE_APP_HOSTNAME}/analysis/list`)
+        .then(res => res.json())
+        .then(arr => this.listAnalysis = arr)
+        .catch(this.catchError)
+    },
     focusAutocomplete: function (idx) {
       this.scanMode = idx
     },
@@ -635,16 +673,19 @@ export default {
       if(!this.validation()){
         return
       }
+
+      const roi1 = this.regionNamesUrlArray.find(r => r[0] === this.roi1s[0])
+      const roi2 = this.regionNamesUrlArray.find(r => r[0] === this.roi2s[0])
         
       const body = {
         id: Date.now(),
         area1: {
           name: this.roi1s.join('-'),
-          PMapURL: this.regionNamesUrlArray.find(r => r[0] === this.roi1s[0])[1]
+          PMapURL: (roi1 && roi1[1]) || null
         },
         area2: {
           name: this.roi2s.join('-'),
-          PMapURL: this.regionNamesUrlArray.find(r => r[0] === this.roi2s[0])[1]
+          PMapURL: (roi2 && roi2[1]) || null
         },
 
         simpleMode: this.simpleMode,
@@ -656,7 +697,19 @@ export default {
         selectedGenes: [...this.selectedgenes]
       }
 
-      this.analyses.push(body)
+      const id = Date.now().toString()
+      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      })
+        .then(() => this.getListAnalysisResults())
+        .then(() => this.launchResultPanel(id))
+        .catch(this.catchError)
+
+      // this.analyses.push(body)
     },
     removeRoi: function (idx, roi) {
       if (idx === 1) {

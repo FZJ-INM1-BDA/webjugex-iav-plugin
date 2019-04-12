@@ -11,6 +11,10 @@ const PLUGIN_DISPLAY_NAME = process.env.PLUGIN_DISPLAY_NAME || 'Untitled Plugin'
 app.use(cors())
 app.disable('x-powered-by')
 
+if (process.env.NODE_ENV !== 'production') {
+  app.use(require('dotenv').config())
+}
+
 const manifest = {
   name: PLUGIN_NAME,
   displayName: PLUGIN_DISPLAY_NAME,
