@@ -17,6 +17,4 @@ WORKDIR /webjugex-frontend
 RUN npm i
 RUN npm run build-ssr
 
-EXPOSE $PORT
-
 ENTRYPOINT [ "node", "vueSsr/deployServer.js"]
