@@ -15,11 +15,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.4.3",
     "dotenv": "^7.0.0",
     "rxjs": "^6.3.3"
   },
   "dependencies": {
+    "@babel/core": "^7.4.3",
     "@babel/preset-env": "^7.4.3",
     "babel-loader": "^8.0.5",
     "body-parser": "^1.18.3",
