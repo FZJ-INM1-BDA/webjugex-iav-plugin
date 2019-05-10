@@ -408,6 +408,13 @@ import { Readmore, AutoComplete, Pill, CheckBox } from 'vue-components'
 import AnalysisCard from './Analysis'
 import Vue from 'vue'
 
+
+const fA = (arr) => arr.concat(
+  ...arr.map(item =>item.children && item.children.length
+    ? fA(item.children)
+    : [])
+)
+
 export default {
   components: {
     AutoComplete,
@@ -473,18 +480,27 @@ export default {
     this.$options.nonReactive.toastHandler.dismissable = false
     this.$options.nonReactive.toastHandler.timeout = -1
 
+    /**
+     * Files are not longer retrieved. Temporary solution is using selected parcellation, since we are using pmap service any way
+     */
+    // this.subscriptions.push(
+    //   window.interactiveViewer.metadata.datasetsBSubject
+    //     .subscribe(array => {
+    //       this.regionNamesUrlArray = array
+    //         .filter(item => /Probabilistic\ cytoarchitectonic\ map/.test(item.name)
+    //           && item.parcellationRegion
+    //           && item.parcellationRegion.length
+    //           && item.parcellationRegion[0].name
+    //           && item.files
+    //           && item.files.length)
+    //         .map(item => [item.parcellationRegion[0].name, item.files.find(file => !/mnicolin27\.nii/.test(file.name)).absolutePath])
+    //     })
+    // )
+
     this.subscriptions.push(
-      window.interactiveViewer.metadata.datasetsBSubject
-        .subscribe(array => {
-          this.regionNamesUrlArray = array
-            .filter(item => /Probabilistic\ cytoarchitectonic\ map/.test(item.name)
-              && item.parcellationRegion
-              && item.parcellationRegion.length
-              && item.parcellationRegion[0].name
-              && item.files
-              && item.files.length)
-            .map(item => [item.parcellationRegion[0].name, item.files.find(file => !/mnicolin27\.nii/.test(file.name)).absolutePath])
-        })
+      interactiveViewer.metadata.selectedParcellationBSubject.subscribe(p => {
+        this.regionNamesUrlArray = fA(p.regions).filter(v => v.labelIndex).map(v => [v.name, v])
+      })
     )
 
     this.subscriptions.push(
