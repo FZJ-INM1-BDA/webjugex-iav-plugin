@@ -23,8 +23,8 @@
         {{ error }}
       </div>
       <div v-else-if="pvaldata && coorddata">
-        <a download="pval.csv" :href="'data:text/csv;charset=utf-8,' + pvaldata">download pvals</a><br />
-        <a download="coord.csv" :href="'data:text/csv;charset=utf-8,' + coorddata">download coord data</a>
+        <a download="pval.tsv" :href="'data:text/tsv;charset=utf-8,' + pvaldata">download pvals</a><br />
+        <a download="coord.tsv" :href="'data:text/tsv;charset=utf-8,' + coorddata">download coord data</a>
       </div>
       <div v-else>
         We are still working on on analysing your data ...
@@ -34,6 +34,7 @@
 </template>
 <script>
 const POLLING_INTERVAL = 3000
+const DELIMITER = `\t`
 export default {
   props: {
     data: {
@@ -131,21 +132,21 @@ export default {
       const parseCoordToFile = (json) => {
         return Object.keys(json).reduce((acc, curr) => {
           const newRows = json[curr].map(item => {
-            return `${curr},${item.xyz.join(',')},${item.winsorzed_mean.join(',')}`
+            return `${curr}${DELIMITER}${item.xyz.join(DELIMITER)}${DELIMITER}${item.winsorzed_mean.join(DELIMITER)}`
           })
           return acc.concat(newRows)
         }, []).join('\n')
       }
 
       const parsePvalToFile = (json) => {
-        return Object.keys(json).map(key => `${key},${json[key]}`).join('\n')
+        return Object.keys(json).map(key => `${key}${DELIMITER}${json[key]}`).join('\n')
       }
 
       const pval = json[1]
       const coord = json[0]
       const stringCoordFile = parseCoordToFile(coord)
       const stringPvalFile = parsePvalToFile(pval)
-      const stringTitledCoordFile = Object.keys(pval).join(',').concat('\n').concat(stringCoordFile)
+      const stringTitledCoordFile = Object.keys(pval).join(DELIMITER).concat('\n').concat(stringCoordFile)
       return {
         pval : stringPvalFile,
         coord : stringTitledCoordFile
