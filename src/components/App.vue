@@ -673,15 +673,9 @@ export default {
 
       const getMerge = (arr) => arr.map(v => 
         v.replace(/\W\(.*?\)$/,'').replace(/\W/g, '-').replace(/\./, '')).join(',')
-      const PMAP_URL = 'https://pmaps-sk-test-project.apps-dev.hbp.eu'
+      const PMAP_URL = VUE_APP_PMAP_URL || 'https://pmaps-sk-test-project.apps-dev.hbp.eu'
       const roi1Url = `${PMAP_URL}/multimerge?threshold=0.5&areas=${getMerge(this.roi1s)}`
       const roi2Url = `${PMAP_URL}/multimerge?threshold=0.5&areas=${getMerge(this.roi2s)}`
-      console.log(
-        this.roi1s,
-        this.roi2s,
-        roi1Url,
-        roi2Url
-      )
       if(!this.validation()){
         return
       }
@@ -693,11 +687,11 @@ export default {
         id: Date.now(),
         area1: {
           name: this.roi1s.join('-'),
-          PMapURL: (roi1 && roi1[1]) || null
+          PMapURL: roi1Url || null
         },
         area2: {
           name: this.roi2s.join('-'),
-          PMapURL: (roi2 && roi2[1]) || null
+          PMapURL: roi2Url || null
         },
 
         simpleMode: this.simpleMode,
