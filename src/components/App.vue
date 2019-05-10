@@ -673,7 +673,7 @@ export default {
 
       const getMerge = (arr) => arr.map(v => 
         v.replace(/\W\(.*?\)$/,'').replace(/\W/g, '-').replace(/\./, '')).join(',')
-      const PMAP_URL = false || 'https://pmaps-sk-test-project.apps-dev.hbp.eu'
+      const PMAP_URL = VUE_APP_PMAP_URL || 'https://pmaps-sk-test-project.apps-dev.hbp.eu'
       const roi1Url = `${PMAP_URL}/multimerge?threshold=0.5&areas=${getMerge(this.roi1s)}&filename=happyface.nii`
       const roi2Url = `${PMAP_URL}/multimerge?threshold=0.5&areas=${getMerge(this.roi2s)}&filename=happyface.nii`
       

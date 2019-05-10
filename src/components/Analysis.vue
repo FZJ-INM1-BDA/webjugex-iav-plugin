@@ -146,7 +146,7 @@ export default {
       const coord = json[0]
       const stringCoordFile = parseCoordToFile(coord)
       const stringPvalFile = parsePvalToFile(pval)
-      const stringTitledCoordFile = Object.keys(pval).join(DELIMITER).concat('\n').concat(stringCoordFile)
+      const stringTitledCoordFile = `Area name${DELIMITER}x${DELIMITER}y${DELIMITER}z${DELIMITER}`+Object.keys(pval).join(DELIMITER).concat('\n').concat(stringCoordFile)
       return {
         pval : stringPvalFile,
         coord : stringTitledCoordFile
