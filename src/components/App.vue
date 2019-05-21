@@ -1,38 +1,13 @@
 <template>
-  <div
-    @animationend = "animationend($event)"
-    id = "fzj-xg-webjugex-container">
+  <div>
+    <div
+      v-if="active"
+      @animationend = "animationend($event)"
+      id = "fzj-xg-webjugex-container">
 
-    <!-- description -->
-    <div class="fzj-xg-webjugex-truncate bg-dark p-2">
-      <small v-if="descReadmore">
-        <p>
-          Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
-        </p>
-        <p>
-          The tool downloads expression values of user specified sets of genes from Allen Brain API<sup>[1]</sup>.
-        </p>
-        <p>
-          Then, it uses zscores to find which genes are expressed differentially between the user specified regions of interests.
-        </p>
-        <p>
-          After the analysis is finished, the genes and their calculated p values are displayed. There is also an option of downloading the gene names and their p values and the roi coordinates used in the analysis.
-        </p>
-        <p>
-          <sup>[1]</sup> &copy; 2015 Allen Institute for Brain Science. Allen Brain Atlas API. Available from: <a target = "_blank" href = "brain-map.org/api/index.html">brain-map.org/api/index.html</a>
-        </p>
-        <a @click="$event.preventDefault(); descReadmore = false" href="#"> readless </a>
-      </small>
-      <small v-else>
-        <p>
-          Find a set of differentially expressed genes between two user defined volumes of interest ... 
-          <a @click="$event.preventDefault(); descReadmore = true" href="#"> readmore </a>
-        </p>
-      </small>
-    </div>
-    <readmore v-if="false" :collapsed-height = "40">
-      <template slot = "readmoreContent">
-        <small>
+      <!-- description -->
+      <div class="fzj-xg-webjugex-truncate bg-dark p-2">
+        <small v-if="descReadmore">
           <p>
             Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
           </p>
@@ -48,358 +23,391 @@
           <p>
             <sup>[1]</sup> &copy; 2015 Allen Institute for Brain Science. Allen Brain Atlas API. Available from: <a target = "_blank" href = "brain-map.org/api/index.html">brain-map.org/api/index.html</a>
           </p>
+          <a @click="$event.preventDefault(); descReadmore = false" href="#"> readless </a>
         </small>
-      </template>
-      <template slot = "resizeSliverContentCollapsed">
-        <div class = "text-center">
-          <i class = "glyphicon glyphicon-chevron-down"></i>
-        </div>
-      </template>
-      <template slot = "resizeSliverContentShown">
-        <div class = "text-center">
-          <i class = "glyphicon glyphicon-chevron-up"></i>
-        </div>
-      </template>
-    </readmore>
-
-    <div class = "fzj.xg.webjugex.divider">
-    </div>
-    
-    <!-- simple mode -->
-    <div v-if="false" class="input-group">
-      <div class="input-group-prepend">
-        <span class="input-group-te">
-          Simple mode
-        </span>
+        <small v-else>
+          <p>
+            Find a set of differentially expressed genes between two user defined volumes of interest ... 
+            <a @click="$event.preventDefault(); descReadmore = true" href="#"> readmore </a>
+          </p>
+        </small>
       </div>
-      <check-box
-        class = "fzj.xg.webjugex.checkbox"
-        @togglecheckbox = "simpleMode = !simpleMode"
-        :flag = "simpleMode"/>
-    </div>
-
-    <div class = "fzj.xg.webjugex.divider">
-    </div>
-
-    <!-- roi1 -->
-    <div class="p-1 bg-dark mb-2">
-      <div style = "z-index: 5" class="input-group">
-        <div class="input-group-prepend">
-          <div class="input-group-text">
-            ROI1
+      <readmore v-if="false" :collapsed-height = "40">
+        <template slot = "readmoreContent">
+          <small>
+            <p>
+              Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
+            </p>
+            <p>
+              The tool downloads expression values of user specified sets of genes from Allen Brain API<sup>[1]</sup>.
+            </p>
+            <p>
+              Then, it uses zscores to find which genes are expressed differentially between the user specified regions of interests.
+            </p>
+            <p>
+              After the analysis is finished, the genes and their calculated p values are displayed. There is also an option of downloading the gene names and their p values and the roi coordinates used in the analysis.
+            </p>
+            <p>
+              <sup>[1]</sup> &copy; 2015 Allen Institute for Brain Science. Allen Brain Atlas API. Available from: <a target = "_blank" href = "brain-map.org/api/index.html">brain-map.org/api/index.html</a>
+            </p>
+          </small>
+        </template>
+        <template slot = "resizeSliverContentCollapsed">
+          <div class = "text-center">
+            <i class = "glyphicon glyphicon-chevron-down"></i>
           </div>
-        </div>
-        <auto-complete
-          ref="roi1"
-          :warning="roi1Warning"
-          class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
-          @focusin.native="focusAutocomplete(1)"
-          @selectslice="selectSlice($event, null, true)"
-          :rawarray="autocompleteRawArray"
-          :placeholder="autocomplete1Placeholder"/>
-        <div class="input-group-append">
-          <div
-            webjugex-tooltip="toggle scan mode for ROI1"
-            @click.stop.prevent="toggleScanMode(1)"
-            :class="scanMode === 1 ? 'btn-active' : 'btn-inactive'"
-            class="btn btn-secondary">
-            <i class="fas fa-satellite-dish"></i>
+        </template>
+        <template slot = "resizeSliverContentShown">
+          <div class = "text-center">
+            <i class = "glyphicon glyphicon-chevron-up"></i>
           </div>
-        </div>
-      </div>
-      <div>
-        <pill
-          class="pill mt-1 mb-0"
-          @remove-pill="removeRoi(1, roi)"
-          :name="roi"
-          :key="roi"
-          v-for="roi in roi1s" />
-      </div>
-    </div>
+        </template>
+      </readmore>
 
-    <!-- roi2 -->
-    <div class="p-1 bg-dark mb-2">
-      <div style = "z-index: 4" class="input-group">
-        <div class="input-group-prepend">
-          <div class="input-group-text">
-            ROI2
-          </div>
-        </div>
-        <auto-complete
-          ref="roi2"
-          :warning="roi2Warning"
-          class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
-          @focusin.native="focusAutocomplete(2)"
-          @selectslice="selectSlice(null, $event, true)"
-          :rawarray="autocompleteRawArray"
-          :placeholder="autocomplete2Placeholder"/>
-        <div class="input-group-append">
-          <div
-            webjugex-tooltip="toggle scan mode for ROI2"
-            @click.stop.prevent="toggleScanMode(2)"
-            :class="scanMode === 2 ? 'btn-active' : 'btn-inactive'"
-            class="btn btn-default">
-            <i class="fas fa-satellite-dish"></i>
-          </div>
-        </div>
+      <div class = "fzj.xg.webjugex.divider">
       </div>
-      <div>
-        <pill
-          class="pill mt-1 mb-0"
-          @remove-pill = "removeRoi(2, roi)"
-          :name = "roi"
-          :key = "roi"
-          v-for = "roi in roi2s" />
-      </div>
-    </div>
-    <div class = "fzj.xg.webjugex.divider">
-    </div>
-
-    <!-- genelist -->
-    <div class="p-1 bg-dark mb-2">
-      <div style="z-index: 3" class="input-group">
-        <auto-complete
-          :warning="selectedgenesWarning"
-          @focusin.native="focusAutocomplete(null)"
-          class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
-          ref="genelist"
-          :rawarray="allgenes"
-          @selectslice="selectgene"/>
-        <div
-          webjugex-tooltip='accepts a stringified list of gene names. e.g, ["MAOA", "TAC1"]'
-          class="input-group-btn">
-          <div
-            @click="importGeneJSON"
-            class="btn btn-default">
-            Import
-            <input
-              @change="fileChosen"
-              class="hidden"
-              hidden="hidden"
-              type="file"
-              ref="importGeneRef" />
-          </div>
-        </div>
-        <div
-          :webjugex-tooltip="selectedgenes.length === 0 ? 'you need to have at least 1 gene selected to export' : 'saves the gene list as a comma separated, utf8 encoded csv file'" 
-          class="input-group-btn">
-          <div
-            :disabled="selectedgenes.length === 0"
-            @click="exportGeneJSON"
-            :class="selectedgenes.length === 0 ? 'fzj-xg-webjugex-pointer-events text-muted' : ''"
-            class="btn btn-default">
-            Export
-            <a class="hidden" hidden download="genelist.json" ref="exportAnchor" :href="geneListJSON">Export Genelist as JSON</a>
-          </div>
-        </div>
-      </div>
-      <div>
-        <pill
-          class="pill"
-          @remove-pill="removeRoi(3, gene)"
-          :name="gene"
-          :key="gene"
-          v-for="gene in selectedgenes" />
-      </div>
-    </div>
-    <div class="fzj.xg.webjugex.divider"></div>
-
-    <!-- complex mode -->
-    <transition name="fzj-xg-webjugex-fade">
-      <div v-if="!simpleMode">
-
-        <div class="input-group">
-          <span class="input-group-addon">
-            Single probe mode
-          </span>
-          <check-box
-            :flag = "singleProbeMode"
-            @togglecheckbox = "singleProbeMode = !singleProbeMode" />
-        </div>
       
-        <div class="input-group">
-          <span class="input-group-addon">
-            Ignore custom probe
+      <!-- simple mode -->
+      <div v-if="false" class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-te">
+            Simple mode
           </span>
-          <check-box
-            :flag = "ignoreCustomProbe"
-            @togglecheckbox = "ignoreCustomProbe = !ignoreCustomProbe" />
         </div>
-        
-        <div class="fzj.xg.webjugex.divider"></div>
-      
-        <div class="input-group">
-          <span class="input-group-addon">
-            Hemisphere
-          </span>
-          <div
-            style = "display:inline-block"
-            :warning = "hemisphereWarning">
-            <div 
-              @click = "lefthemisphere = !lefthemisphere"
-              :class = " lefthemisphere == true ? 'btn-active' : 'btn-inactive'"
-              class="btn btn-default">
-              Left
+        <check-box
+          class = "fzj.xg.webjugex.checkbox"
+          @togglecheckbox = "simpleMode = !simpleMode"
+          :flag = "simpleMode"/>
+      </div>
+
+      <div class = "fzj.xg.webjugex.divider">
+      </div>
+
+      <!-- roi1 -->
+      <div class="p-1 bg-dark mb-2">
+        <div style = "z-index: 5" class="input-group">
+          <div class="input-group-prepend">
+            <div class="input-group-text">
+              ROI1
             </div>
-            <div 
-              @click = "righthemisphere = !righthemisphere"
-              :class = " righthemisphere == true ? 'btn-active' : 'btn-inactive'"
-              class="btn btn-default">
-              Right
+          </div>
+          <auto-complete
+            ref="roi1"
+            :warning="roi1Warning"
+            class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
+            @focusin.native="focusAutocomplete(1)"
+            @selectslice="selectSlice($event, null, true)"
+            :rawarray="autocompleteRawArray"
+            :placeholder="autocomplete1Placeholder"/>
+          <div class="input-group-append">
+            <div
+              webjugex-tooltip="toggle scan mode for ROI1"
+              @click.stop.prevent="toggleScanMode(1)"
+              :class="scanMode === 1 ? 'btn-active' : 'btn-inactive'"
+              class="btn btn-secondary">
+              <i class="fas fa-satellite-dish"></i>
             </div>
           </div>
         </div>
-      
-        <div class="fzj.xg.webjugex.divider"></div>
-      
-        <div class="input-group">
-          <span class="input-group-addon">
-            <small>No. of Perm</small>
-          </span>
-          <input v-model = "nPermutations" type="number" class="form-control">
+        <div>
+          <pill
+            class="pill mt-1 mb-0"
+            @remove-pill="removeRoi(1, roi)"
+            :name="roi"
+            :key="roi"
+            v-for="roi in roi1s" />
         </div>
-      
-        <div class="fzj.xg.webjugex.divider"></div>  
-      </div>
-    </transition>
-
-    <div class="fzj.xg.webjugex.divider"></div>
-
-    <!-- analysis GO -->
-    <div class="btn-group w-100">
-      <div 
-        @click = "startAnalysis"
-        class="btn btn-secondary">
-        Start Differential Analysis
-        <span
-          v-if="!isDefault"
-          class="text-warning">
-          <i class="fas fa-exclamation-triangle"></i>
-        </span>
-      </div>
-      <div
-        @click="showAdvancedMenu = !showAdvancedMenu"
-        class="btn btn-secondary dropdown-toggle dropdown-toggle-split fzj-xg-webjugex-fg-0"
-        data-toggle="dropdown">
-        <span class="sr-only">
-          Toggle Dropdown
-        </span>
       </div>
 
-      <!-- advanced menu -->
-      <div
-        class="bg-dark p-3 fzj-xg-webjugex-advanced-menu"
-        v-if="showAdvancedMenu">
+      <!-- roi2 -->
+      <div class="p-1 bg-dark mb-2">
+        <div style = "z-index: 4" class="input-group">
+          <div class="input-group-prepend">
+            <div class="input-group-text">
+              ROI2
+            </div>
+          </div>
+          <auto-complete
+            ref="roi2"
+            :warning="roi2Warning"
+            class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
+            @focusin.native="focusAutocomplete(2)"
+            @selectslice="selectSlice(null, $event, true)"
+            :rawarray="autocompleteRawArray"
+            :placeholder="autocomplete2Placeholder"/>
+          <div class="input-group-append">
+            <div
+              webjugex-tooltip="toggle scan mode for ROI2"
+              @click.stop.prevent="toggleScanMode(2)"
+              :class="scanMode === 2 ? 'btn-active' : 'btn-inactive'"
+              class="btn btn-default">
+              <i class="fas fa-satellite-dish"></i>
+            </div>
+          </div>
+        </div>
+        <div>
+          <pill
+            class="pill mt-1 mb-0"
+            @remove-pill = "removeRoi(2, roi)"
+            :name = "roi"
+            :key = "roi"
+            v-for = "roi in roi2s" />
+        </div>
+      </div>
+      <div class = "fzj.xg.webjugex.divider">
+      </div>
 
-        <a
-          class="fzj-xg-webjugex-hover-default"
-          @click="reset"
-          :class="isDefault ? 'text-muted disabled' : ''"
-          href="#">
-          reset to default
-        </a>
+      <!-- genelist -->
+      <div class="p-1 bg-dark mb-2">
+        <div style="z-index: 3" class="input-group">
+          <auto-complete
+            :warning="selectedgenesWarning"
+            @focusin.native="focusAutocomplete(null)"
+            class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
+            ref="genelist"
+            :rawarray="allgenes"
+            @selectslice="selectgene"/>
+          <div
+            webjugex-tooltip='accepts a stringified list of gene names. e.g, ["MAOA", "TAC1"]'
+            class="input-group-btn">
+            <div
+              @click="importGeneJSON"
+              class="btn btn-default">
+              Import
+              <input
+                @change="fileChosen"
+                class="hidden"
+                hidden="hidden"
+                type="file"
+                ref="importGeneRef" />
+            </div>
+          </div>
+          <div
+            :webjugex-tooltip="selectedgenes.length === 0 ? 'you need to have at least 1 gene selected to export' : 'saves the gene list as a comma separated, utf8 encoded csv file'" 
+            class="input-group-btn">
+            <div
+              :disabled="selectedgenes.length === 0"
+              @click="exportGeneJSON"
+              :class="selectedgenes.length === 0 ? 'fzj-xg-webjugex-pointer-events text-muted' : ''"
+              class="btn btn-default">
+              Export
+              <a class="hidden" hidden download="genelist.json" ref="exportAnchor" :href="geneListJSON">Export Genelist as JSON</a>
+            </div>
+          </div>
+        </div>
+        <div>
+          <pill
+            class="pill"
+            @remove-pill="removeRoi(3, gene)"
+            :name="gene"
+            :key="gene"
+            v-for="gene in selectedgenes" />
+        </div>
+      </div>
+      <div class="fzj.xg.webjugex.divider"></div>
 
-        <div class="input-group">
-          <span class="input-group-prepend">
-            <span class="input-group-text">
+      <!-- complex mode -->
+      <transition name="fzj-xg-webjugex-fade">
+        <div v-if="!simpleMode">
+
+          <div class="input-group">
+            <span class="input-group-addon">
               Single probe mode
             </span>
-          </span>
-          <check-box
-            :flag = "singleProbeMode"
-            @togglecheckbox = "singleProbeMode = !singleProbeMode" />
-        </div>
-      
-        <div class="input-group">
-          <span class="input-group-prepend">
-            <span class="input-group-text">
+            <check-box
+              :flag = "singleProbeMode"
+              @togglecheckbox = "singleProbeMode = !singleProbeMode" />
+          </div>
+        
+          <div class="input-group">
+            <span class="input-group-addon">
               Ignore custom probe
             </span>
-          </span>
-          <check-box
-            :flag = "ignoreCustomProbe"
-            @togglecheckbox = "ignoreCustomProbe = !ignoreCustomProbe" />
-        </div>
+            <check-box
+              :flag = "ignoreCustomProbe"
+              @togglecheckbox = "ignoreCustomProbe = !ignoreCustomProbe" />
+          </div>
+          
+          <div class="fzj.xg.webjugex.divider"></div>
         
-        <div class="fzj.xg.webjugex.divider"></div>
-      
-        <div class="input-group">
-          <span class="input-group-prepend">
-            <span class="input-group-text">
+          <div class="input-group">
+            <span class="input-group-addon">
               Hemisphere
             </span>
-          </span>
-          <div
-            style = "display:inline-block"
-            :warning = "hemisphereWarning">
-            <div 
-              @click = "lefthemisphere = !lefthemisphere"
-              :class = " lefthemisphere == true ? 'btn-active' : 'btn-inactive'"
-              class="btn btn-default">
-              Left
-            </div>
-            <div 
-              @click = "righthemisphere = !righthemisphere"
-              :class = " righthemisphere == true ? 'btn-active' : 'btn-inactive'"
-              class="btn btn-default">
-              Right
+            <div
+              style = "display:inline-block"
+              :warning = "hemisphereWarning">
+              <div 
+                @click = "lefthemisphere = !lefthemisphere"
+                :class = " lefthemisphere == true ? 'btn-active' : 'btn-inactive'"
+                class="btn btn-default">
+                Left
+              </div>
+              <div 
+                @click = "righthemisphere = !righthemisphere"
+                :class = " righthemisphere == true ? 'btn-active' : 'btn-inactive'"
+                class="btn btn-default">
+                Right
+              </div>
             </div>
           </div>
-        </div>
-      
-        <div class="fzj.xg.webjugex.divider"></div>
-      
-        <div class="input-group">
-          <span class="input-group-prepend">
-            <span class="input-group-text">
+        
+          <div class="fzj.xg.webjugex.divider"></div>
+        
+          <div class="input-group">
+            <span class="input-group-addon">
               <small>No. of Perm</small>
             </span>
+            <input v-model = "nPermutations" type="number" class="form-control">
+          </div>
+        
+          <div class="fzj.xg.webjugex.divider"></div>  
+        </div>
+      </transition>
+
+      <div class="fzj.xg.webjugex.divider"></div>
+
+      <!-- analysis GO -->
+      <div class="btn-group w-100">
+        <div 
+          @click = "startAnalysis"
+          class="btn btn-secondary">
+          Start Differential Analysis
+          <span
+            v-if="!isDefault"
+            class="text-warning">
+            <i class="fas fa-exclamation-triangle"></i>
           </span>
-          <input
-            :value="nPermutations"
-            @change="nPermChange"
-            @keyup="nPermChange"
-            type="number"
-            class="form-control">
+        </div>
+        <div
+          @click="showAdvancedMenu = !showAdvancedMenu"
+          class="btn btn-secondary dropdown-toggle dropdown-toggle-split fzj-xg-webjugex-fg-0"
+          data-toggle="dropdown">
+          <span class="sr-only">
+            Toggle Dropdown
+          </span>
         </div>
 
+        <!-- advanced menu -->
+        <div
+          class="bg-dark p-3 fzj-xg-webjugex-advanced-menu"
+          v-if="showAdvancedMenu">
+
+          <a
+            class="fzj-xg-webjugex-hover-default"
+            @click="reset"
+            :class="isDefault ? 'text-muted disabled' : ''"
+            href="#">
+            reset to default
+          </a>
+
+          <div class="input-group">
+            <span class="input-group-prepend">
+              <span class="input-group-text">
+                Single probe mode
+              </span>
+            </span>
+            <check-box
+              :flag = "singleProbeMode"
+              @togglecheckbox = "singleProbeMode = !singleProbeMode" />
+          </div>
+        
+          <div class="input-group">
+            <span class="input-group-prepend">
+              <span class="input-group-text">
+                Ignore custom probe
+              </span>
+            </span>
+            <check-box
+              :flag = "ignoreCustomProbe"
+              @togglecheckbox = "ignoreCustomProbe = !ignoreCustomProbe" />
+          </div>
+          
+          <div class="fzj.xg.webjugex.divider"></div>
+        
+          <div class="input-group">
+            <span class="input-group-prepend">
+              <span class="input-group-text">
+                Hemisphere
+              </span>
+            </span>
+            <div
+              style = "display:inline-block"
+              :warning = "hemisphereWarning">
+              <div 
+                @click = "lefthemisphere = !lefthemisphere"
+                :class = " lefthemisphere == true ? 'btn-active' : 'btn-inactive'"
+                class="btn btn-default">
+                Left
+              </div>
+              <div 
+                @click = "righthemisphere = !righthemisphere"
+                :class = " righthemisphere == true ? 'btn-active' : 'btn-inactive'"
+                class="btn btn-default">
+                Right
+              </div>
+            </div>
+          </div>
+        
+          <div class="fzj.xg.webjugex.divider"></div>
+        
+          <div class="input-group">
+            <span class="input-group-prepend">
+              <span class="input-group-text">
+                <small>No. of Perm</small>
+              </span>
+            </span>
+            <input
+              :value="nPermutations"
+              @change="nPermChange"
+              @keyup="nPermChange"
+              type="number"
+              class="form-control">
+          </div>
+
+        </div>
+      </div>
+      
+      <!-- warning -->
+      <transition name="fzj-xg-webjugex-fade">
+        <div style="margin-top:0.5em" class="alert alert-danger" v-if="warning.length > 0">
+          <i class="glyphicon glyphicon-alert"></i> WARNING: 
+          <ul>
+            <li :key="w" v-for="w in warning">
+              {{ getWarning(w) }}
+            </li>
+          </ul>
+        </div>
+      </transition>
+
+      <div class="fzj.xg.webjugex.divider"></div>
+
+      <!-- past analysis -->
+      <div v-if="listAnalysis.length > 0">
+        Past analysis:
+      </div>
+      <pill
+        class="pill mt-1 mb-0"
+        @click.native="openOldAnalysis(a)"
+        @remove-pill="deleteAnalysis(a)"
+        :name="a"
+        :key="a"
+        v-for="a in listAnalysis">
+      </pill>
+
+      <!-- results -->
+      <div class="fzj-xg-webjugex-analysis-container">
+        <AnalysisCard
+          :data = "a"
+          :key = "a.id"
+          v-for = "a in analyses" />
       </div>
     </div>
-    
-    <!-- warning -->
-    <transition name="fzj-xg-webjugex-fade">
-      <div style="margin-top:0.5em" class="alert alert-danger" v-if="warning.length > 0">
-        <i class="glyphicon glyphicon-alert"></i> WARNING: 
-        <ul>
-          <li :key="w" v-for="w in warning">
-            {{ getWarning(w) }}
-          </li>
-        </ul>
-      </div>
-    </transition>
-
-    <div class="fzj.xg.webjugex.divider"></div>
-
-    <!-- past analysis -->
-    <div v-if="listAnalysis.length > 0">
-      Past analysis:
-    </div>
-    <pill
-      class="pill mt-1 mb-0"
-      @click.native="openOldAnalysis(a)"
-      @remove-pill="deleteAnalysis(a)"
-      :name="a"
-      :key="a"
-      v-for="a in listAnalysis">
-    </pill>
-
-    <!-- results -->
-    <div class="fzj-xg-webjugex-analysis-container">
-      <AnalysisCard
-        :data = "a"
-        :key = "a.id"
-        v-for = "a in analyses" />
-    </div>
+    <h3
+      class="p-2 text-muted"
+      v-else>
+      JuGEx only works with JuBrain Cytoarchitectonic Atlas.
+    </h3>
   </div>
 </template>
 <script>
@@ -415,6 +423,10 @@ const fA = (arr) => arr.concat(
     : [])
 )
 
+const allowedParcellationName = [
+  `JuBrain Cytoarchitectonic Atlas`
+]
+
 export default {
   components: {
     AutoComplete,
@@ -423,11 +435,19 @@ export default {
     CheckBox,
     AnalysisCard
   },
+  
+  /** 
+    * key values in non standard vue components (ie, not in data, or methods), can be accessed via this.$options[OPTION_NAME]
+    * the advantage is that these properties are non reactive. Thus Vue framework does not attach getters and setters. 
+    */
   nonReactive: {
-    toastHandler: null
+    toastHandler: null,
+    subscriptions: []
   },
   data: function () {
     return {
+      active: false,
+
       desc: `Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
 
         The tool downloads expression values of user specified sets of genes from Allen Brain API[1].
@@ -440,7 +460,6 @@ export default {
       descTruncate: 100,
       descReadmore: false,
 
-      subscriptions: [],
       regionNamesUrlArray: [],
       roi1s: [],
       roi2s: [],
@@ -480,10 +499,17 @@ export default {
     this.$options.nonReactive.toastHandler.dismissable = false
     this.$options.nonReactive.toastHandler.timeout = -1
 
+    this.$options.nonReactive.subscriptions.push(
+      interactiveViewer.metadata.selectedParcellationBSubject.subscribe(({ name } = {}) => {
+        const idx = allowedParcellationName.findIndex(allowedName => allowedName === name)
+        this.active = idx >= 0
+      })
+    )
+
     /**
      * Files are not longer retrieved. Temporary solution is using selected parcellation, since we are using pmap service any way
      */
-    // this.subscriptions.push(
+    // this.$options.nonReactive.subscriptions.push(
     //   window.interactiveViewer.metadata.datasetsBSubject
     //     .subscribe(array => {
     //       this.regionNamesUrlArray = array
@@ -497,19 +523,19 @@ export default {
     //     })
     // )
 
-    this.subscriptions.push(
+    this.$options.nonReactive.subscriptions.push(
       interactiveViewer.metadata.selectedParcellationBSubject.subscribe(p => {
         this.regionNamesUrlArray = fA(p.regions).filter(v => v.labelIndex).map(v => [v.name, v])
       })
     )
 
-    this.subscriptions.push(
+    this.$options.nonReactive.subscriptions.push(
       window.interactiveViewer.viewerHandle.mouseOverNehuba.subscribe(region => {
         this.mouseOverRegion = region
       })
     )
 
-    this.subscriptions.push(
+    this.$options.nonReactive.subscriptions.push(
       window.interactiveViewer.viewerHandle.mouseEvent
         .subscribe(ev => {
           if (ev.eventName === 'mousedown') {
@@ -808,7 +834,7 @@ export default {
     }
   },
   beforeDestroy: function () {
-    this.subscriptions.forEach(s => s.unsubscribe())
+    this.$options.nonReactive.subscriptions.forEach(s => s.unsubscribe())
   },
   filters: {
     truncate: function (text, length = 50, clamp = '...') {
