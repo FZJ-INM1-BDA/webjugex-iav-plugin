@@ -390,7 +390,7 @@
         class="pill mt-1 mb-0"
         @click.native="openOldAnalysis(a)"
         @remove-pill="deleteAnalysis(a)"
-        :name="a"
+        :name="a | dateFilter"
         :key="a"
         v-for="a in listAnalysis">
       </pill>
@@ -837,6 +837,12 @@ export default {
     this.$options.nonReactive.subscriptions.forEach(s => s.unsubscribe())
   },
   filters: {
+
+    dateFilter: function (value) {
+      if (!value) return `Undated`
+      const d = new Date(Number(value))
+      return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}`
+    },
     truncate: function (text, length = 50, clamp = '...') {
       return length >= 0
         ? text.length > length

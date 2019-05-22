@@ -53,7 +53,14 @@ app.get("/vue-script.js", (req, res) => {
 
 app.use('/analysis', require('./analysisRoute'))
 app.get('/genelist', (req, res) => {
-  request(BACKEND_URL).pipe(res)
+
+  request(BACKEND_URL)
+    .on('error', (err) => {
+      console.log('genelist error', err)
+      res.status(500).send()
+    })
+    .pipe(res)
+  
 })
 
 app.listen(PORT)
