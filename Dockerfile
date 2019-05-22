@@ -17,6 +17,11 @@ ENV PORT=$PORT
 COPY . /webjugex-frontend
 WORKDIR /webjugex-frontend
 RUN npm i
+
+# Run tests. If fails, stop container
+RUN npm run test
+
+# Build ssr
 RUN npm run build-ssr
 
 ENTRYPOINT [ "node", "vueSsr/deployServer.js"]

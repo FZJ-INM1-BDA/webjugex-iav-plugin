@@ -415,7 +415,7 @@
 import { Readmore, AutoComplete, Pill, CheckBox } from 'vue-components'
 import AnalysisCard from './Analysis'
 import Vue from 'vue'
-
+import { sanitizeAreaName } from '../util/fn'
 
 const fA = (arr) => arr.concat(
   ...arr.map(item =>item.children && item.children.length
@@ -713,8 +713,7 @@ export default {
     },
     startAnalysis: function () {
 
-      const getMerge = (arr) => arr.map(v => 
-        v.replace(/\W\(.*?\)$/,'').replace(/\W/g, '-').replace(/\./, '')).join(',')
+      const getMerge = (arr) => arr.map(sanitizeAreaName).join(',')
       const PMAP_URL = VUE_APP_PMAP_URL || 'https://pmaps-sk-test-project.apps-dev.hbp.eu'
       const roi1Url = `${PMAP_URL}/multimerge?threshold=0.5&areas=${getMerge(this.roi1s)}&filename=happyface.nii`
       const roi2Url = `${PMAP_URL}/multimerge?threshold=0.5&areas=${getMerge(this.roi2s)}&filename=happyface.nii`
