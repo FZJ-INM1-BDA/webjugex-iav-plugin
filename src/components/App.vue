@@ -161,6 +161,7 @@
       <div class="p-1 bg-dark mb-2">
         <div style="z-index: 3" class="input-group">
           <auto-complete
+            :searchFromStart="true"
             :warning="selectedgenesWarning"
             @focusin.native="focusAutocomplete(null)"
             class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
