@@ -404,11 +404,11 @@
           v-for = "a in analyses" />
       </div>
     </div>
-    <h3
+    <h5
       class="p-2 text-muted"
       v-else>
-      JuGEx only works with JuBrain Cytoarchitectonic Atlas.
-    </h3>
+      JuGEx only works with JuBrain Cytoarchitectonic Atlas in MNI 152 ICBM 2009c Nonlinear Asymmetric template space.
+    </h5>
   </div>
 </template>
 <script>
@@ -426,6 +426,10 @@ const fA = (arr) => arr.concat(
 
 const allowedParcellationName = [
   `JuBrain Cytoarchitectonic Atlas`
+]
+
+const allowedTemplateSpaces = [
+  `MNI 152 ICBM 2009c Nonlinear Asymmetric`
 ]
 
 export default {
@@ -447,7 +451,8 @@ export default {
   },
   data: function () {
     return {
-      active: false,
+      activeParcellation: null,
+      activeTemplate: null,
 
       desc: `Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
 
@@ -805,6 +810,11 @@ export default {
     }
   },
   computed: {
+    active: function () {
+      return this.activeParcellation && this.activeTemplate
+        && allowedParcellationName.indexOf(this.activeParcellation) >= 0
+        && allowedTemplateSpaces.indexOf(this.activeTemplate) >= 0
+    },
     geneListJSON: function () {
       return `data:text/plain;charset=utf-8,${JSON.stringify(this.selectedgenes)}`
     },
