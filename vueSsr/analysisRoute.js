@@ -89,7 +89,7 @@ router.put('/:analysisId', (req, res) => {
    * query webjugex backend
    */
   const BACKEND_URL = req.app.get('BACKEND_URL')
-  request(`${BACKEND_URL}/jugex`, {
+  request(`${BACKEND_URL}/jugex_v2`, {
     method: 'POST',
     headers: {
       'Content-type': 'application/json'
