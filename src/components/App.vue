@@ -451,8 +451,8 @@ export default {
   },
   data: function () {
     return {
-      activeParcellation: null,
-      activeTemplate: null,
+      activeParcellationName: null,
+      activeTemplateName: null,
 
       desc: `Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
 
@@ -507,8 +507,13 @@ export default {
 
     this.$options.nonReactive.subscriptions.push(
       interactiveViewer.metadata.selectedParcellationBSubject.subscribe(({ name } = {}) => {
-        const idx = allowedParcellationName.findIndex(allowedName => allowedName === name)
-        this.active = idx >= 0
+        this.activeParcellationName = name
+      })
+    )
+
+    this.$options.nonReactive.subscriptions.push(
+      interactiveViewer.metadata.selectedTemplateBSubject.subscribe(({name} ={}) => {
+        this.activeTemplateName = name
       })
     )
 
@@ -811,9 +816,9 @@ export default {
   },
   computed: {
     active: function () {
-      return this.activeParcellation && this.activeTemplate
-        && allowedParcellationName.indexOf(this.activeParcellation) >= 0
-        && allowedTemplateSpaces.indexOf(this.activeTemplate) >= 0
+      return this.activeParcellationName && this.activeTemplateName
+        && allowedParcellationName.indexOf(this.activeParcellationName) >= 0
+        && allowedTemplateSpaces.indexOf(this.activeTemplateName) >= 0
     },
     geneListJSON: function () {
       return `data:text/plain;charset=utf-8,${JSON.stringify(this.selectedgenes)}`
