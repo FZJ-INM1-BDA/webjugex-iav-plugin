@@ -23,8 +23,35 @@
         {{ error }}
       </div>
       <div v-else-if="pvaldata && coorddata">
-        <a :webjugex-tooltip="'test pval'" download="pval.tsv" :href="'data:text/tsv;charset=utf-8,' + pvaldata">download pvals</a><br />
-        <a :webjugex-tooltip="'test coord'" download="coord.tsv" :href="'data:text/tsv;charset=utf-8,' + coorddata">download coord data</a>
+        <a
+          download="pval.tsv"
+          @mouseenter="showPreviewPValData=true"
+          @mouseleave="showPreviewPValData=false"
+          class="position-relative"
+          :href="'data:text/tsv;charset=utf-8,' + pvaldata">
+          download pvals
+          <div
+            v-if="showPreviewPValData"
+            class="position-absolute tsv-preview-container">
+            <PreviewTsv class="tsv-preview" :tsv="pvaldata" />
+          </div>
+        </a>
+        
+        <br />
+        
+        <a
+          download="coord.tsv"
+          @mouseenter="showPreviewCoordData=true"
+          @mouseleave="showPreviewCoordData=false"
+          class="position-relative"
+          :href="'data:text/tsv;charset=utf-8,' + coorddata">
+          download coord data
+          <div
+            v-if="showPreviewCoordData"
+            class="position-absolute tsv-preview-container">
+            <PreviewTsv class="tsv-preview" :tsv="coorddata" />
+          </div>
+        </a>
       </div>
       <div v-else>
         We are still working on on analysing your data ...
@@ -36,7 +63,11 @@
 const POLLING_INTERVAL = 3000
 const DELIMITER = `\t`
 import { workspaceMixin } from './mixin'
+import PreviewTsv from './previewTsv'
 export default {
+  components: {
+    PreviewTsv
+  },
   props: {
     data: {
       type: Object,
@@ -48,6 +79,9 @@ export default {
   ],
   data: function () {
     return {
+      showPreviewPValData: false,
+      showPreviewCoordData: false, 
+
       showBody: false,
       analysisComplete: false,
       error: null,
@@ -198,4 +232,16 @@ export default {
   100%   { transform: translateX(0px); }
 }
 
+.tsv-preview-container
+{
+  width: 0px;
+  right: 0;
+  top: 0;
+}
+
+.tsv-preview
+{
+  background-color: rgba(50,50,50,0.8);
+  width: 30em;
+}
 </style>

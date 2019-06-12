@@ -278,7 +278,7 @@
 
         </div>
       </div>
-      
+
       <!-- warning -->
       <transition name="fzj-xg-webjugex-fade">
         <div style="margin-top:0.5em" class="alert alert-danger" v-if="warning.length > 0">
@@ -733,7 +733,7 @@ export default {
       }
 
       const id = Date.now().toString()
-      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}`, {
+      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -889,12 +889,12 @@ export default {
   color: rgba(230,230,230,1.0);
 }
 
-[webjugex-tooltip]
+#fzj-xg-webjugex-container [webjugex-tooltip]
 {
   position: relative;
 }
 
-[webjugex-tooltip]:after
+#fzj-xg-webjugex-container [webjugex-tooltip]:after
 {
   content: attr(webjugex-tooltip);
   position: absolute;
