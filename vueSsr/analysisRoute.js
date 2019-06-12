@@ -6,7 +6,7 @@ const request = require('request')
 const { createBundleRenderer } = require('vue-server-renderer')
 const render = createBundleRenderer(path.join(__dirname, 'distSsr/vue-ssr-server-bundle.json'))
 
-const HOSTNAME = process.env.HOSTNAME || 'http://localhost:3000'
+const HOSTNAME = process.env.HOSTNAME || 'http://localhost:3001'
 const PLUGIN_NAME = process.env.PLUGIN_NAME || 'fzj.xg.webjugex'
 
 const jsFile = fs.readFileSync(path.join(__dirname, 'distSsr/ssr-analysis.js'), 'utf-8')
@@ -18,6 +18,7 @@ const getJsFile = (id) => jsFile
 /**
  * temporary db?
  */
+const workspaceMap = new Map()
 const map = new Map()
 const result = new Map()
 
@@ -36,12 +37,45 @@ const defaultItem = getJson(defaultId)
 
 router.use(bodyParser.json())
 
-router.get('/i-v-manifest/:analysisId', (req, res) => {
+const getWorkSpace = (req = {}) => {
+  const { query = {} } = req
+  const { workspace = 'public' } = query
+  const arr = workspaceMap.get(workspace)
+  if (arr) return arr
+  workspaceMap.set(workspace, [])
+  return workspaceMap.get(workspace)
+}
+
+const checkPermission = (req, res, next) => {
+  const arr = getWorkSpace(req)
+  const { analysisId } = req.params
+  if (arr.indexOf(analysisId) >= 0)
+    return next()
+  else 
+    return res.status(404).send('analysis does not exist on the workspace')
+}
+
+const putAnalysisMiddleWare = (req, res, next) => {
+  const arr = getWorkSpace(req)
+  const { analysisId } = req.params
+  if (analysisId) {
+    arr.push(analysisId)
+    return next()
+  } else {
+    return res.status(400).send('analysisId is required')
+  }
+}
+
+router.get('/i-v-manifest/:analysisId', checkPermission, (req, res) => {
   const { analysisId } = req.params
   return res.status(200).json(getJson(analysisId))
 })
 
-router.get('/i-v-template/:analysisId', (req, res) => {
+/**
+ * TODO implement proper user authentication
+ */
+
+router.get('/i-v-template/:analysisId', /* checkPermission, */ (req, res) => {
   const { analysisId: vueId } = req.params
   render.renderToString({
     analysis: { vueId }
@@ -54,16 +88,23 @@ router.get('/i-v-template/:analysisId', (req, res) => {
     })
 })
 
-router.get('/i-v-script/:analysisId', (req, res) => {
+
+/**
+ * TODO implement proper user authentication
+ */
+
+router.get('/i-v-script/:analysisId',  /* checkPermission, */ (req, res) => {
   const { analysisId } = req.params
   return res.status(200).send(getJsFile(analysisId))
 })
 
+
 router.get('/list', (req, res) => {
-  return res.status(200).json(Array.from(map.keys()))
+  const arr = getWorkSpace(req)
+  return res.status(200).json(arr)
 })
 
-router.get('/:analysisId', (req, res) => {
+router.get('/:analysisId', checkPermission, (req, res) => {
   const { analysisId } = req.params
   const item = map.get(analysisId)
   const analysis = result.get(analysisId)
@@ -72,7 +113,7 @@ router.get('/:analysisId', (req, res) => {
     : res.status(404).send(`analysis with id ${analysisId} not found`)
 })
 
-router.put('/:analysisId', (req, res) => {
+router.put('/:analysisId', putAnalysisMiddleWare, (req, res) => {
   const { body } = req
   const fixedBody = {
     ...body,
@@ -106,7 +147,7 @@ router.put('/:analysisId', (req, res) => {
   })
 })
 
-router.delete('/:analysisId', (req, res) => {
+router.delete('/:analysisId', checkPermission, (req, res) => {
   const { analysisId } = req.params
   const flag = map.delete(analysisId)
   const flag2 = result.delete(analysisId)

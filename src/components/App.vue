@@ -32,52 +32,26 @@
           </p>
         </small>
       </div>
-      <readmore v-if="false" :collapsed-height = "40">
-        <template slot = "readmoreContent">
-          <small>
-            <p>
-              Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
-            </p>
-            <p>
-              The tool downloads expression values of user specified sets of genes from Allen Brain API<sup>[1]</sup>.
-            </p>
-            <p>
-              Then, it uses zscores to find which genes are expressed differentially between the user specified regions of interests.
-            </p>
-            <p>
-              After the analysis is finished, the genes and their calculated p values are displayed. There is also an option of downloading the gene names and their p values and the roi coordinates used in the analysis.
-            </p>
-            <p>
-              <sup>[1]</sup> &copy; 2015 Allen Institute for Brain Science. Allen Brain Atlas API. Available from: <a target = "_blank" href = "brain-map.org/api/index.html">brain-map.org/api/index.html</a>
-            </p>
-          </small>
-        </template>
-        <template slot = "resizeSliverContentCollapsed">
-          <div class = "text-center">
-            <i class = "glyphicon glyphicon-chevron-down"></i>
-          </div>
-        </template>
-        <template slot = "resizeSliverContentShown">
-          <div class = "text-center">
-            <i class = "glyphicon glyphicon-chevron-up"></i>
-          </div>
-        </template>
-      </readmore>
 
-      <div class = "fzj.xg.webjugex.divider">
-      </div>
-      
-      <!-- simple mode -->
-      <div v-if="false" class="input-group">
-        <div class="input-group-prepend">
-          <span class="input-group-te">
-            Simple mode
-          </span>
+      <div class="fzj.xg.webjugex.divider"></div>
+
+      <!-- change workspace -->
+      <div class="input-group input-group-sm">
+        <input
+          v-model="workspaceInput"
+          :placeholder="workspace"
+          @keydown.esc="workspaceInput = ''"
+          @keydown.enter="setWorksSpace(workspaceInput);workspaceInput = ''"
+          type="text"
+          class="form-control form-control-sm"
+          autocomplete="off">
+        <div class="input-group-append">
+          <div
+            @click="setWorksSpace(workspaceInput);workspaceInput = ''"
+            class="btn btn-default">
+            Change WorkSpace
+          </div>
         </div>
-        <check-box
-          class = "fzj.xg.webjugex.checkbox"
-          @togglecheckbox = "simpleMode = !simpleMode"
-          :flag = "simpleMode"/>
       </div>
 
       <div class = "fzj.xg.webjugex.divider">
@@ -205,66 +179,6 @@
             v-for="gene in selectedgenes" />
         </div>
       </div>
-      <div class="fzj.xg.webjugex.divider"></div>
-
-      <!-- complex mode -->
-      <transition name="fzj-xg-webjugex-fade">
-        <div v-if="!simpleMode">
-
-          <div class="input-group">
-            <span class="input-group-addon">
-              Single probe mode
-            </span>
-            <check-box
-              :flag = "singleProbeMode"
-              @togglecheckbox = "singleProbeMode = !singleProbeMode" />
-          </div>
-        
-          <div class="input-group">
-            <span class="input-group-addon">
-              Ignore custom probe
-            </span>
-            <check-box
-              :flag = "ignoreCustomProbe"
-              @togglecheckbox = "ignoreCustomProbe = !ignoreCustomProbe" />
-          </div>
-          
-          <div class="fzj.xg.webjugex.divider"></div>
-        
-          <div class="input-group">
-            <span class="input-group-addon">
-              Hemisphere
-            </span>
-            <div
-              style = "display:inline-block"
-              :warning = "hemisphereWarning">
-              <div 
-                @click = "lefthemisphere = !lefthemisphere"
-                :class = " lefthemisphere == true ? 'btn-active' : 'btn-inactive'"
-                class="btn btn-default">
-                Left
-              </div>
-              <div 
-                @click = "righthemisphere = !righthemisphere"
-                :class = " righthemisphere == true ? 'btn-active' : 'btn-inactive'"
-                class="btn btn-default">
-                Right
-              </div>
-            </div>
-          </div>
-        
-          <div class="fzj.xg.webjugex.divider"></div>
-        
-          <div class="input-group">
-            <span class="input-group-addon">
-              <small>No. of Perm</small>
-            </span>
-            <input v-model = "nPermutations" type="number" class="form-control">
-          </div>
-        
-          <div class="fzj.xg.webjugex.divider"></div>  
-        </div>
-      </transition>
 
       <div class="fzj.xg.webjugex.divider"></div>
 
@@ -296,7 +210,7 @@
 
           <a
             class="fzj-xg-webjugex-hover-default"
-            @click="reset"
+            @click="resetToDefault"
             :class="isDefault ? 'text-muted disabled' : ''"
             href="#">
             reset to default
@@ -323,33 +237,29 @@
               :flag = "ignoreCustomProbe"
               @togglecheckbox = "ignoreCustomProbe = !ignoreCustomProbe" />
           </div>
-          
-          <div class="fzj.xg.webjugex.divider"></div>
-        
+
           <div class="input-group">
-            <span class="input-group-prepend">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="webjugex-threshold">
+                Threshold
+              </label>
+            </div>
+            <input
+              v-model="threshold"
+              class="form-control"
+              type="range"
+              min="0.05"
+              max="1.00"
+              step="0.05"
+              id="webjugex-threshold"
+              name="webjugex-threshold">
+            <div class="input-group-append">
               <span class="input-group-text">
-                Hemisphere
+                {{ threshold | numberFilter }}
               </span>
-            </span>
-            <div
-              style = "display:inline-block"
-              :warning = "hemisphereWarning">
-              <div 
-                @click = "lefthemisphere = !lefthemisphere"
-                :class = " lefthemisphere == true ? 'btn-active' : 'btn-inactive'"
-                class="btn btn-default">
-                Left
-              </div>
-              <div 
-                @click = "righthemisphere = !righthemisphere"
-                :class = " righthemisphere == true ? 'btn-active' : 'btn-inactive'"
-                class="btn btn-default">
-                Right
-              </div>
             </div>
           </div>
-        
+          
           <div class="fzj.xg.webjugex.divider"></div>
         
           <div class="input-group">
@@ -424,128 +334,7 @@ const fA = (arr) => arr.concat(
     : [])
 )
 
-const allowedParcellationName = [
-  `JuBrain Cytoarchitectonic Atlas`
-]
-
-const allowedTemplateSpaces = [
-  `MNI 152 ICBM 2009c Nonlinear Asymmetric`
-]
-
-const hardcode = [
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Fp2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Fp1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hIP1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hIP2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hIP3_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-CM_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Id6_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Id7_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-IF_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Ig1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-LB_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Ig2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-MF_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-4a_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-SF_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-4p_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-VTM_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Fo1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-STS1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Fo2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-STS2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Fo3_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-TE-1.0_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Fo4_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-TE-1.1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Fo5_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-TE-1.2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Fo6_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-TE-3_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Fo7_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Ch-123_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Ch-4_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-OP1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-44_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-OP2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-45_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-OP3_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Dorsal-Dentate-Nucleus_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-OP4_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Ventral-Dentate-Nucleus_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-OP8_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Fastigial-Nucleus_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Interposed-Nucleus_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-OP9_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-25_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-33_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hIP4_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-p24ab_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hIP5_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-p24c_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hIP6_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-p32_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-s24_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hIP7_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-s32_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hIP8_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-CA_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hPO1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-DG_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Entorhinal-Cortex_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-HATA_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-3a_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-3b_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Subiculum_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-6d1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-ifj1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-ifj2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-6d2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-ifs1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-6d3_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-ifs2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-ifs3_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-5Ci_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-ifs4_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-5L_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-PF_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-5M_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-PFcm_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-PFm_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-7A_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-PFop_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-7M_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-PFt_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-PGa_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-7PC_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-PGp_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-7P_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Ia_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-6ma_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Id1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Id4_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-6mp_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Id5_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-FG1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-FG2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-FG3_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-FG4_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hOc1_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hOc2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hOc3d_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hOc3v_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hOc4d_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hOc4la_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hOc4lp_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hOc4v_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hOc5_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-hOc6_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Id2_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Id3_pub',
- 'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Ig3_pub'
-]
+import { WORKSPACE_STRING, allowedParcellationName, allowedTemplateSpaces, hardcode } from './constants' 
 
 export default {
   components: {
@@ -566,6 +355,9 @@ export default {
   },
   data: function () {
     return {
+      workspace: 'public',
+      workspaceInput: '',
+
       activeParcellationName: null,
       activeTemplateName: null,
 
@@ -600,11 +392,10 @@ export default {
        */
       showAdvancedMenu: false,
       simpleMode: true,
-      singleProbeMode: true,
+      singleProbeMode: false,
       ignoreCustomProbe:false,
-      lefthemisphere:true,
-      righthemisphere:true,
       nPermutations:1000,
+      threshold: '0.2',
 
       /**
        * analysis
@@ -615,6 +406,8 @@ export default {
     }
   },
   mounted: function () {
+
+    this.workspace = localStorage.getItem(WORKSPACE_STRING) 
     
     this.$options.nonReactive.toastHandler = interactiveViewer.uiHandle.getToastHandler()
     this.$options.nonReactive.toastHandler.dismissable = false
@@ -695,23 +488,33 @@ export default {
     }
   },
   methods: {
+    setWorksSpace: function (val) {
+      localStorage.setItem(WORKSPACE_STRING, val)
+      this.workspace = val
+
+      /**
+       * side effects of setting workspace
+       */
+      this.listAnalysis = []
+      this.getListAnalysisResults()
+    },
     openOldAnalysis: function (id) {
       this.launchResultPanel(id)
         .catch(this.catchError)
     },
     launchResultPanel: function (id) {
-      return fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}`)
+      return fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}${this.queryParam}`)
         .then(res => res.json())
         .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
     },
     deleteAnalysis: function (id) {
-      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}`, {
+      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.queryParam}`, {
         method: 'DELETE'
       }).then(this.getListAnalysisResults)
         .catch(this.getListAnalysisResults)
     },
     getListAnalysisResults: function () {
-      fetch(`${VUE_APP_HOSTNAME}/analysis/list`)
+      fetch(`${VUE_APP_HOSTNAME}/analysis/list${this.queryParam}`)
         .then(res => res.json())
         .then(arr => this.listAnalysis = arr)
         .catch(this.catchError)
@@ -774,12 +577,11 @@ export default {
         reader.readAsText(file)
       })
     },
-    reset: function (event) {
+    resetToDefault: function (event) {
       event.preventDefault()
-      this.lefthemisphere = true
-      this.righthemisphere = true
       this.nPermutations = 1000
-      this.singleProbeMode = true
+      this.threshold = '0.2'
+      this.singleProbeMode = false
       this.ignoreCustomProbe = false
     },
     scanCaptureRegion: function () {
@@ -805,15 +607,13 @@ export default {
           return `ROI2 must be selected.`
         case 'selectedgenes':
           return `At least 1 gene needs to be selected.`
-        case 'hemisphere':
-          return `If simple mode is off, at least 1 hemisphere needs to be selected.`
         default:
           return `Some other fields need to be filled.`
       }
     },
     validation: function () {
       this.warning = []
-      if(this.roi1s.length > 0 && this.roi2s.length > 0 && this.selectedgenes.length > 0 && (this.simpleMode || (this.lefthemisphere || this.righthemisphere))){
+      if(this.roi1s.length > 0 && this.roi2s.length > 0 && this.selectedgenes.length > 0){
         return true
       }
       const warning = []
@@ -825,9 +625,6 @@ export default {
       }
       if(this.selectedgenes.length <= 0){
         warning.push('selectedgenes')
-      }
-      if(!this.simpleMode && !(this.lefthemisphere || this.righthemisphere)){
-        warning.push('hemisphere')
       }
       this.warning = warning
       return false
@@ -915,7 +712,7 @@ export default {
           PMapURL: PMAP_URL || null,
           body: {
             areas:v18Roi1,
-            threshold: 0.5
+            threshold: Number(this.threshold)
           }
         },
         area2: {
@@ -923,16 +720,15 @@ export default {
           PMapURL: PMAP_URL || null,
           body: {
             areas:v18Roi2,
-            threshold: 0.5
+            threshold: Number(this.threshold)
           }
         },
 
         simpleMode: this.simpleMode,
         singleProbeMode: this.singleProbeMode,
         ignoreCustomProbe: this.ignoreCustomProbe,
+        nPermutations: this.nPermutations,
 
-        lh: this.lefthemisphere,
-        rh: this.righthemisphere,
         selectedGenes: [...this.selectedgenes]
       }
 
@@ -995,6 +791,11 @@ export default {
     }
   },
   computed: {
+    queryParam: function () {
+      const param = new URLSearchParams()
+      param.set('workspace', this.workspace)
+      return '?' + param.toString()
+    },
     active: function () {
       return this.activeParcellationName && this.activeTemplateName
         && allowedParcellationName.indexOf(this.activeParcellationName) >= 0
@@ -1025,14 +826,16 @@ export default {
       return this.regionNamesUrlArray.map(v => v[0])
     },
     isDefault: function () {
-      return this.lefthemisphere && this.righthemisphere && this.nPermutations === 1000 && this.singleProbeMode && !this.ignoreCustomProbe
+      return Number(this.threshold) === 0.2 && this.nPermutations === 1000 && !this.singleProbeMode && !this.ignoreCustomProbe
     }
   },
   beforeDestroy: function () {
     this.$options.nonReactive.subscriptions.forEach(s => s.unsubscribe())
   },
   filters: {
-
+    numberFilter: function (val) {
+      return Number(val).toFixed(2)
+    },
     dateFilter: function (value) {
       if (!value) return `Undated`
       const d = new Date(Number(value))
@@ -1088,12 +891,12 @@ export default {
   color: rgba(230,230,230,1.0);
 }
 
-#fzj-xg-webjugex-container [webjugex-tooltip]
+[webjugex-tooltip]
 {
   position: relative;
 }
 
-#fzj-xg-webjugex-container [webjugex-tooltip]:after
+[webjugex-tooltip]:after
 {
   content: attr(webjugex-tooltip);
   position: absolute;

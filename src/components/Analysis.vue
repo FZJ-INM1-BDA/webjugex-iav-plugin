@@ -23,8 +23,8 @@
         {{ error }}
       </div>
       <div v-else-if="pvaldata && coorddata">
-        <a download="pval.tsv" :href="'data:text/tsv;charset=utf-8,' + pvaldata">download pvals</a><br />
-        <a download="coord.tsv" :href="'data:text/tsv;charset=utf-8,' + coorddata">download coord data</a>
+        <a :webjugex-tooltip="'test pval'" download="pval.tsv" :href="'data:text/tsv;charset=utf-8,' + pvaldata">download pvals</a><br />
+        <a :webjugex-tooltip="'test coord'" download="coord.tsv" :href="'data:text/tsv;charset=utf-8,' + coorddata">download coord data</a>
       </div>
       <div v-else>
         We are still working on on analysing your data ...
@@ -44,6 +44,7 @@ export default {
   },
   data: function () {
     return {
+      workspace: 'public',
       showBody: false,
       analysisComplete: false,
       error: null,
@@ -63,6 +64,11 @@ export default {
     }
   },
   computed: {
+    queryParam: function () {
+      const param = new URLSearchParams()
+      param.set('workspace', this.workspace)
+      return '?' + param.toString()
+    },
     completionTimeString: function () {
       return this.completionTime
         ? this.completionTime
@@ -71,7 +77,14 @@ export default {
   },
   methods: {
     fetching: function () {
-      return fetch(`${VUE_APP_HOSTNAME}/analysis/${this.vueId}`)
+      return fetch(`${VUE_APP_HOSTNAME}/analysis/${this.vueId}${this.queryParam}`)
+        .then(res => {
+          if (res.status >= 400) {
+            reject(res.status)
+          } else {
+            return res
+          }
+        })
         .then(res => res.json())
         .then(json => {
           const analysisBody = json && json.analysis && json.analysis.body
@@ -154,6 +167,7 @@ export default {
     }
   },
   mounted: function () {
+    this.workspace = localStorage.getItem(WORKSPACE_STRING) 
     this.vueId = this.$parent.queryId
     this.getData()
       .then(this.parseFetchedData)
