@@ -334,7 +334,8 @@ const fA = (arr) => arr.concat(
     : [])
 )
 
-import { WORKSPACE_STRING, allowedParcellationName, allowedTemplateSpaces, hardcode } from './constants' 
+import { allowedParcellationName, allowedTemplateSpaces, hardcode } from './constants' 
+import { workspaceMixin } from './mixin'
 
 export default {
   components: {
@@ -353,9 +354,11 @@ export default {
     toastHandler: null,
     subscriptions: []
   },
+  mixins:[
+    workspaceMixin
+  ],
   data: function () {
     return {
-      workspace: 'public',
       workspaceInput: '',
 
       activeParcellationName: null,
@@ -406,8 +409,6 @@ export default {
     }
   },
   mounted: function () {
-
-    this.workspace = localStorage.getItem(WORKSPACE_STRING) 
     
     this.$options.nonReactive.toastHandler = interactiveViewer.uiHandle.getToastHandler()
     this.$options.nonReactive.toastHandler.dismissable = false
@@ -489,8 +490,7 @@ export default {
   },
   methods: {
     setWorksSpace: function (val) {
-      localStorage.setItem(WORKSPACE_STRING, val)
-      this.workspace = val
+      this.workspaceMixin__workspace = val
 
       /**
        * side effects of setting workspace
@@ -503,18 +503,18 @@ export default {
         .catch(this.catchError)
     },
     launchResultPanel: function (id) {
-      return fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}${this.queryParam}`)
+      return fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}${this.workspaceMixin__queryParam || ''}`)
         .then(res => res.json())
         .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
     },
     deleteAnalysis: function (id) {
-      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.queryParam}`, {
+      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
         method: 'DELETE'
       }).then(this.getListAnalysisResults)
         .catch(this.getListAnalysisResults)
     },
     getListAnalysisResults: function () {
-      fetch(`${VUE_APP_HOSTNAME}/analysis/list${this.queryParam}`)
+      fetch(`${VUE_APP_HOSTNAME}/analysis/list${this.workspaceMixin__queryParam || ''}`)
         .then(res => res.json())
         .then(arr => this.listAnalysis = arr)
         .catch(this.catchError)
@@ -791,10 +791,8 @@ export default {
     }
   },
   computed: {
-    queryParam: function () {
-      const param = new URLSearchParams()
-      param.set('workspace', this.workspace)
-      return '?' + param.toString()
+    workspace: function () {
+      return this.workspaceMixin__workspace
     },
     active: function () {
       return this.activeParcellationName && this.activeTemplateName

@@ -35,6 +35,7 @@
 <script>
 const POLLING_INTERVAL = 3000
 const DELIMITER = `\t`
+import { workspaceMixin } from './mixin'
 export default {
   props: {
     data: {
@@ -42,9 +43,11 @@ export default {
       default: null
     }
   },
+  mixins:[
+    workspaceMixin
+  ],
   data: function () {
     return {
-      workspace: 'public',
       showBody: false,
       analysisComplete: false,
       error: null,
@@ -64,11 +67,6 @@ export default {
     }
   },
   computed: {
-    queryParam: function () {
-      const param = new URLSearchParams()
-      param.set('workspace', this.workspace)
-      return '?' + param.toString()
-    },
     completionTimeString: function () {
       return this.completionTime
         ? this.completionTime
@@ -77,7 +75,7 @@ export default {
   },
   methods: {
     fetching: function () {
-      return fetch(`${VUE_APP_HOSTNAME}/analysis/${this.vueId}${this.queryParam}`)
+      return fetch(`${VUE_APP_HOSTNAME}/analysis/${this.vueId}${this.workspaceMixin__queryParam || ''}`)
         .then(res => {
           if (res.status >= 400) {
             reject(res.status)
@@ -167,7 +165,8 @@ export default {
     }
   },
   mounted: function () {
-    this.workspace = localStorage.getItem(WORKSPACE_STRING) 
+    // use mixin
+
     this.vueId = this.$parent.queryId
     this.getData()
       .then(this.parseFetchedData)
