@@ -116,9 +116,9 @@ router.get('/:analysisId', checkPermission, (req, res) => {
 router.put('/:analysisId', putAnalysisMiddleWare, (req, res) => {
   const { body } = req
   const fixedBody = {
-    ...body,
     threshold: 0.2,
-    mode: false
+    mode: false,
+    ...body
   }
   const { analysisId } = req.params
   if (map.get(analysisId))

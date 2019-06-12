@@ -64,6 +64,8 @@ const POLLING_INTERVAL = 3000
 const DELIMITER = `\t`
 import { workspaceMixin } from './mixin'
 import PreviewTsv from './previewTsv'
+
+const NO_RESULTS_YET = 'no results yet'
 export default {
   components: {
     PreviewTsv
@@ -119,13 +121,17 @@ export default {
         })
         .then(res => res.json())
         .then(json => {
-          const analysisBody = json && json.analysis && json.analysis.body
-          if (analysisBody) {
+          const { analysis } = json
+          if (analysis) {
             clearInterval(this.intervalId)
-            const body = JSON.parse(analysisBody)
-            return Promise.resolve(body)
+            const {body, resp} = analysis
+            const { statusCode } = resp
+            if (statusCode && statusCode >= 400) {
+              return Promise.reject(statusCode)
+            }
+            return Promise.resolve(JSON.parse(body))
           } else {
-            return Promise.reject('no results yet')
+            return Promise.reject(NO_RESULTS_YET)
           }
         })
     },
@@ -138,17 +144,26 @@ export default {
 
         this.fetching()
           .then(resolve)
-          .catch(() => {
-            this.intervalId = setInterval(() => {
-              this.fetching()
-                .then(json => {
-                  clearInterval(this.intervalId)
-                  resolve(json)
-                })
-                .catch(e => {
-                  console.log('retrying', e)
-                })
-            }, POLLING_INTERVAL)
+          .catch((reason) => {
+            if (reason === NO_RESULTS_YET) {
+
+              this.intervalId = setInterval(() => {
+                this.fetching()
+                  .then(json => {
+                    clearInterval(this.intervalId)
+                    resolve(json)
+                  })
+                  .catch(e => {
+                    if (e === NO_RESULTS_YET) {
+                      console.log('retrying', e)
+                    } else {
+                      this.error = e
+                    }
+                  })
+              }, POLLING_INTERVAL)
+            } else {
+              this.error = reason
+            }
           })
 
 
