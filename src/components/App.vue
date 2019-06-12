@@ -490,7 +490,7 @@ export default {
   },
   methods: {
     setWorksSpace: function (val) {
-      this.workspaceMixin__workspace = val
+      this.workspaceMixin__setWorkspace(val)
 
       /**
        * side effects of setting workspace
