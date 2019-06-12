@@ -131,6 +131,14 @@ router.put('/:analysisId', putAnalysisMiddleWare, (req, res) => {
    */
   const BACKEND_URL = req.app.get('BACKEND_URL')
   request(`${BACKEND_URL}/jugex_v2`, {
+    /**
+     * TODO
+     * timeout set to 10 mins
+     * In future, either use this service to orchastrate jugex execution
+     * Or have webJuGEx return polling ID
+     * Or provide URL for webJuGEx for CB
+     */
+    timeout: 10 * 60 * 1000,
     method: 'POST',
     headers: {
       'Content-type': 'application/json'
