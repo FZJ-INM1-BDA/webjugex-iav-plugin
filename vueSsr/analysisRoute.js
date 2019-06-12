@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const crypto = require('crypto')
 const router = require('express').Router()
 const bodyParser = require('body-parser')
 const request = require('request')
@@ -18,6 +19,7 @@ const getJsFile = (id) => jsFile
 /**
  * temporary db?
  */
+const cbTokenToIdMap = new Map()
 const workspaceMap = new Map()
 const map = new Map()
 const result = new Map()
@@ -113,14 +115,44 @@ router.get('/:analysisId', checkPermission, (req, res) => {
     : res.status(404).send(`analysis with id ${analysisId} not found`)
 })
 
-router.put('/:analysisId', putAnalysisMiddleWare, (req, res) => {
+router.post('/analysisCB/:randomToken', (req, res) => {
+
+  /**
+   * always return success to avoid 
+   */
+  res.status(200).send('OK')
+
+  const { randomToken } = req.params
   const { body } = req
+
+  const analysisId = cbTokenToIdMap.get(randomToken)
+  if (!analysisId) return
+  cbTokenToIdMap.delete(randomToken)
+  const flag = map.get(analysisId)
+  if (flag) result.set(analysisId, {
+    err: null,
+    resp: {
+      statusCode: 200
+    },
+    body: JSON.stringify(body)
+  })
+})
+
+router.put('/:analysisId', putAnalysisMiddleWare, (req, res) => {
+  const { analysisId } = req.params
+  const { body } = req
+
+  const HOSTNAME = req.app.get('HOSTNAME') || 'http://localhost:3001'
+  const randomToken = crypto.randomBytes(64).toString('hex')
+  const cbUrl = `${HOSTNAME}/analysis/analysisCB/${randomToken}`
+  cbTokenToIdMap.set(randomToken, analysisId)
+
   const fixedBody = {
     threshold: 0.2,
     mode: false,
-    ...body
+    ...body,
+    cbUrl
   }
-  const { analysisId } = req.params
   if (map.get(analysisId))
     return res.status(400).send('analysis already exist')
   map.set(analysisId, fixedBody)
@@ -145,13 +177,10 @@ router.put('/:analysisId', putAnalysisMiddleWare, (req, res) => {
     },
     body: JSON.stringify(fixedBody)
   }, (err, resp, body) => {
-    const flag = map.has(analysisId)
-    if (flag)
-      result.set(analysisId, {
-        err,
-        resp,
-        body
-      })
+    /**
+     * jugex request sent
+     * waiting for cb
+     */
   })
 })
 

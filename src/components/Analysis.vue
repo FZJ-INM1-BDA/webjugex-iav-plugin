@@ -1,6 +1,9 @@
 <template>
   <div class="panel panel-default">
+
+    <!-- header -->
     <div
+      v-if="!error"
       @click="showBody = !showBody"
       class="panel-header btn btn-default btn-block">
       <span v-if="analysisComplete">
@@ -15,8 +18,10 @@
         &times;
       </span>
     </div>
+
+    <!-- body -->
     <div
-      v-if="showBody"
+      v-if="error || showBody"
       class="panel-body p-2">
 
       <div v-if="error">

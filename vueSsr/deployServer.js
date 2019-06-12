@@ -25,6 +25,7 @@ const PLUGIN_DISPLAY_NAME = process.env.PLUGIN_DISPLAY_NAME || 'Untitled Plugin'
 const BACKEND_URL= process.env.BACKEND_URL || 'http://localhost:8003'
 
 app.set('BACKEND_URL', BACKEND_URL)
+app.set('HOSTNAME', HOSTNAME)
 
 const manifest = {
   name: PLUGIN_NAME,
