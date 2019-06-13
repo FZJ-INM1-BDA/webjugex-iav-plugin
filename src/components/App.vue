@@ -328,10 +328,10 @@ import AnalysisCard from './Analysis'
 import Vue from 'vue'
 import { sanitizeAreaName } from '../util/fn'
 
-const fA = (arr) => arr.concat(
+const fA = (arr) => (arr && arr.concat(
   ...arr.map(item =>item.children && item.children.length
     ? fA(item.children)
-    : [])
+    : [])) || []
 )
 
 import { allowedParcellationName, allowedTemplateSpaces, hardcode } from './constants' 

@@ -56,12 +56,22 @@ const checkPermission = (req, res, next) => {
     return res.status(404).send('analysis does not exist on the workspace')
 }
 
-const putAnalysisMiddleWare = (req, res, next) => {
+const mutateWorkspaceMiddleWare = (req, res, next) => {
   const arr = getWorkSpace(req)
   const { analysisId } = req.params
   if (analysisId) {
-    arr.push(analysisId)
-    return next()
+    if (req.method === 'PUT') {
+      arr.push(analysisId)
+      return next()
+    }
+    else if (req.method === 'DELETE') {
+      const idx = arr.indexOf(analysisId)
+      if (idx < 0) return res.status(404).send()
+      arr.splice(idx, 1)
+      return next()
+    } else {
+      return res.status(405).send()
+    }
   } else {
     return res.status(400).send('analysisId is required')
   }
@@ -137,7 +147,7 @@ router.post('/analysisCB/:randomToken', (req, res) => {
   })
 })
 
-router.put('/:analysisId', putAnalysisMiddleWare, (req, res) => {
+router.put('/:analysisId', mutateWorkspaceMiddleWare, (req, res) => {
   const { analysisId } = req.params
   const { body } = req
 
@@ -183,7 +193,7 @@ router.put('/:analysisId', putAnalysisMiddleWare, (req, res) => {
   })
 })
 
-router.delete('/:analysisId', checkPermission, (req, res) => {
+router.delete('/:analysisId', checkPermission, mutateWorkspaceMiddleWare, (req, res) => {
   const { analysisId } = req.params
   const flag = map.delete(analysisId)
   const flag2 = result.delete(analysisId)
