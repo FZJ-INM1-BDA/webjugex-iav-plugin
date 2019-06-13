@@ -8,5 +8,10 @@ setTimeout(() => {
       queryId
     })
     analysis.$mount(el)
+
+    interactiveViewer.pluginControl['fzj-xg-webjugex-placeholder'].onShutdown(() => {
+      analysis.$destroy()
+    })
   }
+
 })

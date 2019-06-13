@@ -13,9 +13,8 @@ const PLUGIN_NAME = process.env.PLUGIN_NAME || 'fzj.xg.webjugex'
 const jsFile = fs.readFileSync(path.join(__dirname, 'distSsr/ssr-analysis.js'), 'utf-8')
 
 const getJsFile = (id) => jsFile
-  .replace('fzj-xg-webjugex-placeholder', `${PLUGIN_NAME}-${id}`)
-  .replace('fzj-xg-webjugex-tempId', id)
-
+  .replace(/fzj-xg-webjugex-placeholder/g, `${PLUGIN_NAME}-${id}`)
+  .replace(/fzj-xg-webjugex-tempId/g, id)
 /**
  * temporary db?
  */
