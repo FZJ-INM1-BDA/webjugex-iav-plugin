@@ -450,7 +450,7 @@ export default {
     )
 
     this.$options.nonReactive.subscriptions.push(
-      window.interactiveViewer.viewerHandle.mouseOverNehuba.subscribe(({foundRegion}) => {
+      window.interactiveViewer.viewerHandle.mouseOverNehuba.subscribe(({foundRegion} = {}) => {
         this.mouseOverRegion = foundRegion
       })
     )
