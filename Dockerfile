@@ -21,7 +21,6 @@ RUN npm run test
 
 # Build ssr
 RUN mkdir /webjugex-frontend/deploy/dist
-ENV OUTPUT_PATH=/webjugex-frontend/deploy/dist 
 RUN npm run build-ssr
 
 FROM node:8-alpine
