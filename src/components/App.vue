@@ -6,179 +6,38 @@
       id = "fzj-xg-webjugex-container">
 
       <!-- description -->
-      <div class="fzj-xg-webjugex-truncate bg-dark p-2">
-        <small v-if="descReadmore">
-          <p>
-            Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
-          </p>
-          <p>
-            The tool downloads expression values of user specified sets of genes from Allen Brain API<sup>[1]</sup>.
-          </p>
-          <p>
-            Then, it uses zscores to find which genes are expressed differentially between the user specified regions of interests.
-          </p>
-          <p>
-            After the analysis is finished, the genes and their calculated p values are displayed. There is also an option of downloading the gene names and their p values and the roi coordinates used in the analysis.
-          </p>
-          <p>
-            <sup>[1]</sup> &copy; 2015 Allen Institute for Brain Science. Allen Brain Atlas API. Available from: <a target = "_blank" href = "brain-map.org/api/index.html">brain-map.org/api/index.html</a>
-          </p>
-          <a @click="$event.preventDefault(); descReadmore = false" href="#"> readless </a>
-        </small>
-        <small v-else>
-          <p>
-            Find a set of differentially expressed genes between two user defined volumes of interest ... 
-            <a @click="$event.preventDefault(); descReadmore = true" href="#"> readmore </a>
-          </p>
-        </small>
-      </div>
+      <DescBlock />
 
       <div class="fzj.xg.webjugex.divider"></div>
 
-      <!-- change workspace -->
-      <div class="input-group input-group-sm">
-        <input
-          v-model="workspaceInput"
-          :placeholder="workspace"
-          @keydown.esc="workspaceInput = ''"
-          @keydown.enter="setWorksSpace(workspaceInput);workspaceInput = ''"
-          type="text"
-          class="form-control form-control-sm"
-          autocomplete="off">
-        <div class="input-group-append">
-          <div
-            @click="setWorksSpace(workspaceInput);workspaceInput = ''"
-            class="btn btn-default">
-            Change WorkSpace
-          </div>
-        </div>
-      </div>
+      <!-- roi selection -->
+      <RoiSelector
+        ref="roi1Selector"
+        label="ROI1"
+        class="position-relative"
+        style="z-index:6"
+        placeholderText="Search & Add ROI 1"
+        :warning="roi1Warning"
+        :autocompleteArray="regionAutocompleteRawArray">
+      </RoiSelector>
 
-      <div class = "fzj.xg.webjugex.divider">
-      </div>
-
-      <!-- roi1 -->
-      <div class="p-1 bg-dark mb-2">
-        <div style = "z-index: 5" class="input-group">
-          <div class="input-group-prepend">
-            <div class="input-group-text">
-              ROI1
-            </div>
-          </div>
-          <auto-complete
-            ref="roi1"
-            :warning="roi1Warning"
-            class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
-            @focusin.native="focusAutocomplete(1)"
-            @selectslice="selectSlice($event, null, true)"
-            :rawarray="autocompleteRawArray"
-            :placeholder="autocomplete1Placeholder"/>
-          <div class="input-group-append">
-            <div
-              webjugex-tooltip="toggle scan mode for ROI1"
-              @click.stop.prevent="toggleScanMode(1)"
-              :class="scanMode === 1 ? 'btn-active' : 'btn-inactive'"
-              class="btn btn-secondary">
-              <i class="fas fa-satellite-dish"></i>
-            </div>
-          </div>
-        </div>
-        <div>
-          <pill
-            class="pill mt-1 mb-0"
-            @remove-pill="removeRoi(1, roi)"
-            :name="roi"
-            :key="roi"
-            v-for="roi in roi1s" />
-        </div>
-      </div>
-
-      <!-- roi2 -->
-      <div class="p-1 bg-dark mb-2">
-        <div style = "z-index: 4" class="input-group">
-          <div class="input-group-prepend">
-            <div class="input-group-text">
-              ROI2
-            </div>
-          </div>
-          <auto-complete
-            ref="roi2"
-            :warning="roi2Warning"
-            class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
-            @focusin.native="focusAutocomplete(2)"
-            @selectslice="selectSlice(null, $event, true)"
-            :rawarray="autocompleteRawArray"
-            :placeholder="autocomplete2Placeholder"/>
-          <div class="input-group-append">
-            <div
-              webjugex-tooltip="toggle scan mode for ROI2"
-              @click.stop.prevent="toggleScanMode(2)"
-              :class="scanMode === 2 ? 'btn-active' : 'btn-inactive'"
-              class="btn btn-default">
-              <i class="fas fa-satellite-dish"></i>
-            </div>
-          </div>
-        </div>
-        <div>
-          <pill
-            class="pill mt-1 mb-0"
-            @remove-pill = "removeRoi(2, roi)"
-            :name = "roi"
-            :key = "roi"
-            v-for = "roi in roi2s" />
-        </div>
-      </div>
-      <div class = "fzj.xg.webjugex.divider">
-      </div>
+      <RoiSelector
+        ref="roi2Selector"
+        label="ROI2"
+        class="position-relative"
+        style="z-index:5"
+        placeholderText="Search & Add ROI 2"
+        :warning="roi2Warning"
+        :autocompleteArray="regionAutocompleteRawArray">
+      </RoiSelector>
 
       <!-- genelist -->
-      <div class="p-1 bg-dark mb-2">
-        <div style="z-index: 3" class="input-group">
-          <auto-complete
-            :searchFromStart="true"
-            :warning="selectedgenesWarning"
-            @focusin.native="focusAutocomplete(null)"
-            class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
-            ref="genelist"
-            :rawarray="allgenes"
-            @selectslice="selectgene"/>
-          <div
-            webjugex-tooltip='accepts a stringified list of gene names. e.g, ["MAOA", "TAC1"]'
-            class="input-group-btn">
-            <div
-              @click="importGeneJSON"
-              class="btn btn-default">
-              Import
-              <input
-                @change="fileChosen"
-                class="hidden"
-                hidden="hidden"
-                type="file"
-                ref="importGeneRef" />
-            </div>
-          </div>
-          <div
-            :webjugex-tooltip="selectedgenes.length === 0 ? 'you need to have at least 1 gene selected to export' : 'saves the gene list as a comma separated, utf8 encoded csv file'" 
-            class="input-group-btn">
-            <div
-              :disabled="selectedgenes.length === 0"
-              @click="exportGeneJSON"
-              :class="selectedgenes.length === 0 ? 'fzj-xg-webjugex-pointer-events text-muted' : ''"
-              class="btn btn-default">
-              Export
-              <a class="hidden" hidden download="genelist.json" ref="exportAnchor" :href="geneListJSON">Export Genelist as JSON</a>
-            </div>
-          </div>
-        </div>
-        <div>
-          <pill
-            class="pill"
-            @remove-pill="removeRoi(3, gene)"
-            :name="gene"
-            :key="gene"
-            v-for="gene in selectedgenes" />
-        </div>
-      </div>
+      <GeneSelector
+        ref="geneSelector"
+        class="position-relative"
+        style="z-index:4"
+        :warning="selectedgenesWarning">
+      </GeneSelector>
 
       <div class="fzj.xg.webjugex.divider"></div>
 
@@ -186,10 +45,10 @@
       <div class="btn-group w-100">
         <div 
           @click = "startAnalysis"
-          class="btn btn-secondary">
-          Start Differential Analysis
+          :class="(initAnalysisFlag ? 'text-muted' : '') + ' btn btn-secondary'">
+          {{ analysisBtnText }}
           <span
-            v-if="!isDefault"
+            v-if="!advancedIsDefault"
             class="text-warning">
             <i class="fas fa-exclamation-triangle"></i>
           </span>
@@ -204,79 +63,12 @@
         </div>
 
         <!-- advanced menu -->
-        <div
+        <Advanced
+          @updateIsDefault="advancedIsDefault = $event"
+          ref="advancedRef"
+          style="z-index:3"
           class="bg-dark p-3 fzj-xg-webjugex-advanced-menu"
-          v-if="showAdvancedMenu">
-
-          <a
-            class="fzj-xg-webjugex-hover-default"
-            @click="resetToDefault"
-            :class="isDefault ? 'text-muted disabled' : ''"
-            href="#">
-            reset to default
-          </a>
-
-          <div class="input-group">
-            <span class="input-group-prepend">
-              <span class="input-group-text">
-                Single probe mode
-              </span>
-            </span>
-            <check-box
-              :flag = "singleProbeMode"
-              @togglecheckbox = "singleProbeMode = !singleProbeMode" />
-          </div>
-        
-          <div class="input-group">
-            <span class="input-group-prepend">
-              <span class="input-group-text">
-                Ignore custom probe
-              </span>
-            </span>
-            <check-box
-              :flag = "ignoreCustomProbe"
-              @togglecheckbox = "ignoreCustomProbe = !ignoreCustomProbe" />
-          </div>
-
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="webjugex-threshold">
-                Threshold
-              </label>
-            </div>
-            <input
-              v-model="threshold"
-              class="form-control"
-              type="range"
-              min="0.05"
-              max="1.00"
-              step="0.05"
-              id="webjugex-threshold"
-              name="webjugex-threshold">
-            <div class="input-group-append">
-              <span class="input-group-text">
-                {{ threshold | numberFilter }}
-              </span>
-            </div>
-          </div>
-          
-          <div class="fzj.xg.webjugex.divider"></div>
-        
-          <div class="input-group">
-            <span class="input-group-prepend">
-              <span class="input-group-text">
-                <small>No. of Perm</small>
-              </span>
-            </span>
-            <input
-              :value="nPermutations"
-              @change="nPermChange"
-              @keyup="nPermChange"
-              type="number"
-              class="form-control">
-          </div>
-
-        </div>
+          v-show="showAdvancedMenu"/>
       </div>
 
       <!-- warning -->
@@ -294,25 +86,8 @@
       <div class="fzj.xg.webjugex.divider"></div>
 
       <!-- past analysis -->
-      <div v-if="listAnalysis.length > 0">
-        Past analysis:
-      </div>
-      <pill
-        class="pill mt-1 mb-0"
-        @click.native="openOldAnalysis(a)"
-        @remove-pill="deleteAnalysis(a)"
-        :name="a | dateFilter"
-        :key="a"
-        v-for="a in listAnalysis">
-      </pill>
+      <PastAnalysis ref="pastAnalysis" />
 
-      <!-- results -->
-      <div class="fzj-xg-webjugex-analysis-container">
-        <AnalysisCard
-          :data = "a"
-          :key = "a.id"
-          v-for = "a in analyses" />
-      </div>
     </div>
     <h5
       class="p-2 text-muted"
@@ -326,7 +101,12 @@
 import { Readmore, AutoComplete, Pill, CheckBox } from 'vue-components'
 import AnalysisCard from './Analysis'
 import Vue from 'vue'
-import { sanitizeAreaName } from '../util/fn'
+import { sanitizeAreaName, validateGetError, prepareAnalysisBody } from '../util/fn'
+import RoiSelector from './RoiSelector'
+import GeneSelector from './GeneSelector'
+import Advanced, { defaultConfig } from './Advanced'
+import DescBlock from './Desc'
+import PastAnalysis from './PastAnalysis'
 
 const fA = (arr) => (arr && arr.concat(
   ...arr.map(item =>item.children && item.children.length
@@ -334,7 +114,7 @@ const fA = (arr) => (arr && arr.concat(
     : [])) || []
 )
 
-import { allowedParcellationName, allowedTemplateSpaces, hardcode } from './constants' 
+import { allowedParcellationName, allowedTemplateSpaces } from './constants' 
 import { workspaceMixin } from './mixin'
 
 export default {
@@ -343,7 +123,12 @@ export default {
     Pill,
     Readmore,
     CheckBox,
-    AnalysisCard
+    AnalysisCard,
+    RoiSelector,
+    GeneSelector,
+    Advanced,
+    DescBlock,
+    PastAnalysis,
   },
   
   /** 
@@ -359,64 +144,40 @@ export default {
   ],
   data: function () {
     return {
-      workspaceInput: '',
 
       activeParcellationName: null,
       activeTemplateName: null,
 
-      desc: `Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.
-
-        The tool downloads expression values of user specified sets of genes from Allen Brain API[1].
-
-        Then, it uses zscores to find which genes are expressed differentially between the user specified regions of interests.
-
-        After the analysis is finished, the genes and their calculated p values are displayed. There is also an option of downloading the gene names and their p values and the roi coordinates used in the analysis.
-        
-        [1] &copy; 2015 Allen Institute for Brain Science. Allen Brain Atlas API. Available from: <a target = "_blank" href = "brain-map.org/api/index.html">brain-map.org/api/index.html</a>`,
-      descTruncate: 100,
-      descReadmore: false,
-
       regionNamesUrlArray: [],
-      roi1s: [],
-      roi2s: [],
-      allgenes: [],
-      selectedgenes: [],
+      
       warning : [],
-      scanMode: null,
-
-      /**
-       * scan mode
-       */
-      mouseOverRegion: null,
-      scanFlag: false,
 
       /**
        * complex mode
        */
       showAdvancedMenu: false,
-      simpleMode: true,
-      singleProbeMode: false,
-      ignoreCustomProbe:false,
-      nPermutations:1000,
-      threshold: '0.2',
 
       /**
        * analysis
        */
-      analyses: [],
-      listAnalysis: []
+      listAnalysis: [],
 
+      advancedIsDefault: true,
+      initAnalysisFlag: false
     }
   },
   mounted: function () {
     
-    this.$options.nonReactive.toastHandler = interactiveViewer.uiHandle.getToastHandler()
-    this.$options.nonReactive.toastHandler.dismissable = false
-    this.$options.nonReactive.toastHandler.timeout = -1
+    const toastHandler = interactiveViewer.uiHandle.getToastHandler()
+    toastHandler.dismissable = false
+    toastHandler.timeout = -1
+    
+    this.$options.nonReactive.toastHandler = toastHandler
 
     this.$options.nonReactive.subscriptions.push(
-      interactiveViewer.metadata.selectedParcellationBSubject.subscribe(({ name } = {}) => {
+      interactiveViewer.metadata.selectedParcellationBSubject.subscribe(({ name, regions } = {}) => {
         this.activeParcellationName = name
+        this.regionNamesUrlArray = fA(regions).filter(v => v.labelIndex).map(v => [v.name, v])
       })
     )
 
@@ -425,174 +186,10 @@ export default {
         this.activeTemplateName = name
       })
     )
-
-    /**
-     * Files are not longer retrieved. Temporary solution is using selected parcellation, since we are using pmap service any way
-     */
-    // this.$options.nonReactive.subscriptions.push(
-    //   window.interactiveViewer.metadata.datasetsBSubject
-    //     .subscribe(array => {
-    //       this.regionNamesUrlArray = array
-    //         .filter(item => /Probabilistic\ cytoarchitectonic\ map/.test(item.name)
-    //           && item.parcellationRegion
-    //           && item.parcellationRegion.length
-    //           && item.parcellationRegion[0].name
-    //           && item.files
-    //           && item.files.length)
-    //         .map(item => [item.parcellationRegion[0].name, item.files.find(file => !/mnicolin27\.nii/.test(file.name)).absolutePath])
-    //     })
-    // )
-
-    this.$options.nonReactive.subscriptions.push(
-      interactiveViewer.metadata.selectedParcellationBSubject.subscribe(p => {
-        this.regionNamesUrlArray = fA(p.regions).filter(v => v.labelIndex).map(v => [v.name, v])
-      })
-    )
-
-    this.$options.nonReactive.subscriptions.push(
-      window.interactiveViewer.viewerHandle.mouseOverNehuba.subscribe(({foundRegion} = {}) => {
-        this.mouseOverRegion = foundRegion
-      })
-    )
-
-    this.$options.nonReactive.subscriptions.push(
-      window.interactiveViewer.viewerHandle.mouseEvent
-        .subscribe(ev => {
-          if (ev.eventName === 'mousedown') {
-            this.scanFlag = true
-            setTimeout(() => this.scanFlag = false, 300)
-          }
-          if (ev.eventName === 'mouseup' && this.scanFlag) {
-            this.scanCaptureRegion()
-          }
-        })
-    )
-
-    fetch(`${VUE_APP_HOSTNAME}/genelist`)
-      .then(res => res.json())
-      .then(arr => this.allgenes = arr)
-      .catch(this.catchError)
-
-    this.getListAnalysisResults()
-  },
-  watch:{
-    scanMode: function (val) {
-      this.$options.nonReactive.toastHandler.hide()
-      if (val) {
-
-        this.$options.nonReactive.toastHandler.message = val === 1
-          ? `Hover and click on the viewer to add region to ROI1`
-          : `Hover and click on the viewer to add region to ROI2`
-        this.$options.nonReactive.toastHandler.show()
-
-      }
-    }
   },
   methods: {
-    setWorksSpace: function (val) {
-      this.workspaceMixin__setWorkspace(val)
-
-      /**
-       * side effects of setting workspace
-       */
-      this.listAnalysis = []
-      this.getListAnalysisResults()
-    },
-    openOldAnalysis: function (id) {
-      this.launchResultPanel(id)
-        .catch(this.catchError)
-    },
-    launchResultPanel: function (id) {
-      return fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}${this.workspaceMixin__queryParam || ''}`)
-        .then(res => res.json())
-        .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
-    },
-    deleteAnalysis: function (id) {
-      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
-        method: 'DELETE'
-      }).then(this.getListAnalysisResults)
-        .catch(this.getListAnalysisResults)
-    },
-    getListAnalysisResults: function () {
-      fetch(`${VUE_APP_HOSTNAME}/analysis/list${this.workspaceMixin__queryParam || ''}`)
-        .then(res => res.json())
-        .then(arr => this.listAnalysis = arr)
-        .catch(this.catchError)
-    },
-    focusAutocomplete: function (idx) {
-      this.scanMode = idx
-    },
     catchError: function (e) {
       console.log(e)
-    },
-    importGeneJSON: function () {
-      const importInput = this.$refs.importGeneRef
-      if (importInput)
-        importInput.click()
-    },
-    exportGeneJSON: function () {
-      /**
-       * TODO this method breaks if gene names contain spaces, comma etc. 
-       * need a more permanent solution
-       * perhaps use csv?
-       */
-
-      const anchor = this.$refs.exportAnchor
-      if (anchor)
-        anchor.click()
-    },
-    fileChosen: function (ev) {
-      
-      const file = ev.target && ev.target.files && ev.target.files[0]
-      if (file) {
-        this.readFile(file)
-          .then(text => JSON.parse(text))
-          .then(arr => {
-            const validate = arr && Array.isArray(arr) && arr.every(item => typeof item === 'string')
-            if (validate) return arr
-            else throw new Error('file was not validated')  
-          })
-          .then(arr => this.selectedgenes = arr)
-          .then(() => {
-            /**
-             * TODO
-             * reset file input
-             */
-          })
-          .catch(console.error)
-      }
-    },
-    readFile: function (file){
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = (evt) => {
-          const result = evt && evt.target && evt.target.result
-          if (result) {
-            resolve(result)
-          } else {
-            reject('result undefined')
-          }
-        }
-        reader.onerror = reject
-        reader.readAsText(file)
-      })
-    },
-    resetToDefault: function (event) {
-      event.preventDefault()
-      this.nPermutations = 1000
-      this.threshold = '0.2'
-      this.singleProbeMode = false
-      this.ignoreCustomProbe = false
-    },
-    scanCaptureRegion: function () {
-      if (this.mouseOverRegion !== null) {
-        if (this.scanMode === 1) {
-          this.roi1s = this.reduce([...this.roi1s, this.mouseOverRegion.name])
-        }
-        if (this.scanMode === 2) {
-          this.roi2s = this.reduce([...this.roi2s, this.mouseOverRegion.name])
-        }
-      }
     },
     animationend: function (event) {
       if (event.animationName === 'flash') {
@@ -611,196 +208,65 @@ export default {
           return `Some other fields need to be filled.`
       }
     },
-    validation: function () {
-      this.warning = []
-      if(this.roi1s.length > 0 && this.roi2s.length > 0 && this.selectedgenes.length > 0){
-        return true
-      }
-      const warning = []
-      if(this.roi1s.length === 0){
-        warning.push('roi1')
-      }
-      if(this.roi2s.length === 0){
-        warning.push('roi2')
-      }
-      if(this.selectedgenes.length <= 0){
-        warning.push('selectedgenes')
-      }
-      this.warning = warning
-      return false
-    },
-    nPermChange: function (ev) {
-      const value = ev && ev.target && ev.target.value
-      if (value && !isNaN(value))
-        this.nPermutations = Number(ev.target.value)
-    },
     startAnalysis: function () {
 
-      const getMerge = (arr) => arr.map(sanitizeAreaName).join(',')
-      // const PMAP_URL = VUE_APP_PMAP_URL || 'https://pmaps-sk-test-project.apps-dev.hbp.eu'
-      // const roi1Url = `${PMAP_URL}/multimerge?threshold=0.5&areas=${getMerge(this.roi1s)}&filename=happyface.nii`
-      // const roi2Url = `${PMAP_URL}/multimerge?threshold=0.5&areas=${getMerge(this.roi2s)}&filename=happyface.nii`
+      if (this.initAnalysisFlag) return
       
-      const PMAP_URL = (VUE_APP_PMAP_URL || 'https://pmaps-sk-test-project.apps-dev.hbp.eu') + '/multimerge_v2'
+      const { roi1Selector, roi2Selector, geneSelector, advancedRef } = this.$refs
+      const { 
+        nPermutations,
+        threshold,
+        singleProbeMode,
+        ignoreCustomProbe
+       } = advancedRef || defaultConfig
 
-      if(!this.validation()){
-        return
-      }
+      const roi1s = roi1Selector.selectedRois
+      const roi2s = roi2Selector.selectedRois
+      const genes = geneSelector.selectedGenes
 
-      const roi1 = this.regionNamesUrlArray.find(r => r[0] === this.roi1s[0])
-      const roi2 = this.regionNamesUrlArray.find(r => r[0] === this.roi2s[0])
+      this.warning = []
+      this.warning = validateGetError({
+        roi1s,
+        roi2s,
+        genes
+      })
+      if (this.warning.length > 0) return
       
       /**
-       * bandaid for JuBrain v18
+       * send the prepared payload to past analysis 
        */
-      const getRoi = (name) => {
-        const match = /^(.*?)\s\(.*?\s(left|right)\shemisphere$/.exec(name)
-        return (match && [ match[1], match[2] ]) || null
-      }
+      const [error, body] = prepareAnalysisBody({
+        roi1s,
+        roi2s,
+        genes,
 
-      let errorFlag = false
-
-      const removeNull = (entry) => {
-        if (!!entry) {
-          return true
-        } else {
-          errorFlag = true
-          return false
-        }
-      }
-
-      const getActualAreaName = ([name, hemisphere]) => {
-        // in order to prevent PF to match PFm
-        const regexString = name.replace(/\s/g, '-') + '_pub'
-        const regex = new RegExp(regexString, 'i')
-        const foundEntry = hardcode.find(entry => regex.test(entry))
-        if (foundEntry) {
-          return {
-            name: foundEntry
-              .replace('https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-', '')
-              .replace('_pub', ''),
-            hemisphere
-          }
-        } else {
-          return null
-        }
-      }
-      const v18Roi1 = this.roi1s
-        .map(getRoi)
-        .filter(removeNull)
-        .map(getActualAreaName)
-        .filter(removeNull)
-
-      const v18Roi2 = this.roi2s
-        .map(getRoi)
-        .filter(removeNull)
-        .map(getActualAreaName)
-        .filter(removeNull)
-
-      if (errorFlag) {
-        const toastHandler = interactiveViewer.uiHandle.getToastHandler()
-        toastHandler.dismissable = true
-        toastHandler.message = `Error fetching valid area name`
-        toastHandler.timeout = 5000
-        toastHandler.show()
-      }
-
-      const body = {
-        id: Date.now(),
-        area1: {
-          name: this.roi1s.join('-'),
-          PMapURL: PMAP_URL || null,
-          body: {
-            areas:v18Roi1,
-            threshold: Number(this.threshold)
-          }
-        },
-        area2: {
-          name: this.roi2s.join('-'),
-          PMapURL: PMAP_URL || null,
-          body: {
-            areas:v18Roi2,
-            threshold: Number(this.threshold)
-          }
-        },
-
-        simpleMode: this.simpleMode,
-        singleProbeMode: this.singleProbeMode,
-        ignoreCustomProbe: this.ignoreCustomProbe,
-        nPermutations: this.nPermutations,
-
-        selectedGenes: [...this.selectedgenes]
-      }
-
-      const id = Date.now().toString()
-      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
+        nPermutations,
+        threshold,
+        singleProbeMode,
+        ignoreCustomProbe
       })
-        .then(() => this.getListAnalysisResults())
-        .then(() => this.launchResultPanel(id))
-        .catch(this.catchError)
-
-      // this.analyses.push(body)
-    },
-    removeRoi: function (idx, roi) {
-      if (idx === 1) {
-        this.roi1s = this.roi1s.filter(r => r !== roi)
-      }
-      if (idx === 2) {
-        this.roi2s = this.roi2s.filter(r => r !== roi)
-      }
-      if (idx === 3) {
-        this.selectedgenes = this.selectedgenes.filter(g => g !== roi)
-      }
-    },
-    reduce: function (array) {
-      return array.reduce((acc, curr) => {
-        return new Set(acc).has(curr)
-          ? acc
-          : acc.concat(curr)
-      }, [])
-    },
-    selectgene: function (gene) {
-      this.selectedgenes = this.reduce([...this.selectedgenes, gene])
-      this.$refs.genelist.$refs.input.focus()
-    },
-    selectSlice: function(roi1, roi2, refocus) {
-      if (roi1) {
-        this.roi1s = this.reduce([...this.roi1s, roi1])
-      }
-      if (roi2) {
-        this.roi2s = this.reduce([...this.roi2s, roi2])
-      }
-      if (refocus) {
-        if (roi1) {
-          this.$refs.roi1.$refs.input.focus()
-        }
-        if (roi2) {
-          this.$refs.roi2.$refs.input.focus()
-        }
-      }
-    },
-    toggleScanMode: function (idx) {
-      this.scanMode = this.scanMode === idx
-        ? null
-        : idx
+      console.log({
+        error,
+        body
+      })
+      this.initAnalysisFlag = true
+      this.$refs.pastAnalysis.newAnalysis(body)
+        .then(() => {
+          this.initAnalysisFlag = false
+        })
+        .catch(console.error)
     }
   },
   computed: {
-    workspace: function () {
-      return this.workspaceMixin__workspace
+    analysisBtnText: function () {
+      return this.initAnalysisFlag
+        ? 'Starting analysis  ...'
+        : 'Start Differential Analysis'
     },
     active: function () {
       return this.activeParcellationName && this.activeTemplateName
         && allowedParcellationName.indexOf(this.activeParcellationName) >= 0
         && allowedTemplateSpaces.indexOf(this.activeTemplateName) >= 0
-    },
-    geneListJSON: function () {
-      return `data:text/plain;charset=utf-8,${JSON.stringify(this.selectedgenes)}`
     },
     hemisphereWarning : function(){
       return this.warning.findIndex(v => v === 'hemisphere') >= 0
@@ -814,38 +280,12 @@ export default {
     selectedgenesWarning: function(){
       return this.warning.findIndex(v => v === 'selectedgenes') >= 0
     },
-    autocomplete1Placeholder: function () {
-      return `Search all the regions ...`
-    },
-    autocomplete2Placeholder: function () {
-      return `Search all the regions ...`
-    },
-    autocompleteRawArray: function () {
+    regionAutocompleteRawArray: function () {
       return this.regionNamesUrlArray.map(v => v[0])
-    },
-    isDefault: function () {
-      return Number(this.threshold) === 0.2 && this.nPermutations === 1000 && !this.singleProbeMode && !this.ignoreCustomProbe
     }
   },
   beforeDestroy: function () {
     this.$options.nonReactive.subscriptions.forEach(s => s.unsubscribe())
-  },
-  filters: {
-    numberFilter: function (val) {
-      return Number(val).toFixed(2)
-    },
-    dateFilter: function (value) {
-      if (!value) return `Undated`
-      const d = new Date(Number(value))
-      return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}`
-    },
-    truncate: function (text, length = 50, clamp = '...') {
-      return length >= 0
-        ? text.length > length
-          ? text.slice(0, length) + clamp
-          : text
-        : text
-    }
   }
 }
 </script>
@@ -899,7 +339,7 @@ export default {
   content: attr(webjugex-tooltip);
   position: absolute;
   top: 3em;
-  right: 0;
+  left: 0;
   color:white;
   background-color:rgba(0,0,0,0.7);
   width: 10em;

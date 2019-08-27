@@ -23,18 +23,16 @@ const workspaceMap = new Map()
 const map = new Map()
 const result = new Map()
 
-const getJson = (id) => {
+const getJson = ({ id }) => {
   return {
     name: `${PLUGIN_NAME}-${id}`,
-    displayName: `Analysis Result- ${id}`,
+    displayName: `Analysis Result - ${id}`,
     templateURL: `${HOSTNAME}/analysis/i-v-template/${id}`,
-    scriptURL: `${HOSTNAME}/analysis/i-v-script/${id}`,
-    state: 'minimised'
+    scriptURL: `${HOSTNAME}/analysis/i-v-script/${id}`
   }
 }
 
 const defaultId = '001'
-const defaultItem = getJson(defaultId)
 
 router.use(bodyParser.json())
 
@@ -50,10 +48,8 @@ const getWorkSpace = (req = {}) => {
 const checkPermission = (req, res, next) => {
   const arr = getWorkSpace(req)
   const { analysisId } = req.params
-  if (arr.indexOf(analysisId) >= 0)
-    return next()
-  else 
-    return res.status(404).send('analysis does not exist on the workspace')
+  if (arr.findIndex(({ id }) => id === analysisId) >= 0) return next()
+  else  return res.status(404).send('analysis does not exist on the workspace')
 }
 
 const mutateWorkspaceMiddleWare = (req, res, next) => {
@@ -61,11 +57,25 @@ const mutateWorkspaceMiddleWare = (req, res, next) => {
   const { analysisId } = req.params
   if (analysisId) {
     if (req.method === 'PUT') {
-      arr.push(analysisId)
+      const found = arr.find(({ id }) => id === analysisId)
+      if (!found) return res.status(404).end()
+      else {
+        const { id, ...rest } = req.body
+        found = {
+          ...found,
+          ...rest
+        }
+        return res.status(202).end()
+      }
+    }
+    if (req.method === 'POST') {
+      const found = arr.find(({ id }) => id === analysisId)
+      if (!found) arr.push({ id: analysisId })
+      else res.status(409).end()
       return next()
     }
     else if (req.method === 'DELETE') {
-      const idx = arr.indexOf(analysisId)
+      const idx = arr.findIndex(({ id }) => id === analysisId)
       if (idx < 0) return res.status(404).send()
       arr.splice(idx, 1)
       return next()
@@ -79,7 +89,7 @@ const mutateWorkspaceMiddleWare = (req, res, next) => {
 
 router.get('/i-v-manifest/:analysisId', checkPermission, (req, res) => {
   const { analysisId } = req.params
-  return res.status(200).json(getJson(analysisId))
+  return res.status(200).json(getJson({ id: analysisId }))
 })
 
 /**
@@ -147,7 +157,7 @@ router.post('/analysisCB/:randomToken', (req, res) => {
   })
 })
 
-router.put('/:analysisId', mutateWorkspaceMiddleWare, (req, res) => {
+router.post('/:analysisId', mutateWorkspaceMiddleWare, (req, res) => {
   const { analysisId } = req.params
   const { body } = req
 
@@ -186,6 +196,7 @@ router.put('/:analysisId', mutateWorkspaceMiddleWare, (req, res) => {
     },
     body: JSON.stringify(fixedBody)
   }, (err, resp, body) => {
+    if (err) console.error(`analysis#PUT error`, err)
     /**
      * jugex request sent
      * waiting for cb

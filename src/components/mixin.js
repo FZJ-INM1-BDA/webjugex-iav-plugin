@@ -1,10 +1,12 @@
 import { WORKSPACE_STRING } from './constants'
 
+const sharedState = {
+  workspaceMixin__workspace: 'public'
+}
+
 export const workspaceMixin = {
   data: function () {
-    return {
-      workspaceMixin__workspace: 'public'
-    }
+    return sharedState
   },
   mounted() {
     this.workspaceMixin__workspace = localStorage.getItem(WORKSPACE_STRING) || 'public'

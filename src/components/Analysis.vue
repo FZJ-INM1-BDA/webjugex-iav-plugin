@@ -390,6 +390,7 @@ export default {
     /**
      * remove coord on destroy
      */
+    if (this.intervalId) clearInterval(this.intervalId)
     this.destroyCoord()
   }
 }
