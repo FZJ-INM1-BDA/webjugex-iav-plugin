@@ -1,4 +1,4 @@
-import { createAnalysis } from './app'
+import { createAnalysis } from './vueSsrApp'
 
 setTimeout(() => {
   const el = document.getElementById('fzj-xg-webjugex-placeholder')

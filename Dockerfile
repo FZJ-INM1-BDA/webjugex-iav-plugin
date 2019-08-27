@@ -1,4 +1,4 @@
-FROM node:8
+FROM node:8 as builder
 
 ARG HOSTNAME
 ARG VUE_APP_BACKEND_URL
@@ -20,6 +20,15 @@ RUN npm i
 RUN npm run test
 
 # Build ssr
+RUN mkdir /webjugex-frontend/deploy/dist
+ENV OUTPUT_PATH=/webjugex-frontend/deploy/dist 
 RUN npm run build-ssr
 
-ENTRYPOINT [ "node", "vueSsr/deployServer.js"]
+FROM node:8-alpine
+
+ENV NODE_ENV=production
+COPY --from=builder /webjugex-frontend/deploy /webjugex-deploy
+WORKDIR /webjugex-deploy
+RUN npm i
+
+ENTRYPOINT [ "node", "server.js"]
