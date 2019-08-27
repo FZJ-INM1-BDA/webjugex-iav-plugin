@@ -27,8 +27,9 @@ RUN npm run build-ssr
 FROM node:8-alpine
 
 ENV NODE_ENV=production
-COPY --from=builder /webjugex-frontend/deploy /webjugex-deploy
-WORKDIR /webjugex-deploy
+RUN mkdir /webjugex-frontend
+COPY --from=builder /webjugex-frontend/deploy /webjugex-frontend/deploy
+WORKDIR /webjugex-frontend/deploy
 RUN npm i
 
 ENTRYPOINT [ "node", "server.js"]
