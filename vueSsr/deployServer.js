@@ -20,8 +20,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 const HOSTNAME = process.env.HOSTNAME || `http://localhost:3001`
 const PORT = process.env.PORT || 3001
-const PLUGIN_NAME = process.env.PLUGIN_NAME || `fzj.xg.untitled-${Date.now()}`
-const PLUGIN_DISPLAY_NAME = process.env.PLUGIN_DISPLAY_NAME || 'Untitled Plugin'
+const PLUGIN_NAME = process.env.PLUGIN_NAME || `fzj.xg.webjugex`
+const PLUGIN_DISPLAY_NAME = process.env.PLUGIN_DISPLAY_NAME || 'JuGEx differential gene expression analysis'
 const BACKEND_URL= process.env.BACKEND_URL || 'http://localhost:8003'
 
 app.set('BACKEND_URL', BACKEND_URL)

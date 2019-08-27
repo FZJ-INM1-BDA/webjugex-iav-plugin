@@ -196,7 +196,9 @@ router.post('/:analysisId', mutateWorkspaceMiddleWare, (req, res) => {
     },
     body: JSON.stringify(fixedBody)
   }, (err, resp, body) => {
-    if (err) console.error(`analysis#PUT error`, err)
+    if (err) console.error(`analysis#POST error`, err)
+    if (resp.statusCode >= 400) console.error(`analysis#POST statusCode ${resp.statusCode}`, body)
+    else console.log(`analysis#POST successful. waiting for reply`)
     /**
      * jugex request sent
      * waiting for cb

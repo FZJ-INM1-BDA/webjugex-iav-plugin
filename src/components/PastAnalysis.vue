@@ -83,7 +83,7 @@ export default {
   },
   methods: {
     newAnalysis: function (payload) {
-      const { id } = payload
+      const { id, ...body } = payload
       return new Promise((resolve, reject) => {
         fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
           method: 'POST',
