@@ -40,11 +40,10 @@ export const validateGetError = ({ roi1s, roi2s, genes }) => {
   return warning
 }
 
-
-const PMAP_URL = (VUE_APP_PMAP_URL || 'https://pmaps-sk-test-project.apps-dev.hbp.eu') + '/multimerge_v2'
-      
 export const prepareAnalysisBody = ({ roi1s, roi2s, genes, ...rest }) => {
 
+  const PMAP_URL = (VUE_APP_PMAP_URL || 'https://pmaps-sk-test-project.apps-dev.hbp.eu') + '/multimerge_v2'
+      
   let errors = []
 
   /**
