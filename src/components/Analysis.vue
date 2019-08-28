@@ -352,9 +352,9 @@ export default {
     showCoord: function () {
       if (this.shownLandmarks.length > 0) return
       if (this.coorddata) {
-        const lms = getCoord(this.coorddata).map(({ name, coord, ...rest }) => {
+        const lms = getCoord(this.coorddata).map(({ name, coord, ...rest }, idx) => {
           return {
-            id: `${this.vueId}-${name}`,
+            id: `${this.vueId}-${name}-${idx}`,
             position: coord,
             ...rest
           }

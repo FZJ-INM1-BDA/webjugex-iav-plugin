@@ -159,7 +159,7 @@ export default {
       if (!value) return `Undated`
       const d = new Date(Number(value))
       return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}`
-    },
+    }
   }
 }
 </script>
