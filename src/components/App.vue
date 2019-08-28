@@ -86,7 +86,10 @@
       <div class="fzj.xg.webjugex.divider"></div>
 
       <!-- past analysis -->
-      <PastAnalysis ref="pastAnalysis" />
+      <PastAnalysis
+        :getNewName="getNewName"
+        :launchPastAnalysis="launchPastAnalysis"
+        ref="pastAnalysis" />
 
     </div>
     <h5
@@ -163,7 +166,20 @@ export default {
       listAnalysis: [],
 
       advancedIsDefault: true,
-      initAnalysisFlag: false
+      initAnalysisFlag: false,
+
+      getNewName: window.interactiveViewer.uiHandle.getUserInput
+        ? val => window.interactiveViewer.uiHandle.getUserInput({
+            title: 'Rename webJuGEx Analysis',
+            message: 'Enter a new name for this analysis',
+            defaultValue: val,
+            placeholder: 'Enter a new name for this analysis'
+          })
+        : null,
+
+      launchPastAnalysis: ({ id, workspaceMixin__queryParam }) => fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}${workspaceMixin__queryParam || ''}`)
+        .then(res => res.json())
+        .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
     }
   },
   mounted: function () {

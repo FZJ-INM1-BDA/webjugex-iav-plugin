@@ -2,13 +2,16 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const DefinePlugin = require('webpack').DefinePlugin
 
 module.exports = {
-  entry: './src/main.js',
+  entry: {
+    'standalone': './src/standalone.js',
+    'vue-script': './src/vue-script.js'
+  },
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   resolve: {
     extensions: ['.vue', '.js', '.css']
   },
   output: {
-    filename: 'vue-script.js'
+    filename: '[name].js'
   },
   module: {
     rules: [{

@@ -36,7 +36,12 @@
           @click="openOldAnalysis(analysis)"
           type="button"
           class="btn btn-sm btn-secondary">
-          {{ analysis.name || (analysis.id | dateFilter) }}
+          <span v-if="analysis.name">
+            {{ analysis.name }}
+          </span>
+          <span v-else>
+            {{ analysis.id | dateFilter }}
+          </span>
         </button>
         <button
           @click="editName(analysis)"
@@ -47,7 +52,6 @@
         </button>
         <button
           @click="deleteAnalysis(analysis)"
-          v-if="canBeEdited"
           type="button"
           class="btn btn-sm btn-secondary">
           <i class="fas fa-trash"></i>
@@ -65,21 +69,34 @@ export default {
   computed: {
     workspace: function () {
       return this.workspaceMixin__workspace
+    },
+    canBeEdited: function () {
+      return !!this.getNewName
+    }
+  },
+  props: {
+    getNewName: {
+      type: Function,
+      default: function () {
+        return null
+      }
+    },
+    launchPastAnalysis: {
+      type: Function,
+      default: function () {
+        return null
+      }
     }
   },
   data: function () {
     return {
       workspaceInput: '',
       listAnalysis: [],
-      canBeEdited: false,
       busyAnalyses: []
     }
   },
   mounted: function () {
     this.getListAnalysisResults()
-    if (window.interactiveViewer.uiHandle.getUserInput) {
-      this.canBeEdited = true
-    }
   },
   methods: {
     newAnalysis: function (payload) {
@@ -99,12 +116,8 @@ export default {
       })
     },
     editName: function ({id, name}) {
-      window.interactiveViewer.uiHandle.getUserInput({
-        title: 'Rename webJuGEx Analysis',
-        message: 'Enter a new name for this analysis',
-        defaultValue: name || val,
-        placeholder: 'Enter a new name for this analysis'
-      }).then(newValue => {
+      if (!this.getNewName) return
+      this.getNewName( name || id).then(newValue => {
         this.busyAnalyses.push({ id })
         return fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
           method: 'PUT',
@@ -143,9 +156,8 @@ export default {
         .catch(console.error)
     },
     launchResultPanel: function (id) {
-      return fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}${this.workspaceMixin__queryParam || ''}`)
-        .then(res => res.json())
-        .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
+      if (!this.launchPastAnalysis) return 
+      return this.launchPastAnalysis({ id, workspaceMixin__queryParam: this.workspaceMixin__queryParam})
     },
     deleteAnalysis: function ({id}) {
       fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
