@@ -490,6 +490,7 @@ export default {
   },
   methods: {
     setWorksSpace: function (val) {
+      if (val === '') return
       this.workspaceMixin__setWorkspace(val)
 
       /**
