@@ -6,7 +6,7 @@ const bodyParser = require('body-parser')
 const request = require('request')
 const { createBundleRenderer } = require('vue-server-renderer')
 
-const OUTPUT_PATH = process.env.OUTPUT_PATH || path.join(__dirname, 'distSsr')
+const OUTPUT_PATH = path.join(__dirname, 'distSsr')
 
 const render = createBundleRenderer(path.join(OUTPUT_PATH, 'vue-ssr-server-bundle.json'))
 const jsFile = fs.readFileSync(path.join(OUTPUT_PATH, 'ssr-analysis.js'), 'utf-8')

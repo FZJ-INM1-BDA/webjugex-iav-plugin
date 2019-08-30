@@ -168,21 +168,25 @@ export default {
       advancedIsDefault: true,
       initAnalysisFlag: false,
 
-      getNewName: window.interactiveViewer.uiHandle.getUserInput
-        ? val => window.interactiveViewer.uiHandle.getUserInput({
-            title: 'Rename webJuGEx Analysis',
-            message: 'Enter a new name for this analysis',
-            defaultValue: val,
-            placeholder: 'Enter a new name for this analysis'
-          })
-        : null,
+      getNewName: null,
 
-      launchPastAnalysis: ({ id, workspaceMixin__queryParam }) => fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}${workspaceMixin__queryParam || ''}`)
-        .then(res => res.json())
-        .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
+      launchPastAnalysis: null 
     }
   },
   mounted: function () {
+
+    this.getNewName = window.interactiveViewer.uiHandle.getUserInput
+      ? val => window.interactiveViewer.uiHandle.getUserInput({
+          title: 'Rename webJuGEx Analysis',
+          message: 'Enter a new name for this analysis',
+          defaultValue: val,
+          placeholder: 'Enter a new name for this analysis'
+        })
+      : null
+
+    this.launchPastAnalysis = ({ id, workspaceMixin__queryParam }) => fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}${workspaceMixin__queryParam || ''}`)
+      .then(res => res.json())
+      .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
     
     const toastHandler = interactiveViewer.uiHandle.getToastHandler()
     toastHandler.dismissable = false

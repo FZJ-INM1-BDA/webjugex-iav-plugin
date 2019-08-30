@@ -11,7 +11,7 @@ const request = require('request')
 const cors = require('cors')
 const { createBundleRenderer } = require('vue-server-renderer')
 
-const OUTPUT_PATH = process.env.OUTPUT_PATH || path.join(__dirname, 'distSsr')
+const OUTPUT_PATH = path.join(__dirname, 'distSsr')
 
 const renderer = createBundleRenderer(path.join(OUTPUT_PATH, 'vue-ssr-server-bundle.json'))
 const js = fs.readFileSync(path.join(OUTPUT_PATH, 'ssr-app.js'), 'utf-8')

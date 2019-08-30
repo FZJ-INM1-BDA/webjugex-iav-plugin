@@ -2,7 +2,6 @@ const path = require('path')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const VueSSRServerPlugin = require('vue-server-renderer/server-plugin')
 const DefinePlugin = require('webpack').DefinePlugin
-const OUTPUT_PATH = process.env.OUTPUT_PATH || path.join(__dirname, 'distSsr')
 
 module.exports = {
   entry: path.join(__dirname, './ssr.server.js'),
@@ -12,7 +11,7 @@ module.exports = {
   },
   output: {
     libraryTarget: 'commonjs2',
-    path: OUTPUT_PATH,
+    path: path.join(__dirname, 'distSsr'),
     filename: 'ssr-server.js'
   },
   module: {

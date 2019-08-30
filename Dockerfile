@@ -11,7 +11,6 @@ ENV BACKEND_URL=$BACKEND_URL
 ENV HOSTNAME=$HOSTNAME
 ENV VUE_APP_BACKEND_URL=$VUE_APP_BACKEND_URL
 ENV PORT=$PORT
-
 COPY . /webjugex-frontend
 WORKDIR /webjugex-frontend
 RUN npm i
@@ -20,14 +19,16 @@ RUN npm i
 RUN npm run test
 
 # Build ssr
-RUN mkdir /webjugex-frontend/deploy/dist
 RUN npm run build-ssr
 
 FROM node:8-alpine
 
 ENV NODE_ENV=production
 RUN mkdir /webjugex-frontend
+
 COPY --from=builder /webjugex-frontend/deploy /webjugex-frontend/deploy
+COPY --from=builder /webjugex-frontend/vueSsr/distSsr /webjugex-frontend/deploy/distSsr
+
 WORKDIR /webjugex-frontend/deploy
 RUN npm i
 
