@@ -13,7 +13,7 @@ module.exports = {
     extensions: ['.vue', '.js', '.css']
   },
   output: {
-    path: path.join(__dirname, 'distSsr'),
+    path: path.join(__dirname, '../deploy/distSsr'),
     filename: 'ssr-[name].js'
   },
   module: {

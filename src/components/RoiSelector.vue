@@ -90,7 +90,7 @@ export default {
 
     subscriptions.push(
       window.interactiveViewer.viewerHandle.mouseOverNehubaLayers.subscribe(layers => {
-        const suitableLayer = layers.find(({ segment }) => !!segment)
+        const suitableLayer = layers && layers.find(({ segment }) => !!segment)
         if (!suitableLayer) return this.updateMouseOverRegion(null)
         const { segment } = suitableLayer
         this.updateMouseOverRegion(segment)
