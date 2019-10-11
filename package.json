@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha-webpack --webpack-config webpack.config.js",
+    "test": "mocha --require @babel/register",
     "karma": "karma start",
     "dev": "webpack-dev-server --mode development",
     "build": "webpack --mode production",
