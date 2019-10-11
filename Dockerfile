@@ -27,7 +27,6 @@ ENV NODE_ENV=production
 RUN mkdir /webjugex-frontend
 
 COPY --from=builder /webjugex-frontend/deploy /webjugex-frontend/deploy
-COPY --from=builder /webjugex-frontend/vueSsr/distSsr /webjugex-frontend/deploy/distSsr
 
 WORKDIR /webjugex-frontend/deploy
 RUN npm i

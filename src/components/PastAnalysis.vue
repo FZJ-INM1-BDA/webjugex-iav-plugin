@@ -77,15 +77,11 @@ export default {
   props: {
     getNewName: {
       type: Function,
-      default: function () {
-        return null
-      }
+      default: null
     },
     launchPastAnalysis: {
       type: Function,
-      default: function () {
-        return null
-      }
+      default: null
     }
   },
   data: function () {

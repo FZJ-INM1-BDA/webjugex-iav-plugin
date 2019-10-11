@@ -11,7 +11,7 @@ module.exports = {
   },
   output: {
     libraryTarget: 'commonjs2',
-    path: path.join(__dirname, 'distSsr'),
+    path: path.join(__dirname, '../deploy/distSsr'),
     filename: 'ssr-server.js'
   },
   module: {
