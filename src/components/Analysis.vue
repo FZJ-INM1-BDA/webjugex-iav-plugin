@@ -248,6 +248,8 @@ export default {
         })
         .then(res => res.json())
         .then(json => {
+          const { error } = json
+          if (error) throw new Error(err)
           const { analysis, ignoreCustomProbe,nPermutations,singleProbeMode, mode,threshold, selectedGenes, area1, area2, ...rest } = json
           
           this.ignoreCustomProbe = ignoreCustomProbe
@@ -294,6 +296,7 @@ export default {
                     if (e === NO_RESULTS_YET) {
                       console.log('retrying', e)
                     } else {
+                      clearInterval(this.intervalId)
                       this.error = e
                     }
                   })
@@ -370,6 +373,7 @@ export default {
     }
   },
   mounted: function () {
+    console.log('analysis mounted')
     // use mixin
     this.vueId = this.$parent.queryId
     this.getData()

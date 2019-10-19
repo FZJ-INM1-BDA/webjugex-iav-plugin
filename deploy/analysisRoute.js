@@ -135,27 +135,31 @@ router.get('/:analysisId', checkPermission, (req, res) => {
     : res.status(404).send(`analysis with id ${analysisId} not found`)
 })
 
+const setResponse = ({ token, body, err }) => {
+
+  const analysisId = cbTokenToIdMap.get(token)
+  if (!analysisId) return
+  cbTokenToIdMap.delete(token)
+  const flag = map.get(analysisId)
+  if (flag) result.set(analysisId, {
+    err: err && JSON.stringify(err),
+    resp: {
+      statusCode: 200
+    },
+    body: body && JSON.stringify(body)
+  })
+}
+
 router.post('/analysisCB/:randomToken', (req, res) => {
 
   /**
-   * always return success to avoid 
+   * always return success to avoid sniffing
    */
   res.status(200).send('OK')
 
   const { randomToken } = req.params
   const { body } = req
-
-  const analysisId = cbTokenToIdMap.get(randomToken)
-  if (!analysisId) return
-  cbTokenToIdMap.delete(randomToken)
-  const flag = map.get(analysisId)
-  if (flag) result.set(analysisId, {
-    err: null,
-    resp: {
-      statusCode: 200
-    },
-    body: JSON.stringify(body)
-  })
+  setResponse({ token: randomToken, body })
 })
 
 router.post('/:analysisId', mutateWorkspaceMiddleWare, (req, res) => {
@@ -173,8 +177,7 @@ router.post('/:analysisId', mutateWorkspaceMiddleWare, (req, res) => {
     ...body,
     cbUrl
   }
-  if (map.get(analysisId))
-    return res.status(400).send('analysis already exist')
+  if (map.get(analysisId)) return res.status(400).send('analysis already exist')
   map.set(analysisId, fixedBody)
   res.status(200).send()
   
@@ -197,8 +200,15 @@ router.post('/:analysisId', mutateWorkspaceMiddleWare, (req, res) => {
     },
     body: JSON.stringify(fixedBody)
   }, (err, resp, body) => {
-    if (err) console.error(`analysis#POST error`, err)
-    if (resp.statusCode >= 400) console.error(`analysis#POST statusCode ${resp.statusCode}`, body)
+    if (err) {
+      console.error(`analysis#POST error`, err)
+      setResponse({ token: randomToken, err: err.toString() })
+      return
+    }
+    if (resp.statusCode >= 400) {
+      console.error(`analysis#POST statusCode ${resp.statusCode}`, body)
+      setResponse({ token: randomToken, err: resp.statusCode, body })
+    }
     else console.log(`analysis#POST successful. waiting for reply`)
     /**
      * jugex request sent
