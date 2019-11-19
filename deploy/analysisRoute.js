@@ -11,13 +11,13 @@ const OUTPUT_PATH = path.join(__dirname, 'distSsr')
 const render = createBundleRenderer(path.join(OUTPUT_PATH, 'vue-ssr-server-bundle.json'))
 const jsFile = fs.readFileSync(path.join(OUTPUT_PATH, 'ssr-analysis.js'), 'utf-8')
 
-const getJsFile = (id) => jsFile
-  .replace(/fzj-xg-webjugex-placeholder/g, `${PLUGIN_NAME}-${id}`)
-  .replace(/fzj-xg-webjugex-tempId/g, id)
-
 const HOSTNAME = process.env.HOSTNAME || 'http://localhost:3001'
 const PLUGIN_NAME = process.env.PLUGIN_NAME || 'fzj.xg.webjugex'
 
+
+const getJsFile = (id) => jsFile
+  .replace(/fzj-xg-webjugex-placeholder/g, `${PLUGIN_NAME}-${id}`)
+  .replace(/fzj-xg-webjugex-tempId/g, id)
 /**
  * temporary db?
  */
@@ -34,8 +34,6 @@ const getJson = ({ id }) => {
     scriptURL: `${HOSTNAME}/analysis/i-v-script/${id}`
   }
 }
-
-const defaultId = '001'
 
 router.use(bodyParser.json())
 

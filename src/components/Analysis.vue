@@ -151,6 +151,7 @@ const POLLING_INTERVAL = 3000
 const DELIMITER = `\t`
 import { workspaceMixin } from './mixin'
 import PreviewTsv from './previewTsv'
+import { baseUrl } from './constants'
 
 const NO_RESULTS_YET = 'no results yet'
 
@@ -238,7 +239,7 @@ export default {
   },
   methods: {
     fetching: function () {
-      return fetch(`${VUE_APP_HOSTNAME}/analysis/${this.vueId}${this.workspaceMixin__queryParam || ''}`)
+      return fetch(`${baseUrl}/analysis/${this.vueId}${this.workspaceMixin__queryParam || ''}`)
         .then(res => {
           if (res.status >= 400) {
             return Promise.reject(res.status)
@@ -302,27 +303,6 @@ export default {
               this.error = reason
             }
           })
-
-
-        /**
-         * v1.0
-         */
-        // const data = {
-        //   ...this.data,
-        //   threshold: 0.2,
-        //   mode: false
-        // }
-        // fetch(`${VUE_APP_BACKEND_URL}/jugex`, {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json'
-        //   },
-        //   body: JSON.stringify(data)
-        // })
-        //   .then(res => res.json())
-        //   .then(resolve)
-        //   .catch(reject)
-
       })
     },
     parseFetchedData: function (json) {
@@ -352,9 +332,9 @@ export default {
     showCoord: function () {
       if (this.shownLandmarks.length > 0) return
       if (this.coorddata) {
-        const lms = getCoord(this.coorddata).map(({ name, coord, ...rest }) => {
+        const lms = getCoord(this.coorddata).map(({ name, coord, ...rest }, idx) => {
           return {
-            id: `${this.vueId}-${name}`,
+            id: `${this.vueId}-${name}-${idx}`,
             position: coord,
             ...rest
           }
@@ -390,6 +370,7 @@ export default {
     /**
      * remove coord on destroy
      */
+    if (this.intervalId) clearInterval(this.intervalId)
     this.destroyCoord()
   }
 }

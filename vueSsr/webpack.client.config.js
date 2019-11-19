@@ -13,7 +13,7 @@ module.exports = {
     extensions: ['.vue', '.js', '.css']
   },
   output: {
-    path: path.join(__dirname, 'distSsr'),
+    path: path.join(__dirname, '../deploy/distSsr'),
     filename: 'ssr-[name].js'
   },
   module: {
@@ -33,7 +33,6 @@ module.exports = {
     new DefinePlugin({
       HOSTNAME: JSON.stringify(process.env.HOSTNAME || 'http://localhost:3001'),
       VUE_APP_HOSTNAME: JSON.stringify(process.env.VUE_APP_HOSTNAME || 'http://localhost:3001'),
-      VUE_APP_BACKEND_URL: JSON.stringify(process.env.VUE_APP_BACKEND_URL || 'http://localhost:8003'),
       VUE_APP_PMAP_URL: JSON.stringify(process.env.VUE_APP_PMAP_URL || 'https://pmaps-sk-test-project.apps-dev.hbp.eu'),
       PLUGIN_NAME: JSON.stringify(process.env.PLUGIN_NAME || 'fzj.xg.webjugex-frontend')
   }),

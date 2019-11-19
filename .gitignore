@@ -1,2 +1,7 @@
 node_modules
 package-lock.json
+package-lock.json
+.env
+build.sh
+run.sh
+distSsr

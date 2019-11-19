@@ -2,13 +2,16 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const DefinePlugin = require('webpack').DefinePlugin
 
 module.exports = {
-  entry: './src/main.js',
+  entry: {
+    'standalone': './src/standalone.js',
+    'vue-script': './src/vue-script.js'
+  },
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   resolve: {
     extensions: ['.vue', '.js', '.css']
   },
   output: {
-    filename: 'vue-script.js'
+    filename: '[name].js'
   },
   module: {
     rules: [{
@@ -25,9 +28,9 @@ module.exports = {
   plugins: [
     new VueLoaderPlugin(),
     new DefinePlugin({
-      VUE_APP_BACKEND_URL: JSON.stringify(process.env.VUE_APP_BACKEND_URL || 'http://localhost:8003'),
       VUE_APP_PMAP_URL: JSON.stringify(process.env.VUE_APP_PMAP_URL || 'https://pmaps-sk-test-project.apps-dev.hbp.eu'),
-      PLUGIN_NAME: JSON.stringify(process.env.PLUGIN_NAME || 'fzj.xg.webjugex-frontend')
+      PLUGIN_NAME: JSON.stringify(process.env.PLUGIN_NAME || 'fzj.xg.webjugex-frontend'),
+      VUE_APP_HOSTNAME: JSON.stringify(process.env.VUE_APP_HOSTNAME || 'http://localhost:3001'),
     })
   ],
   externals: {

@@ -1,4 +1,4 @@
-import { createApp } from './app'
+import { createApp } from './vueSsrApp'
 const { app } = createApp()
 
 /**

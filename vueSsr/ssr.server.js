@@ -1,4 +1,4 @@
-import { createApp, createAnalysis } from './app'
+import { createApp, createAnalysis } from './vueSsrApp'
 
 export default ({ app, analysis }) => {
   if ( app ) {
