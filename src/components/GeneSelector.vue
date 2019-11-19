@@ -52,6 +52,7 @@
 <script>
 import { AutoComplete, Pill } from 'vue-components'
 import { readFile } from '../util/fn'
+import { baseUrl } from './constants'
 
 export default {
   components: {
@@ -81,7 +82,7 @@ export default {
     }
   },
   mounted: function () {
-    fetch(`${VUE_APP_HOSTNAME}/genelist`)
+    fetch(`${baseUrl}/genelist`)
       .then(res => res.json())
       .then(arr => this.allgenes = arr)
       .catch(this.catchError)

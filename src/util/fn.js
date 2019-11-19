@@ -42,7 +42,7 @@ export const validateGetError = ({ roi1s, roi2s, genes }) => {
 
 export const prepareAnalysisBody = ({ roi1s, roi2s, genes, ...rest }) => {
 
-  const PMAP_URL = (VUE_APP_PMAP_URL || 'https://pmaps-sk-test-project.apps-dev.hbp.eu') + '/multimerge_v2'
+  const PMAP_URL = (VUE_APP_PMAP_URL || 'https://pmaps-sk-test-project.apps-dev.hbp.eu') + '/multimerge_v2?filename=extension.nii.gz'
       
   let errors = []
 

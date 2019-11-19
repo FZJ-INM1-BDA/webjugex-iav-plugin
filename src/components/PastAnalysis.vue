@@ -62,6 +62,8 @@
 </template>
 <script>
 import { workspaceMixin } from './mixin'
+import { baseUrl } from './constants'
+
 export default {
   mixins: [
     workspaceMixin
@@ -98,7 +100,7 @@ export default {
     newAnalysis: function (payload) {
       const { id, ...body } = payload
       return new Promise((resolve, reject) => {
-        fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
+        fetch(`${baseUrl}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -115,7 +117,7 @@ export default {
       if (!this.getNewName) return
       this.getNewName( name || id).then(newValue => {
         this.busyAnalyses.push({ id })
-        return fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
+        return fetch(`${baseUrl}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -142,7 +144,7 @@ export default {
       this.getListAnalysisResults()
     },
     getListAnalysisResults: function () {
-      fetch(`${VUE_APP_HOSTNAME}/analysis/list${this.workspaceMixin__queryParam || ''}`)
+      fetch(`${baseUrl}/analysis/list${this.workspaceMixin__queryParam || ''}`)
         .then(res => res.json())
         .then(arr => this.listAnalysis = arr)
         .catch(console.error)
@@ -156,7 +158,7 @@ export default {
       return this.launchPastAnalysis({ id, workspaceMixin__queryParam: this.workspaceMixin__queryParam})
     },
     deleteAnalysis: function ({id}) {
-      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
+      fetch(`${baseUrl}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
         method: 'DELETE'
       }).then(this.getListAnalysisResults)
         .catch(this.getListAnalysisResults)

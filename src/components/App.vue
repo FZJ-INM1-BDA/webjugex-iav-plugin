@@ -117,7 +117,7 @@ const fA = (arr) => (arr && arr.concat(
     : [])) || []
 )
 
-import { allowedParcellationName, allowedTemplateSpaces } from './constants' 
+import { allowedParcellationName, allowedTemplateSpaces, baseUrl } from './constants' 
 import { workspaceMixin } from './mixin'
 
 export default {
@@ -184,7 +184,7 @@ export default {
         })
       : null
 
-    this.launchPastAnalysis = ({ id, workspaceMixin__queryParam }) => fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}${workspaceMixin__queryParam || ''}`)
+    this.launchPastAnalysis = ({ id, workspaceMixin__queryParam }) => fetch(`${baseUrl}/analysis/i-v-manifest/${id}${workspaceMixin__queryParam || ''}`)
       .then(res => res.json())
       .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
     

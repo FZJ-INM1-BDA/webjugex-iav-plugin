@@ -1,4 +1,4 @@
-import { WORKSPACE_STRING } from './constants'
+import { WORKSPACE_STRING, baseUrl } from './constants'
 
 export const workspaceMixin = {
   data: function () {
@@ -19,12 +19,12 @@ export const workspaceMixin = {
   },
   methods: {
     workspaceMixin__deleteAnalysis: function ({ id }) {
-      return fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
+      return fetch(`${baseUrl}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
         method: 'DELETE'
       })
     },
     workspaceMixin__editName: function ({ id, name }) {
-      return fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
+      return fetch(`${baseUrl}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -35,7 +35,7 @@ export const workspaceMixin = {
       })
     },
     workspaceMixin__getListAnalysisResults: function () {
-      return fetch(`${VUE_APP_HOSTNAME}/analysis/list${this.workspaceMixin__queryParam || ''}`)
+      return fetch(`${baseUrl}/analysis/list${this.workspaceMixin__queryParam || ''}`)
         .then(res => res.json())
     },
     workspaceMixin__setWorkspace: function (val) {

@@ -122,3 +122,5 @@ export const hardcode = [
  'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Id3_pub',
  'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Ig3_pub'
 ]
+
+export const baseUrl = VUE_APP_HOSTNAME || `${window.location.origin}${window.location.pathname}`

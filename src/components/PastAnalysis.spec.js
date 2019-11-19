@@ -3,7 +3,6 @@ import PastAnalysis from './PastAnalysis.vue'
 import fetchMock from 'fetch-mock'
 import { expect, assert } from 'chai'
 
-const VUE_APP_HOSTNAME = process.env.VUE_APP_HOSTNAME || 'http://localhost:3001'
 const testAnalyses = [{
   id: 123,
   name: 'hello world'
