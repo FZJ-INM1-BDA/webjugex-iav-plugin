@@ -208,6 +208,40 @@ export default {
     )
   },
   methods: {
+    setWorksSpace: function (val) {
+      if (val === '') return
+      this.workspaceMixin__setWorkspace(val)
+
+      /**
+       * side effects of setting workspace
+       */
+      this.listAnalysis = []
+      this.getListAnalysisResults()
+    },
+    openOldAnalysis: function (id) {
+      this.launchResultPanel(id)
+        .catch(this.catchError)
+    },
+    launchResultPanel: function (id) {
+      return fetch(`${VUE_APP_HOSTNAME}/analysis/i-v-manifest/${id}${this.workspaceMixin__queryParam || ''}`)
+        .then(res => res.json())
+        .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
+    },
+    deleteAnalysis: function (id) {
+      fetch(`${VUE_APP_HOSTNAME}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
+        method: 'DELETE'
+      }).then(this.getListAnalysisResults)
+        .catch(this.getListAnalysisResults)
+    },
+    getListAnalysisResults: function () {
+      fetch(`${VUE_APP_HOSTNAME}/analysis/list${this.workspaceMixin__queryParam || ''}`)
+        .then(res => res.json())
+        .then(arr => this.listAnalysis = arr)
+        .catch(this.catchError)
+    },
+    focusAutocomplete: function (idx) {
+      this.scanMode = idx
+    },
     catchError: function (e) {
       console.log(e)
     },
