@@ -1,4 +1,5 @@
 # Interactive Viewer Plugin Template
+![](https://github.com/fzj-inm1-bda/webjugex-iav-plugin/workflows/Unit%20Tests/badge.svg)
 
 [interactive atlas viewer](https://github.com/HumanBrainProject/interactive-viewer) provides support for a [plugin system](https://github.com/HumanBrainProject/interactive-viewer/blob/master/src/plugin_examples/README.md). This repo aims to provide typing and a node express backend for the development of plugins
 
