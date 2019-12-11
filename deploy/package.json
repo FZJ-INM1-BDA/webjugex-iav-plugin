@@ -11,7 +11,13 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "hbp-seafile": "0.0.7",
+    "memorystore": "^1.6.1",
+    "openid-client": "^3.9.0",
+    "passport": "^0.4.1",
     "request": "^2.88.0",
+    "uuid": "^3.3.3",
     "vue-server-renderer": "^2.6.10"
   },
   "devDependencies": {

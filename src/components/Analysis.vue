@@ -2,7 +2,7 @@
   <div class="p-2">
 
     <!-- show experimental parameters regardless -->
-    <div>
+    <form method="POST" :action="formPostEndpoint" target="_blank" enctype="application/x-www-form-urlencoded">
       <!-- id -->
       <div class="input-group input-group-sm mt-1">
         <div class="input-group-prepend">
@@ -51,6 +51,21 @@
           readonly="readonly">
       </div>
 
+      <div class="input-group input-group-sm mt-1">
+        <div class="input-group-prepend">
+          <label for="webjugex-analysis-genes" class="input-group-text">
+            genes
+          </label>
+          <input
+            type="text"
+            id="webjugex-analysis-genes"
+            name="webjugex-analysis-genes"
+            class="form-control form-control-sm"
+            :value="genes | stringify"
+            readonly="readonly">
+        </div>
+      </div>
+
       <!-- permutations -->
       <div class="input-group input-group-sm mt-1">
         <div class="input-group-prepend">
@@ -82,7 +97,9 @@
           :value="threshold"
           readonly="readonly">
       </div>
-    </div>
+
+      <input type="submit" class="btn btn-link" value="Save to collab.drive">
+    </form>
     
     <!-- results container -->
     <div class="mt-2" v-if="!error">
@@ -186,6 +203,10 @@ export default {
     data: {
       type: Object,
       default: null
+    },
+    formPostEndpoint: {
+      type: String,
+      default: `${HOSTNAME}/user`
     }
   },
   mixins:[
@@ -218,6 +239,7 @@ export default {
        */
       roi1: null,
       roi2: null,
+      genes: [],
       ignoreCustomProbe: null,
       singleProbeMode: null,
       nPermutations: null,
@@ -235,6 +257,11 @@ export default {
       return this.completionTime
         ? this.completionTime
         : `Not yet complete`
+    }
+  },
+  filters: {
+    stringify: function (array) {
+      return JSON.stringify(array)
     }
   },
   methods: {
@@ -259,6 +286,7 @@ export default {
 
           this.roi1 = getRoiArray(area1)
           this.roi2 = getRoiArray(area2)
+          this.genes = selectedGenes
 
           if (analysis) {
             clearInterval(this.intervalId)
