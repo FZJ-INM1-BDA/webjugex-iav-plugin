@@ -19,7 +19,7 @@ RUN npm run test
 # Build ssr
 RUN npm run build-ssr
 
-FROM node:8-alpine
+FROM node:12-alpine
 
 ENV NODE_ENV=production
 RUN mkdir /webjugex-frontend
