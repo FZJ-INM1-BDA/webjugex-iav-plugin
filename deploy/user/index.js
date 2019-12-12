@@ -5,7 +5,7 @@ const { getNBFromPostReq } = require('./util')
 const { saveUserData, WEBJUGEX_DIR_NAME } = require('./store')
 
 const HBP_COLLAB_HOST = process.env.HBP_COLLAB_HOST || `https://jupyterhub-preview.apps-dev.hbp.eu`
-const HBP_COLLAB_PATH = process.env.HBP_COLLAB_PATH || '/hub/user-redirect/tree/drive/My%20Library/'
+const HBP_COLLAB_PATH = process.env.HBP_COLLAB_PATH || '/hub/user-redirect/lab/tree/drive/My%20Library/'
 
 const authMiddleware = (req, res, next) => {
   if (req.user) return next()
