@@ -206,7 +206,7 @@ export default {
     },
     formPostEndpoint: {
       type: String,
-      default: `${HOSTNAME}/user`
+      default: `${baseUrl}/user`
     }
   },
   mixins:[
