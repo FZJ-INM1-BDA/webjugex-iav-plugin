@@ -12,21 +12,9 @@ fs.readFile(pathToTemplate, 'utf-8', (err, data) => {
   template = data
 })
 
-const getPmapUrl = (u) => {
-  if (!u) return DEFAULT_PMAP_URL
-  const v = new url.URL(u)
-  return `${v.protocol}//${v.hostname}`
-}
-
-const getArea = ({ name, hemisphere }) => `
-"    {\n",
-"      \"name\": \"${name}\",\n",
-"      \"hemisphere\": \"${hemisphere}\"\n",
-"    }\n"`
-
-const getAreas = arr => `[\n",
-${arr.map(getArea).join(',')}
-"  ]`
+const getAreas = arr => JSON.stringify(JSON.stringify(arr))
+  .replace(/^\"/, '')
+  .replace(/\"$/, '')
 
 const getAreasFromString = value => value
   .split(', ')
@@ -55,7 +43,9 @@ const getNBFromPostReq = ({ body }) => {
   const areas1 = getAreasFromString(body['webjugex-analysis-roi1'])
   const areas2 = getAreasFromString(body['webjugex-analysis-roi2'])
 
-  const geneReplace = JSON.stringify(JSON.parse(body['webjugex-analysis-genes']))
+  const geneReplace = JSON.stringify(JSON.stringify(JSON.parse(body['webjugex-analysis-genes'])))
+    .replace(/^\"/, '')
+    .replace(/\"$/, '')
   
   const pmapServiceUrl = DEFAULT_PMAP_URL
 
