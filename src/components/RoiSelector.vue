@@ -73,7 +73,9 @@ export default {
       selectedRois: [],
       scanActive: false,
       mouseoverRegion: null,
-      clickFlag: false
+      clickFlag: false,
+      setRegionSelectionSubscription: null
+
     }
   },
   computed: {
@@ -96,12 +98,6 @@ export default {
         this.updateMouseOverRegion(segment)
       })
     )
-
-    subscriptions.push(
-      window.interactiveViewer.viewerHandle.mouseEvent.subscribe(ev => {
-        if (this.scanActive) this.handleMouseEvent(ev)
-      })
-    )
     
   },
   beforeDestroy: function () {
@@ -109,24 +105,9 @@ export default {
     while (subscriptions.length > 0) {
       subscriptions.pop().unsubscribe()
     }
-    window.interactiveViewer.uiHandle.cancelPromise(
-            window.interactiveViewer.uiHandle.getUserToSelectARegion
-    )
+    this.deactivateScan()
   },
   methods:{
-    handleMouseEvent: function (ev) {
-      const { eventName } = ev
-      if (eventName === 'mousedown') {
-        this.clickFlag = true
-        setTimeout(() => this.clickFlag = false, 200)
-        return
-      }
-      if (eventName === 'mouseup' && this.clickFlag && this.mouseoverRegion) {
-        const { name } = this.mouseoverRegion
-        this.selectRoi(name)
-        return
-      }
-    },
     updateMouseOverRegion: function (roi) {
       this.mouseoverRegion = roi
     },
@@ -145,15 +126,21 @@ export default {
 
       if (this.scanActive) {
         this.$emit('DisableRoi1scan', true)
-        window.interactiveViewer.uiHandle.getUserToSelectARegion()
-                .then(res => {}).catch(err => {})
+        this.setRegionSelectionSubscription = window.interactiveViewer.uiHandle
+                .getUserToSelectARegion().subscribe(res => {
+          const { name } = this.mouseoverRegion
+          if (name) this.selectRoi(name)
+        })
       } else {
-        window.interactiveViewer.uiHandle.cancelPromise(
-                window.interactiveViewer.uiHandle.getUserToSelectARegion
-        )
+        this.deactivateScan()
       }
     },
     deactivateScan() {
+      if (this.setRegionSelectionSubscription)
+        this.setRegionSelectionSubscription.unsubscribe()
+      window.interactiveViewer.uiHandle.cancelPromise(
+              window.interactiveViewer.uiHandle.getUserToSelectARegion
+      )
       this.scanActive = false
     }
   }
