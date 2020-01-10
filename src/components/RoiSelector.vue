@@ -109,6 +109,9 @@ export default {
     while (subscriptions.length > 0) {
       subscriptions.pop().unsubscribe()
     }
+    window.interactiveViewer.uiHandle.cancelPromise(
+            window.interactiveViewer.uiHandle.getUserToSelectARegion
+    )
   },
   methods:{
     handleMouseEvent: function (ev) {
@@ -139,6 +142,15 @@ export default {
     },
     toggleScanMode: function () {
       this.scanActive = !this.scanActive
+
+      if (this.scanActive) {
+        window.interactiveViewer.uiHandle.getUserToSelectARegion()
+                .then(res => {}).catch(err => {})
+      } else {
+        window.interactiveViewer.uiHandle.cancelPromise(
+                window.interactiveViewer.uiHandle.getUserToSelectARegion
+        )
+      }
     }
   }
 }
