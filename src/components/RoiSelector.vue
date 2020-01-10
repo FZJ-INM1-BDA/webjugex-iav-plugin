@@ -144,6 +144,7 @@ export default {
       this.scanActive = !this.scanActive
 
       if (this.scanActive) {
+        this.$emit('DisableRoi1scan', true)
         window.interactiveViewer.uiHandle.getUserToSelectARegion()
                 .then(res => {}).catch(err => {})
       } else {
@@ -151,6 +152,9 @@ export default {
                 window.interactiveViewer.uiHandle.getUserToSelectARegion
         )
       }
+    },
+    deactivateScan() {
+      this.scanActive = false
     }
   }
 }

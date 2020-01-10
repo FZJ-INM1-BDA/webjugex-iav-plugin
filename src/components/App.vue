@@ -17,6 +17,7 @@
         class="position-relative"
         style="z-index:6"
         placeholderText="Search & Add ROI 1"
+        @DisableRoi1scan="$refs.roi2Selector.deactivateScan()"
         :warning="roi1Warning"
         :autocompleteArray="regionAutocompleteRawArray">
       </RoiSelector>
@@ -27,6 +28,7 @@
         class="position-relative"
         style="z-index:5"
         placeholderText="Search & Add ROI 2"
+        @DisableRoi1scan="$refs.roi1Selector.deactivateScan()"
         :warning="roi2Warning"
         :autocompleteArray="regionAutocompleteRawArray">
       </RoiSelector>
