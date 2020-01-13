@@ -127,7 +127,7 @@ export default {
       if (this.scanActive) {
         this.$emit('DisableRoi1scan', true)
         this.setRegionSelectionSubscription = window.interactiveViewer.uiHandle
-                .getUserToSelectARegion().subscribe(res => {
+                .getUserToSelectARegion(`Region Selection Mode for ${this.label}`).subscribe(res => {
           const { name } = this.mouseoverRegion
           if (name) this.selectRoi(name)
         })
