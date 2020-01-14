@@ -96,7 +96,7 @@ export default {
               .getUserToSelectARegion(`Region Selection Mode for ${this.label}`)
               .then(res => {
                 if (res) {
-                  res.forEach(r => this.selectRoi(r))
+                  res.forEach(r => this.selectRoi(r.name))
                   this.regionSelectionPromise()
                 }
               })
