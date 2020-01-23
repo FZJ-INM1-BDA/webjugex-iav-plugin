@@ -13,7 +13,7 @@
       <!-- roi selection -->
       <RoiSelector
         ref="roi1Selector"
-        label="ROI1"
+        label="Region(s) 1"
         class="position-relative"
         style="z-index:6"
         placeholderText="Search & Add ROI 1"
@@ -24,7 +24,7 @@
 
       <RoiSelector
         ref="roi2Selector"
-        label="ROI2"
+        label="Region(s) 2"
         class="position-relative"
         style="z-index:5"
         placeholderText="Search & Add ROI 2"
@@ -37,6 +37,7 @@
       <GeneSelector
         ref="geneSelector"
         class="position-relative"
+        label="Gene(s)"
         style="z-index:4"
         :warning="selectedgenesWarning">
       </GeneSelector>
@@ -87,11 +88,14 @@
 
       <div class="fzj.xg.webjugex.divider"></div>
 
+      <AnalysisCard :vue-id="'1579795588632'"></AnalysisCard>
+
+      <!-- ToDo remove past analyses fully?-->
       <!-- past analysis -->
-      <PastAnalysis
-        :getNewName="getNewName"
-        :launchPastAnalysis="launchPastAnalysis"
-        ref="pastAnalysis" />
+<!--      <PastAnalysis-->
+<!--        :getNewName="getNewName"-->
+<!--        :launchPastAnalysis="launchPastAnalysis"-->
+<!--        ref="pastAnalysis" />-->
 
     </div>
     <h5
@@ -172,7 +176,9 @@ export default {
 
       getNewName: null,
 
-      launchPastAnalysis: null 
+      launchPastAnalysis: null,
+
+      dataId: null
     }
   },
   mounted: function () {
@@ -306,12 +312,28 @@ export default {
         body
       })
       this.initAnalysisFlag = true
-      this.$refs.pastAnalysis.newAnalysis(body)
+      this.newAnalysis(body)
         .then(() => {
           this.initAnalysisFlag = false
         })
         .catch(console.error)
-    }
+    },
+    newAnalysis: function (payload) {
+      const { id, ...body } = payload
+      return new Promise((resolve, reject) => {
+        fetch(`${baseUrl}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        })
+                .then(() => this.getListAnalysisResults())
+                .then(() => this.launchResultPanel(id))
+                .then(resolve)
+                .catch(reject)
+      })
+    },
   },
   computed: {
     analysisBtnText: function () {
