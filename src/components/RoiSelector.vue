@@ -8,12 +8,6 @@
       @keydown.enter.prevent
       style = "z-index: 5"
       class="input-group">
-      <!-- ToDo Fully remove? -->
-<!--      <div class="input-group-prepend">-->
-<!--        <div class="input-group-text">-->
-<!--          {{ label }}-->
-<!--        </div>-->
-<!--      </div>-->
       <auto-complete
         ref="autocomplete"
         :warning="warning"

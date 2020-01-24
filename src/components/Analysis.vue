@@ -1,105 +1,106 @@
 <template>
   <div class="p-2">
 
-    <!-- show experimental parameters regardless -->
-<!--    <form method="POST" :action="formPostEndpoint" target="_blank" enctype="application/x-www-form-urlencoded">-->
-<!--      &lt;!&ndash; id &ndash;&gt;-->
-<!--      <div class="input-group input-group-sm mt-1">-->
-<!--        <div class="input-group-prepend">-->
-<!--          <label for="webjugex-analysis-id" class="input-group-text">-->
-<!--            id-->
-<!--          </label>-->
-<!--        </div>-->
-<!--        <input-->
-<!--          type="text"-->
-<!--          id="webjugex-analysis-id"-->
-<!--          name="webjugex-analysis-id"-->
-<!--          class="form-control form-control-sm"-->
-<!--          :value="vueId"-->
-<!--          readonly="readonly">-->
-<!--      </div>-->
+<!--    ToDo Fully Remove?-->
+     show experimental parameters regardless
+    <form method="POST" :action="formPostEndpoint" target="_blank" enctype="application/x-www-form-urlencoded">
+      <!-- id -->
+      <div class="input-group input-group-sm mt-1">
+        <div class="input-group-prepend">
+          <label for="webjugex-analysis-id" class="input-group-text">
+            id
+          </label>
+        </div>
+        <input
+          type="text"
+          id="webjugex-analysis-id"
+          name="webjugex-analysis-id"
+          class="form-control form-control-sm"
+          :value="vueId"
+          readonly="readonly">
+      </div>
 
-<!--      &lt;!&ndash; roi1 &ndash;&gt;-->
-<!--      <div class="input-group input-group-sm mt-1">-->
-<!--        <div class="input-group-prepend">-->
-<!--          <label for="webjugex-analysis-roi1" class="input-group-text">-->
-<!--            roi1-->
-<!--          </label>-->
-<!--        </div>-->
-<!--        <input-->
-<!--          type="text"-->
-<!--          id="webjugex-analysis-roi1"-->
-<!--          name="webjugex-analysis-roi1"-->
-<!--          class="form-control form-control-sm"-->
-<!--          :value="roi1 ? roi1.join(', ') : ''"-->
-<!--          readonly="readonly">-->
-<!--      </div>-->
+      <!-- roi1 -->
+      <div class="input-group input-group-sm mt-1">
+        <div class="input-group-prepend">
+          <label for="webjugex-analysis-roi1" class="input-group-text">
+            roi1
+          </label>
+        </div>
+        <input
+          type="text"
+          id="webjugex-analysis-roi1"
+          name="webjugex-analysis-roi1"
+          class="form-control form-control-sm"
+          :value="roi1 ? roi1.join(', ') : ''"
+          readonly="readonly">
+      </div>
 
-<!--      &lt;!&ndash; roi2 &ndash;&gt;-->
-<!--      <div class="input-group input-group-sm mt-1">-->
-<!--        <div class="input-group-prepend">-->
-<!--          <label for="webjugex-analysis-roi2" class="input-group-text">-->
-<!--            roi2-->
-<!--          </label>-->
-<!--        </div>-->
-<!--        <input-->
-<!--          type="text"-->
-<!--          id="webjugex-analysis-roi2"-->
-<!--          name="webjugex-analysis-roi2"-->
-<!--          class="form-control form-control-sm"-->
-<!--          :value="roi2 ? roi2.join(', ') : ''"-->
-<!--          readonly="readonly">-->
-<!--      </div>-->
+      <!-- roi2 -->
+      <div class="input-group input-group-sm mt-1">
+        <div class="input-group-prepend">
+          <label for="webjugex-analysis-roi2" class="input-group-text">
+            roi2
+          </label>
+        </div>
+        <input
+          type="text"
+          id="webjugex-analysis-roi2"
+          name="webjugex-analysis-roi2"
+          class="form-control form-control-sm"
+          :value="roi2 ? roi2.join(', ') : ''"
+          readonly="readonly">
+      </div>
 
-<!--      <div class="input-group input-group-sm mt-1">-->
-<!--        <div class="input-group-prepend">-->
-<!--          <label for="webjugex-analysis-genes" class="input-group-text">-->
-<!--            genes-->
-<!--          </label>-->
-<!--          <input-->
-<!--            type="text"-->
-<!--            id="webjugex-analysis-genes"-->
-<!--            name="webjugex-analysis-genes"-->
-<!--            class="form-control form-control-sm"-->
-<!--            :value="genes | stringify"-->
-<!--            readonly="readonly">-->
-<!--        </div>-->
-<!--      </div>-->
+      <div class="input-group input-group-sm mt-1">
+        <div class="input-group-prepend">
+          <label for="webjugex-analysis-genes" class="input-group-text">
+            genes
+          </label>
+          <input
+            type="text"
+            id="webjugex-analysis-genes"
+            name="webjugex-analysis-genes"
+            class="form-control form-control-sm"
+            :value="genes | stringify"
+            readonly="readonly">
+        </div>
+      </div>
 
-<!--      &lt;!&ndash; permutations &ndash;&gt;-->
-<!--      <div class="input-group input-group-sm mt-1">-->
-<!--        <div class="input-group-prepend">-->
-<!--          <label for="webjugex-analysis-permutations" class="input-group-text">-->
-<!--            permutations-->
-<!--          </label>-->
-<!--        </div>-->
-<!--        <input-->
-<!--          type="text"-->
-<!--          id="webjugex-analysis-permutations"-->
-<!--          name="webjugex-analysis-permutations"-->
-<!--          class="form-control form-control-sm"-->
-<!--          :value="nPermutations"-->
-<!--          readonly="readonly">-->
-<!--      </div>-->
+      <!-- permutations -->
+      <div class="input-group input-group-sm mt-1">
+        <div class="input-group-prepend">
+          <label for="webjugex-analysis-permutations" class="input-group-text">
+            permutations
+          </label>
+        </div>
+        <input
+          type="text"
+          id="webjugex-analysis-permutations"
+          name="webjugex-analysis-permutations"
+          class="form-control form-control-sm"
+          :value="nPermutations"
+          readonly="readonly">
+      </div>
 
-<!--      &lt;!&ndash; threshold &ndash;&gt;-->
-<!--      <div class="input-group input-group-sm mt-1">-->
-<!--        <div class="input-group-prepend">-->
-<!--          <label for="webjugex-analysis-threshold" class="input-group-text">-->
-<!--            threshold-->
-<!--          </label>-->
-<!--        </div>-->
-<!--        <input-->
-<!--          type="text"-->
-<!--          id="webjugex-analysis-threshold"-->
-<!--          name="webjugex-analysis-threshold"-->
-<!--          class="form-control form-control-sm"-->
-<!--          :value="threshold"-->
-<!--          readonly="readonly">-->
-<!--      </div>-->
+      <!-- threshold -->
+      <div class="input-group input-group-sm mt-1">
+        <div class="input-group-prepend">
+          <label for="webjugex-analysis-threshold" class="input-group-text">
+            threshold
+          </label>
+        </div>
+        <input
+          type="text"
+          id="webjugex-analysis-threshold"
+          name="webjugex-analysis-threshold"
+          class="form-control form-control-sm"
+          :value="threshold"
+          readonly="readonly">
+      </div>
 
-<!--      <input type="submit" class="btn btn-link" value="Save to HBP jupyter hub">-->
-<!--    </form>-->
+      <input type="submit" class="btn btn-link" value="Save to HBP jupyter hub">
+    </form>
     
     <!-- results container -->
     <div class="mt-2" v-if="!error">
@@ -148,7 +149,9 @@
             <PreviewTsv class="tsv-preview" :tsv="coorddata" />
           </div>
         </a>
-        <input type="submit" class="btn btn-link" value="Save to HBP jupyter hub">
+        <form method="POST" :action="formPostEndpoint" target="_blank" enctype="application/x-www-form-urlencoded">
+          <input type="submit" class="btn btn-link w-100" value="Save to HBP jupyter hub">
+        </form>
 
       </div>
 
@@ -215,10 +218,18 @@ export default {
   mixins:[
     workspaceMixin
   ],
+  watch: {
+    vueId: function (vueId) {
+      Object.assign(this.$data, this.$options.data.call(this))
+
+      this.getDataRunner()
+      this.vueId = vueId
+    },
+  },
   data: function () {
     return {
       showPreviewPValData: false,
-      showPreviewCoordData: false, 
+      showPreviewCoordData: false,
 
       showBody: false,
       analysisComplete: false,
@@ -271,6 +282,7 @@ export default {
     fetching: function () {
       return fetch(`${baseUrl}/analysis/${this.vueId}${this.workspaceMixin__queryParam || ''}`)
         .then(res => {
+          console.log()
           if (res.status >= 400) {
             return Promise.reject(res.status)
           } else {
@@ -303,6 +315,21 @@ export default {
             return Promise.reject(NO_RESULTS_YET)
           }
         })
+    },
+    getDataRunner: function() {
+      this.getData()
+              .then(this.parseFetchedData)
+              .then(rjson => {
+                this.completionTime = new Date().toString()
+                this.analysisComplete = true
+                this.pvaldata = rjson.pval
+                this.coorddata = rjson.coord
+              })
+              .catch(e => {
+                console.error('error', e)
+                this.error = e
+                this.$emit('error', e)
+              })
     },
     getData: function () {
       return new Promise((resolve, reject) => {
@@ -383,19 +410,7 @@ export default {
   mounted: function () {
     // use mixin
     // this.vueId = this.$parent.queryId
-    this.getData()
-      .then(this.parseFetchedData)
-      .then(rjson => {
-        this.completionTime = new Date().toString()
-        this.analysisComplete = true
-        this.pvaldata = rjson.pval
-        this.coorddata = rjson.coord
-      })
-      .catch(e => {
-        console.error('error', e)
-        this.error = e
-        this.$emit('error', e)
-      })
+    this.getDataRunner()
   },
   beforeDestroy: function () {
     /**
