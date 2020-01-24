@@ -63,7 +63,7 @@
       </div>
 
       <div
-              @click = "startAnalysis"
+              @click = "startAnalysis(), $refs.roi1Selector.deactivateScan(), $refs.roi2Selector.deactivateScan()"
               :class="(initAnalysisFlag ? 'text-muted' : '') + ' btn btn-secondary w-100 mt-1 mb-1'">
         {{ analysisBtnText }}
         <span
@@ -73,51 +73,6 @@
           </span>
       </div>
 
-      <!--Save to collab drive-->
-          <form method="POST" :action="formPostEndpoint" target="_blank" enctype="application/x-www-form-urlencoded" class="mt-1 mb-1">
-            <!-- id -->
-            <div class="input-group input-group-sm mt-1 d-none">
-              <input
-                :value="analysisId"
-                readonly="readonly">
-            </div>
-
-            <!-- roi1 -->
-            <div class="input-group input-group-sm mt-1 d-none">
-              <input
-                :value="$refs.roi1Selector && $refs.roi1Selector.selectedRois ? $refs.roi1Selector.selectedRois.join(', ') : ''"
-                readonly="readonly">
-            </div>
-
-            <!-- roi2 -->
-            <div class="input-group input-group-sm mt-1 d-none">
-              <input
-                :value="$refs.roi2Selector && $refs.roi2Selector.selectedRois ? $refs.roi2Selector.selectedRois.join(', ') : ''"
-                readonly="readonly">
-            </div>
-
-            <div class="input-group input-group-sm mt-1 d-none">
-                <input
-                  :value="$refs.geneSelector && $refs.geneSelector.selectedGenes | stringify"
-                  readonly="readonly">
-            </div>
-
-            <!-- permutations -->
-            <div class="input-group input-group-sm mt-1 d-none">
-              <input
-                :value="getNPermutations"
-                readonly="readonly">
-            </div>
-
-            <!-- threshold -->
-            <div class="input-group input-group-sm mt-1 d-none">
-              <input
-                :value="getThreshold"
-                readonly="readonly">
-            </div>
-
-            <input type="submit" class="btn btn-link w-100 text-decoration-none" value="Save to HBP jupyter hub">
-          </form>
 
       <!-- warning -->
       <transition name="fzj-xg-webjugex-fade">
@@ -130,8 +85,6 @@
           </ul>
         </div>
       </transition>
-
-      <div class="fzj.xg.webjugex.divider"></div>
 
       <AnalysisCard v-show="this.analysisId" :vue-id="analysisId"/>
 
@@ -384,17 +337,6 @@ export default {
     }
   },
   computed: {
-    getThreshold: function() {
-      const { advancedRef } = this.$refs
-      const {threshold} = advancedRef || defaultConfig
-      return threshold
-    },
-    getNPermutations: function() {
-      const { advancedRef } = this.$refs
-      const {nPermutations} = advancedRef || defaultConfig
-      return nPermutations
-    },
-
     analysisBtnText: function () {
       return this.initAnalysisFlag
         ? 'Starting analysis  ...'
