@@ -1,7 +1,8 @@
 <template>
   <div class="p-2">
 
-    <!-- show experimental parameters regardless -->
+<!--    ToDo Fully Remove?-->
+     show experimental parameters regardless
     <form method="POST" :action="formPostEndpoint" target="_blank" enctype="application/x-www-form-urlencoded">
       <!-- id -->
       <div class="input-group input-group-sm mt-1">
@@ -98,7 +99,7 @@
           readonly="readonly">
       </div>
 
-      <input type="submit" class="btn btn-link" value="Save to collab.drive">
+      <input type="submit" class="btn btn-link" value="Save to HBP jupyter hub">
     </form>
     
     <!-- results container -->
@@ -148,6 +149,10 @@
             <PreviewTsv class="tsv-preview" :tsv="coorddata" />
           </div>
         </a>
+        <form method="POST" :action="formPostEndpoint" target="_blank" enctype="application/x-www-form-urlencoded">
+          <input type="submit" class="btn btn-link w-100" value="Save to HBP jupyter hub">
+        </form>
+
       </div>
 
       <!-- if not complete, show spinner. introduce percentage in the turue -->
@@ -200,6 +205,7 @@ export default {
     PreviewTsv
   },
   props: {
+    vueId: null,
     data: {
       type: Object,
       default: null
@@ -212,10 +218,18 @@ export default {
   mixins:[
     workspaceMixin
   ],
+  watch: {
+    vueId: function (vueId) {
+      Object.assign(this.$data, this.$options.data.call(this))
+
+      this.getDataRunner()
+      this.vueId = vueId
+    },
+  },
   data: function () {
     return {
       showPreviewPValData: false,
-      showPreviewCoordData: false, 
+      showPreviewCoordData: false,
 
       showBody: false,
       analysisComplete: false,
@@ -232,7 +246,7 @@ export default {
        * polling
        */
       intervalId: null,
-      vueId: null,
+      // vueId: null,
 
       /**
        * expmt param
@@ -268,6 +282,7 @@ export default {
     fetching: function () {
       return fetch(`${baseUrl}/analysis/${this.vueId}${this.workspaceMixin__queryParam || ''}`)
         .then(res => {
+          console.log()
           if (res.status >= 400) {
             return Promise.reject(res.status)
           } else {
@@ -300,6 +315,21 @@ export default {
             return Promise.reject(NO_RESULTS_YET)
           }
         })
+    },
+    getDataRunner: function() {
+      this.getData()
+              .then(this.parseFetchedData)
+              .then(rjson => {
+                this.completionTime = new Date().toString()
+                this.analysisComplete = true
+                this.pvaldata = rjson.pval
+                this.coorddata = rjson.coord
+              })
+              .catch(e => {
+                console.error('error', e)
+                this.error = e
+                this.$emit('error', e)
+              })
     },
     getData: function () {
       return new Promise((resolve, reject) => {
@@ -379,20 +409,8 @@ export default {
   },
   mounted: function () {
     // use mixin
-    this.vueId = this.$parent.queryId
-    this.getData()
-      .then(this.parseFetchedData)
-      .then(rjson => {
-        this.completionTime = new Date().toString()
-        this.analysisComplete = true
-        this.pvaldata = rjson.pval
-        this.coorddata = rjson.coord
-      })
-      .catch(e => {
-        console.error('error', e)
-        this.error = e
-        this.$emit('error', e)
-      })
+    // this.vueId = this.$parent.queryId
+    this.getDataRunner()
   },
   beforeDestroy: function () {
     /**

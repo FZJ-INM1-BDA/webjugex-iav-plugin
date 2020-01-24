@@ -1,5 +1,6 @@
 <template>
-  <form autocomplete="off" class="p1 bg-dark mb-2">
+  <form autocomplete="off" class="p1 bg-dark mb-2 p-1">
+    {{label}}
     <div
       @keydown.enter.prevent
       class="input-group">
@@ -63,6 +64,10 @@ export default {
     warning: {
       type: Boolean,
       default: false,
+    },
+    label: {
+      type: String,
+      default: 'Default Gene'
     }
   },
   computed: {
