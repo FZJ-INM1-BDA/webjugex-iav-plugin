@@ -50,7 +50,10 @@
           @click="showAdvancedMenu = !showAdvancedMenu"
           class="btn btn-secondary w-100"
           data-toggle="dropdown">
-            Advanced filter
+          <div class="d-flex align-items-center">
+          <span style="flex: 1">Settings</span>
+          <i :class="'fas ' + (showAdvancedMenu? 'fa-angle-up' : 'fa-angle-down')"></i>
+          </div>
         </div>
 
         <!-- advanced menu -->
