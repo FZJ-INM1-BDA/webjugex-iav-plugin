@@ -101,54 +101,58 @@
 
       <input type="submit" class="btn btn-link w-100" value="Save to HBP jupyter hub">
     </form>
-    
+
     <!-- results container -->
     <div class="mt-2" v-if="!error">
 
       <!-- if complete show result -->
       <div v-if="analysisComplete">
-        <div class="btn-group btn-block">
-          <div
-            @click="showCoord"
-            class="btn btn-default">
-            show coord
-          </div>
-          <div
-            @click="destroyCoord"
-            class="btn btn-default">
-            hide coord
+        <div class="input-group f-flex align-items-center">
+          <span class="input-group-prepend p-2">
+            Display probe locations
+          </span>
+          <check-box v-model="displayProbeLocation"
+                     :flag = "displayProbeLocation"
+                     @togglecheckbox="toggleDisplayProbeLocation()"/>
+        </div>
+
+        <div class="bg-dark pt-1">
+          <div class="w-100 d-flex justify-content-center">Download</div>
+          <div class="btn-group btn-block">
+            <div class="btn btn-default">
+              <a
+                      download="pval.tsv"
+                      @mouseenter="showPreviewPValData=true"
+                      @mouseleave="showPreviewPValData=false"
+                      class="position-relative"
+                      :href="'data:text/tsv;charset=utf-8,' + pvaldata">
+                p values
+                <div
+                        v-if="showPreviewPValData"
+                        class="position-absolute tsv-preview-container">
+                  <PreviewTsv class="tsv-preview" :tsv="pvaldata"/>
+                </div>
+              </a>
+            </div>
+            <div class="btn btn-default">
+              <a
+                      download="coord.tsv"
+                      @mouseenter="showPreviewCoordData=true"
+                      @mouseleave="showPreviewCoordData=false"
+                      class="position-relative"
+                      :href="'data:text/tsv;charset=utf-8,' + coorddata">
+                probe locations
+                <div
+                        v-if="showPreviewCoordData"
+                        class="position-absolute tsv-preview-container">
+                  <PreviewTsv class="tsv-preview" :tsv="coorddata"/>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
 
-        <a
-          download="pval.tsv"
-          @mouseenter="showPreviewPValData=true"
-          @mouseleave="showPreviewPValData=false"
-          class="position-relative"
-          :href="'data:text/tsv;charset=utf-8,' + pvaldata">
-          download pvals
-          <div
-            v-if="showPreviewPValData"
-            class="position-absolute tsv-preview-container">
-            <PreviewTsv class="tsv-preview" :tsv="pvaldata" />
-          </div>
-        </a>
-        
-        <br />
-        
-        <a
-          download="coord.tsv"
-          @mouseenter="showPreviewCoordData=true"
-          @mouseleave="showPreviewCoordData=false"
-          class="position-relative"
-          :href="'data:text/tsv;charset=utf-8,' + coorddata">
-          download coord data
-          <div
-            v-if="showPreviewCoordData"
-            class="position-absolute tsv-preview-container">
-            <PreviewTsv class="tsv-preview" :tsv="coorddata" />
-          </div>
-        </a>
+
 
       </div>
 
@@ -161,7 +165,8 @@
 
     <!-- showing if there is an error -->
     <div v-else>
-      Error: {{ error }}
+<!--      Error: {{ error }}-->
+      No genes had been found
     </div>
   </div>
 </template>
@@ -170,6 +175,7 @@ const POLLING_INTERVAL = 3000
 const DELIMITER = `\t`
 import { workspaceMixin } from './mixin'
 import PreviewTsv from './previewTsv'
+import { CheckBox } from 'vue-components'
 import { baseUrl } from './constants'
 
 const NO_RESULTS_YET = 'no results yet'
@@ -199,7 +205,8 @@ const getCoord = (tsv) => tsv
 
 export default {
   components: {
-    PreviewTsv
+    PreviewTsv,
+    CheckBox
   },
   props: {
     vueId: null,
@@ -260,7 +267,9 @@ export default {
        * showing landmark(s)
        */
       coordShown: false,
-      shownLandmarks: []
+      shownLandmarks: [],
+
+      displayProbeLocation: null
     }
   },
   computed: {
@@ -383,6 +392,13 @@ export default {
         pval : stringPvalFile,
         coord : stringTitledCoordFile
       }
+    },
+    toggleDisplayProbeLocation: function() {
+      this.displayProbeLocation = !this.displayProbeLocation
+      if (this.displayProbeLocation)
+        this.showCoord()
+      if (!this.displayProbeLocation)
+        this.destroyCoord()
     },
     showCoord: function () {
       if (this.shownLandmarks.length > 0) return
