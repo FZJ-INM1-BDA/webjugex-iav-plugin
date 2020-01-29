@@ -7,6 +7,13 @@ const { saveUserData, WEBJUGEX_DIR_NAME } = require('./store')
 const HBP_COLLAB_HOST = process.env.HBP_COLLAB_HOST || `https://jupyterhub-preview.apps-dev.hbp.eu`
 const HBP_COLLAB_PATH = process.env.HBP_COLLAB_PATH || '/hub/user-redirect/lab/tree/drive/My%20Libraries/My%20Library/'
 
+const fs = require('fs')
+const path = require('path')
+
+const pathToRedirectHTML = path.join(__dirname, 'data/redirect.html')
+const redirectPage = fs.readFileSync(pathToRedirectHTML, 'utf-8')
+const metaSubstitutionString = `<!-- METAREDIRECT -->`
+
 const authMiddleware = (req, res, next) => {
   if (req.user) return next()
   req.session[POST_BODY_TMP_STORE] = req.body
@@ -31,7 +38,8 @@ const saveNb = async (req, res) => {
 
   try {
     await saveUserData(user, nb, { filename: `webjugex-${id}.ipynb` })
-    res.redirect(`${HBP_COLLAB_HOST}${HBP_COLLAB_PATH}${encodeURIComponent(WEBJUGEX_DIR_NAME)}/${encodeURIComponent(`webjugex-${id}.ipynb`)}`)
+    
+    res.status(200).send(redirectPage.replace(metaSubstitutionString, `<meta http-equiv="refresh" content="20;url=${HBP_COLLAB_HOST}${HBP_COLLAB_PATH}${encodeURIComponent(WEBJUGEX_DIR_NAME)}/${encodeURIComponent(`webjugex-${id}.ipynb`)}" />`))
   } catch (e) {
     res.status(501).send(e.toString())
   }
