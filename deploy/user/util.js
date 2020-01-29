@@ -1,11 +1,8 @@
 const fs = require('fs')
 const path = require('path')
-const url = require('url')
 let template
 
 const pathToTemplate = path.join(__dirname, './data/template.ipynb')
-
-const DEFAULT_PMAP_URL = `http://pmap-pmap-service.apps-dev.hbp.eu`
 
 fs.readFile(pathToTemplate, 'utf-8', (err, data) => {
   if (err) throw new Error(`reading template error: ${err.toString()}`)
@@ -42,21 +39,22 @@ const getNBFromPostReq = ({ body }) => {
 
   const areas1 = getAreasFromString(body['webjugex-analysis-roi1'])
   const areas2 = getAreasFromString(body['webjugex-analysis-roi2'])
+  const threshold = Number(body['webjugex-analysis-threshold'])
+  const rep = Number(body['webjugex-analysis-permutations'])
 
   const geneReplace = JSON.stringify(JSON.stringify(JSON.parse(body['webjugex-analysis-genes'])))
     .replace(/^\"/, '')
     .replace(/\"$/, '')
-  
-  const pmapServiceUrl = DEFAULT_PMAP_URL
 
   const area1Replace = getAreas(areas1)
   const area2Replace = getAreas(areas2)
   
   return template
-    .replace('$$PMAP_SERVICE_URL$$', pmapServiceUrl)
-    .replace('$$AREA1$$', area1Replace)
-    .replace('$$AREA2$$', area2Replace)
-    .replace('$$GENELIST$$', geneReplace)
+    .replace('$AREA1$', area1Replace)
+    .replace('$AREA2$', area2Replace)
+    .replace('$GENELIST$', geneReplace)
+    .replace('$THRESHOLD$', threshold)
+    .replace('$REPS$', rep)
 }
 
 module.exports = {
