@@ -39,7 +39,7 @@ const saveNb = async (req, res) => {
   try {
     await saveUserData(user, nb, { filename: `webjugex-${id}.ipynb` })
     
-    res.status(200).send(redirectPage.replace(metaSubstitutionString, `<meta http-equiv="refresh" content="20;url=${HBP_COLLAB_HOST}${HBP_COLLAB_PATH}${encodeURIComponent(WEBJUGEX_DIR_NAME)}/${encodeURIComponent(`webjugex-${id}.ipynb`)}" />`))
+    res.status(200).send(redirectPage.replace(metaSubstitutionString, `<meta http-equiv="refresh" content="60;url=${HBP_COLLAB_HOST}${HBP_COLLAB_PATH}${encodeURIComponent(WEBJUGEX_DIR_NAME)}/${encodeURIComponent(`webjugex-${id}.ipynb`)}" />`))
   } catch (e) {
     res.status(501).send(e.toString())
   }
