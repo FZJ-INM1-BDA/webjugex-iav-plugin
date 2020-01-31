@@ -50,11 +50,11 @@ const getNBFromPostReq = ({ body }) => {
   const area2Replace = getAreas(areas2)
   
   return template
-    .replace('$AREA1$', area1Replace)
-    .replace('$AREA2$', area2Replace)
-    .replace('$GENELIST$', geneReplace)
-    .replace('$THRESHOLD$', threshold)
-    .replace('$REPS$', rep)
+    .replace(/\$AREA1\$/g, area1Replace)
+    .replace(/\$AREA2\$/g, area2Replace)
+    .replace(/\$GENELIST\$/g, geneReplace)
+    .replace(/\$THRESHOLD\$/g, threshold)
+    .replace(/\$REPS\$/g, rep)
 }
 
 module.exports = {
