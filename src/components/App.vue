@@ -367,6 +367,9 @@ export default {
     }
   },
   beforeDestroy: function () {
+    window.interactiveViewer.uiHandle.cancelPromise(
+      window.interactiveViewer.uiHandle.getUserToSelectARegion
+    )
     this.$options.nonReactive.subscriptions.forEach(s => s.unsubscribe())
   }
 }
