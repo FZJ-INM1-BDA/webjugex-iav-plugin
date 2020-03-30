@@ -1,0 +1,20 @@
+site_name: WebJuGEx User Documentation
+
+theme:
+  name: 'material'
+
+docs_dir: docs
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - mdx_truly_sane_lists
+
+pages:
+  - Home: 'index.md'
+  - User Manual:
+    - Getting Started: 'gettingStarted.md'
+    - Setting Inputs and Parameters: 'parameters.md'
+    - Running Analysis: 'running.md'
+    - Analysis Result: 'preview.md'

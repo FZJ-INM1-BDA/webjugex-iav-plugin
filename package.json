@@ -1,7 +1,7 @@
 {
-  "name": "iv-plugin-template",
+  "name": "web-jugex",
   "version": "1.0.0",
-  "description": "",
+  "description": "WebJuGEx is a simple and intuitive graphical user interface for [JuGEx](https://pyjugex.readthedocs.io/) - a workflow for analyzing differential gene expressions in different regions of the JuBrain probabilistic cytoarchitectonic human brain atlas.",
   "main": "index.js",
   "scripts": {
     "test": "mocha-webpack --webpack-config webpack.config.js --require test/setup.js",

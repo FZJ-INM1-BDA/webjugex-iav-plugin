@@ -6,3 +6,4 @@ package-lock.json
 build.sh
 run.sh
 distSsr
+venv
