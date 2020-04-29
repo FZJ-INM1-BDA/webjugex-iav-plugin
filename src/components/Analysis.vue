@@ -165,8 +165,7 @@
 
     <!-- showing if there is an error -->
     <div v-else>
-<!--      Error: {{ error }}-->
-      No genes had been found
+      Error: {{ error }}
     </div>
   </div>
 </template>
@@ -288,7 +287,6 @@ export default {
     fetching: function () {
       return fetch(`${baseUrl}/analysis/${this.vueId}${this.workspaceMixin__queryParam || ''}`)
         .then(res => {
-          console.log()
           if (res.status >= 400) {
             return Promise.reject(res.status)
           } else {
@@ -311,10 +309,10 @@ export default {
 
           if (analysis) {
             clearInterval(this.intervalId)
-            const {body, resp} = analysis
+            const { body, resp, err } = analysis
             const { statusCode } = resp
-            if (statusCode && statusCode >= 400) {
-              return Promise.reject(statusCode)
+            if (!!err) {
+              return Promise.reject(err)
             }
             return Promise.resolve(JSON.parse(body))
           } else {
