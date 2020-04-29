@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- METAREDIRECT -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Saving to HBP Jupyterhub ... </title>
+</head>
+<style>
+
+@keyframes spinning
+{
+  from {
+    transform: rotate(0deg);
+  }
+  to{
+    transform: rotate(359deg);
+  }
+}
+
+.spinnerAnimationCircle
+{
+  width: 1em;
+  height:1em;
+  border-radius: 50%;
+  border: 0.2em rgba(128,128,128,0.2) solid;
+  border-top: 0.2em rgba(128,128,128,0.99) solid;
+  animation: spinning 700ms linear infinite running;
+}
+
+.d-flex
+{
+  display:flex!important;
+}
+
+.d-inline-block
+{
+  display:inline-block!important;
+}
+
+.w-100
+{
+  width: 100%!important;
+}
+</style>
+<body>
+  <div class="w-100 d-flex">
+    <span class="d-inline-block spinnerAnimationCircle">
+
+    </span>
+    <span>
+      Saving to HBP Jupyterhub ...
+    </span>
+  </div>
+</body>
+</html>

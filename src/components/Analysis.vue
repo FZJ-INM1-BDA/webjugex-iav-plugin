@@ -1,10 +1,11 @@
 <template>
-  <div class="p-2">
+  <div>
 
-    <!-- show experimental parameters regardless -->
-    <div>
+<!--    ToDo Fully Remove?-->
+<!--     show experimental parameters regardless-->
+    <form method="POST" :action="formPostEndpoint" target="_blank" enctype="application/x-www-form-urlencoded">
       <!-- id -->
-      <div class="input-group input-group-sm mt-1">
+      <div class="input-group input-group-sm mt-1 d-none">
         <div class="input-group-prepend">
           <label for="webjugex-analysis-id" class="input-group-text">
             id
@@ -20,7 +21,7 @@
       </div>
 
       <!-- roi1 -->
-      <div class="input-group input-group-sm mt-1">
+      <div class="input-group input-group-sm mt-1 d-none">
         <div class="input-group-prepend">
           <label for="webjugex-analysis-roi1" class="input-group-text">
             roi1
@@ -36,7 +37,7 @@
       </div>
 
       <!-- roi2 -->
-      <div class="input-group input-group-sm mt-1">
+      <div class="input-group input-group-sm mt-1 d-none">
         <div class="input-group-prepend">
           <label for="webjugex-analysis-roi2" class="input-group-text">
             roi2
@@ -51,8 +52,23 @@
           readonly="readonly">
       </div>
 
+      <div class="input-group input-group-sm mt-1 d-none">
+        <div class="input-group-prepend">
+          <label for="webjugex-analysis-genes" class="input-group-text">
+            genes
+          </label>
+          <input
+            type="text"
+            id="webjugex-analysis-genes"
+            name="webjugex-analysis-genes"
+            class="form-control form-control-sm"
+            :value="genes | stringify"
+            readonly="readonly">
+        </div>
+      </div>
+
       <!-- permutations -->
-      <div class="input-group input-group-sm mt-1">
+      <div class="input-group input-group-sm mt-1 d-none">
         <div class="input-group-prepend">
           <label for="webjugex-analysis-permutations" class="input-group-text">
             permutations
@@ -68,7 +84,7 @@
       </div>
 
       <!-- threshold -->
-      <div class="input-group input-group-sm mt-1">
+      <div class="input-group input-group-sm mt-1 d-none">
         <div class="input-group-prepend">
           <label for="webjugex-analysis-threshold" class="input-group-text">
             threshold
@@ -82,55 +98,62 @@
           :value="threshold"
           readonly="readonly">
       </div>
-    </div>
-    
+
+      <input type="submit" class="btn btn-link w-100" value="Save to HBP jupyter hub">
+    </form>
+
     <!-- results container -->
     <div class="mt-2" v-if="!error">
 
       <!-- if complete show result -->
       <div v-if="analysisComplete">
-        <div class="btn-group btn-block">
-          <div
-            @click="showCoord"
-            class="btn btn-default">
-            show coord
-          </div>
-          <div
-            @click="destroyCoord"
-            class="btn btn-default">
-            hide coord
+        <div class="input-group f-flex align-items-center">
+          <span class="input-group-prepend p-2">
+            Display probe locations
+          </span>
+          <check-box v-model="displayProbeLocation"
+                     :flag = "displayProbeLocation"
+                     @togglecheckbox="toggleDisplayProbeLocation()"/>
+        </div>
+
+        <div class="bg-dark pt-1">
+          <div class="w-100 d-flex justify-content-center">Download</div>
+          <div class="btn-group btn-block">
+            <div class="btn btn-default">
+              <a
+                      download="pval.tsv"
+                      @mouseenter="showPreviewPValData=true"
+                      @mouseleave="showPreviewPValData=false"
+                      class="position-relative"
+                      :href="'data:text/tsv;charset=utf-8,' + pvaldata">
+                p values
+                <div
+                        v-if="showPreviewPValData"
+                        class="position-absolute tsv-preview-container">
+                  <PreviewTsv class="tsv-preview" :tsv="pvaldata"/>
+                </div>
+              </a>
+            </div>
+            <div class="btn btn-default">
+              <a
+                      download="coord.tsv"
+                      @mouseenter="showPreviewCoordData=true"
+                      @mouseleave="showPreviewCoordData=false"
+                      class="position-relative"
+                      :href="'data:text/tsv;charset=utf-8,' + coorddata">
+                probe locations
+                <div
+                        v-if="showPreviewCoordData"
+                        class="position-absolute tsv-preview-container">
+                  <PreviewTsv class="tsv-preview" :tsv="coorddata"/>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
 
-        <a
-          download="pval.tsv"
-          @mouseenter="showPreviewPValData=true"
-          @mouseleave="showPreviewPValData=false"
-          class="position-relative"
-          :href="'data:text/tsv;charset=utf-8,' + pvaldata">
-          download pvals
-          <div
-            v-if="showPreviewPValData"
-            class="position-absolute tsv-preview-container">
-            <PreviewTsv class="tsv-preview" :tsv="pvaldata" />
-          </div>
-        </a>
-        
-        <br />
-        
-        <a
-          download="coord.tsv"
-          @mouseenter="showPreviewCoordData=true"
-          @mouseleave="showPreviewCoordData=false"
-          class="position-relative"
-          :href="'data:text/tsv;charset=utf-8,' + coorddata">
-          download coord data
-          <div
-            v-if="showPreviewCoordData"
-            class="position-absolute tsv-preview-container">
-            <PreviewTsv class="tsv-preview" :tsv="coorddata" />
-          </div>
-        </a>
+
+
       </div>
 
       <!-- if not complete, show spinner. introduce percentage in the turue -->
@@ -142,7 +165,8 @@
 
     <!-- showing if there is an error -->
     <div v-else>
-      Error: {{ error }}
+<!--      Error: {{ error }}-->
+      No genes had been found
     </div>
   </div>
 </template>
@@ -151,6 +175,7 @@ const POLLING_INTERVAL = 3000
 const DELIMITER = `\t`
 import { workspaceMixin } from './mixin'
 import PreviewTsv from './previewTsv'
+import { CheckBox } from 'vue-components'
 import { baseUrl } from './constants'
 
 const NO_RESULTS_YET = 'no results yet'
@@ -180,21 +205,35 @@ const getCoord = (tsv) => tsv
 
 export default {
   components: {
-    PreviewTsv
+    PreviewTsv,
+    CheckBox
   },
   props: {
+    vueId: null,
     data: {
       type: Object,
       default: null
+    },
+    formPostEndpoint: {
+      type: String,
+      default: `${baseUrl}/user`
     }
   },
   mixins:[
     workspaceMixin
   ],
+  watch: {
+    vueId: function (vueId) {
+      Object.assign(this.$data, this.$options.data.call(this))
+
+      this.getDataRunner()
+      this.vueId = vueId
+    },
+  },
   data: function () {
     return {
       showPreviewPValData: false,
-      showPreviewCoordData: false, 
+      showPreviewCoordData: false,
 
       showBody: false,
       analysisComplete: false,
@@ -211,13 +250,14 @@ export default {
        * polling
        */
       intervalId: null,
-      vueId: null,
+      // vueId: null,
 
       /**
        * expmt param
        */
       roi1: null,
       roi2: null,
+      genes: [],
       ignoreCustomProbe: null,
       singleProbeMode: null,
       nPermutations: null,
@@ -227,7 +267,9 @@ export default {
        * showing landmark(s)
        */
       coordShown: false,
-      shownLandmarks: []
+      shownLandmarks: [],
+
+      displayProbeLocation: null
     }
   },
   computed: {
@@ -237,10 +279,16 @@ export default {
         : `Not yet complete`
     }
   },
+  filters: {
+    stringify: function (array) {
+      return JSON.stringify(array)
+    }
+  },
   methods: {
     fetching: function () {
       return fetch(`${baseUrl}/analysis/${this.vueId}${this.workspaceMixin__queryParam || ''}`)
         .then(res => {
+          console.log()
           if (res.status >= 400) {
             return Promise.reject(res.status)
           } else {
@@ -259,6 +307,7 @@ export default {
 
           this.roi1 = getRoiArray(area1)
           this.roi2 = getRoiArray(area2)
+          this.genes = selectedGenes
 
           if (analysis) {
             clearInterval(this.intervalId)
@@ -272,6 +321,21 @@ export default {
             return Promise.reject(NO_RESULTS_YET)
           }
         })
+    },
+    getDataRunner: function() {
+      this.getData()
+              .then(this.parseFetchedData)
+              .then(rjson => {
+                this.completionTime = new Date().toString()
+                this.analysisComplete = true
+                this.pvaldata = rjson.pval
+                this.coorddata = rjson.coord
+              })
+              .catch(e => {
+                console.error('error', e)
+                this.error = e
+                this.$emit('error', e)
+              })
     },
     getData: function () {
       return new Promise((resolve, reject) => {
@@ -329,6 +393,13 @@ export default {
         coord : stringTitledCoordFile
       }
     },
+    toggleDisplayProbeLocation: function() {
+      this.displayProbeLocation = !this.displayProbeLocation
+      if (this.displayProbeLocation)
+        this.showCoord()
+      if (!this.displayProbeLocation)
+        this.destroyCoord()
+    },
     showCoord: function () {
       if (this.shownLandmarks.length > 0) return
       if (this.coorddata) {
@@ -351,20 +422,8 @@ export default {
   },
   mounted: function () {
     // use mixin
-    this.vueId = this.$parent.queryId
-    this.getData()
-      .then(this.parseFetchedData)
-      .then(rjson => {
-        this.completionTime = new Date().toString()
-        this.analysisComplete = true
-        this.pvaldata = rjson.pval
-        this.coorddata = rjson.coord
-      })
-      .catch(e => {
-        console.error('error', e)
-        this.error = e
-        this.$emit('error', e)
-      })
+    // this.vueId = this.$parent.queryId
+    this.getDataRunner()
   },
   beforeDestroy: function () {
     /**

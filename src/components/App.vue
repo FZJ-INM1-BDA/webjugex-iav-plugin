@@ -13,20 +13,22 @@
       <!-- roi selection -->
       <RoiSelector
         ref="roi1Selector"
-        label="ROI1"
+        label="Region(s) 1"
         class="position-relative"
         style="z-index:6"
         placeholderText="Search & Add ROI 1"
+        @DisableRoi1scan="$refs.roi2Selector.deactivateScan()"
         :warning="roi1Warning"
         :autocompleteArray="regionAutocompleteRawArray">
       </RoiSelector>
 
       <RoiSelector
         ref="roi2Selector"
-        label="ROI2"
+        label="Region(s) 2"
         class="position-relative"
         style="z-index:5"
         placeholderText="Search & Add ROI 2"
+        @DisableRoi1scan="$refs.roi1Selector.deactivateScan()"
         :warning="roi2Warning"
         :autocompleteArray="regionAutocompleteRawArray">
       </RoiSelector>
@@ -35,6 +37,7 @@
       <GeneSelector
         ref="geneSelector"
         class="position-relative"
+        label="Gene(s)"
         style="z-index:4"
         :warning="selectedgenesWarning">
       </GeneSelector>
@@ -42,24 +45,15 @@
       <div class="fzj.xg.webjugex.divider"></div>
 
       <!-- analysis GO -->
-      <div class="btn-group w-100">
-        <div 
-          @click = "startAnalysis"
-          :class="(initAnalysisFlag ? 'text-muted' : '') + ' btn btn-secondary'">
-          {{ analysisBtnText }}
-          <span
-            v-if="!advancedIsDefault"
-            class="text-warning">
-            <i class="fas fa-exclamation-triangle"></i>
-          </span>
-        </div>
+      <div class="w-100 mb-1">
         <div
           @click="showAdvancedMenu = !showAdvancedMenu"
-          class="btn btn-secondary dropdown-toggle dropdown-toggle-split fzj-xg-webjugex-fg-0"
+          class="btn btn-secondary w-100"
           data-toggle="dropdown">
-          <span class="sr-only">
-            Toggle Dropdown
-          </span>
+          <div class="d-flex align-items-center">
+          <span style="flex: 1">Settings</span>
+          <i :class="'fas ' + (showAdvancedMenu? 'fa-angle-up' : 'fa-angle-down')"></i>
+          </div>
         </div>
 
         <!-- advanced menu -->
@@ -67,9 +61,21 @@
           @updateIsDefault="advancedIsDefault = $event"
           ref="advancedRef"
           style="z-index:3"
-          class="bg-dark p-3 fzj-xg-webjugex-advanced-menu"
+          class="bg-dark p-3 w-100"
           v-show="showAdvancedMenu"/>
       </div>
+
+      <div
+              @click = "startAnalysis(), $refs.roi1Selector.deactivateScan(), $refs.roi2Selector.deactivateScan()"
+              :class="(initAnalysisFlag ? 'text-muted' : '') + ' btn btn-secondary w-100 mt-1 mb-1'">
+        {{ analysisBtnText }}
+        <span
+                v-if="!advancedIsDefault"
+                class="text-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+          </span>
+      </div>
+
 
       <!-- warning -->
       <transition name="fzj-xg-webjugex-fade">
@@ -83,13 +89,7 @@
         </div>
       </transition>
 
-      <div class="fzj.xg.webjugex.divider"></div>
-
-      <!-- past analysis -->
-      <PastAnalysis
-        :getNewName="getNewName"
-        :launchPastAnalysis="launchPastAnalysis"
-        ref="pastAnalysis" />
+      <AnalysisCard v-show="this.analysisId" :vue-id="analysisId"/>
 
     </div>
     <h5
@@ -145,6 +145,12 @@ export default {
   mixins:[
     workspaceMixin
   ],
+  props: {
+    formPostEndpoint: {
+      type: String,
+      default: `${baseUrl}/user`
+    }
+  },
   data: function () {
     return {
 
@@ -170,7 +176,9 @@ export default {
 
       getNewName: null,
 
-      launchPastAnalysis: null 
+      launchPastAnalysis: null,
+
+      analysisId: null
     }
   },
   mounted: function () {
@@ -304,11 +312,31 @@ export default {
         body
       })
       this.initAnalysisFlag = true
-      this.$refs.pastAnalysis.newAnalysis(body)
+      this.newAnalysis(body)
         .then(() => {
           this.initAnalysisFlag = false
         })
         .catch(console.error)
+    },
+    newAnalysis: function (payload) {
+      const { id, ...body } = payload
+      return new Promise((resolve, reject) => {
+        fetch(`${baseUrl}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        })
+                .then(() => this.analysisId = id)
+                .then(resolve)
+                .catch(reject)
+      })
+    },
+  },
+  filters: {
+    stringify: function (array) {
+      return JSON.stringify(array)
     }
   },
   computed: {
@@ -339,6 +367,9 @@ export default {
     }
   },
   beforeDestroy: function () {
+    window.interactiveViewer.uiHandle.cancelPromise(
+      window.interactiveViewer.uiHandle.getUserToSelectARegion
+    )
     this.$options.nonReactive.subscriptions.forEach(s => s.unsubscribe())
   }
 }
@@ -481,12 +512,6 @@ export default {
 .fzj-xg-webjugex-analysis-container > *
 {
   margin-bottom: 0;
-}
-.fzj-xg-webjugex-advanced-menu
-{
-  position:absolute;
-  margin-top:2.5em;
-  width:100%;
 }
 .fzj-xg-webjugex-fg-0
 {
