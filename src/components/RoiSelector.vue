@@ -42,7 +42,8 @@ export default {
     Pill
   },
   nonReactive: {
-    subscriptions: []
+    subscriptions: [],
+    selectRoiPromise: null
   },
   props:{
     warning:{
@@ -63,17 +64,42 @@ export default {
       }
     }
   },
+  mounted: function() {
+    const fnStr = window.interactiveViewer.uiHandle.getUserToSelectARegion.toString()
+    this.useV2 = !/this\.rejectUserSelectionMode/.test(fnStr)
+  },
   data: function () {
     return {
       selectedRois: [],
-      scanActive: false,
+      useV2: false,
+      v1ScanActive: false,
+      v2ScanActive: false,
       clickFlag: false,
       setRegionSelectionSubscription: null
 
     }
   },
   beforeDestroy: function () {
-    this.deactivateScan()
+    this.v1DeactivateScan()
+  },
+  computed: {
+    scanActive: {
+      get: function() {
+        return this.useV2 ? this.v2ScanActive : this.v1ScanActive
+      },
+      set: function (val) {
+        if (this.useV2) {
+          this.v2ScanActive = val
+        } else {
+          this.v1ScanActive = val
+        }
+      }
+    }
+  },
+  watch: {
+    scanActive: function(val) {
+      if (val) this.$emit('DisableRoi1scan', true)
+    }
   },
   methods:{
     selectRoi: function (name) {
@@ -100,21 +126,67 @@ export default {
     },
 
     toggleScanMode: function () {
-      this.scanActive = !this.scanActive
-
-      if (this.scanActive) {
-        this.$emit('DisableRoi1scan', true)
-        this.regionSelectionPromise()
-
+      if (this.useV2) {
+        if (!this.scanActive) this.v2ActivateScan() 
+        else {
+          this.v2DeactiveScan()
+        }
       } else {
-        this.deactivateScan()
+        this.scanActive = !this.scanActive
+        if (this.scanActive) {
+          this.$emit('DisableRoi1scan', true)
+          this.regionSelectionPromise()
+
+        } else {
+          this.v1DeactivateScan()
+        }
       }
     },
-    deactivateScan() {
+    deactivateScan(){
+      if (this.useV2) this.v2DeactiveScan()
+      else this.v1DeactivateScan()
+    },
+    v1DeactivateScan() {
       window.interactiveViewer.uiHandle.cancelPromise(
               window.interactiveViewer.uiHandle.getUserToSelectARegion
       )
       this.scanActive = false
+    },
+
+    v2ActivateScan(){
+      if(this.scanActive) throw new Error(`scan is already active`)
+      this.scanActive = true
+      if (this.$options.selectRoiPromise) window.interactiveViewer.uiHandle.cancelPromise(
+        this.$options.selectRoiPromise
+      )
+
+      const getSingleRegion = () => {
+        this.$options.selectRoiPromise = window.interactiveViewer.uiHandle.getUserToSelectARegion(`Select a region for ${this.label}`)
+        this.$options.selectRoiPromise
+          .then(obj => {
+            this.selectRoi(obj.segment.name)
+            getSingleRegion()
+          })
+          .catch(e => {
+            const { userInitiated } = e
+            this.v2DeactiveScan()
+          })
+      }
+      getSingleRegion()
+    },
+    v2DeactiveScan(){
+
+      this.scanActive = false
+      if (this.$options.selectRoiPromise) {
+        try {
+          window.interactiveViewer.uiHandle.cancelPromise(
+            this.$options.selectRoiPromise
+          )
+        } catch (e) {
+
+        }
+      }
+      this.$options.selectRoiPromise = null
     }
   }
 }
