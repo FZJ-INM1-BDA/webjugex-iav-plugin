@@ -27,7 +27,7 @@
         </div>
       </div>
       <div
-        :webjugex-tooltip="exportTooltip" 
+        :webjugex-tooltip="exportTooltip"
         class="input-group-btn">
         <div
           :disabled="selectedGenes.length === 0"
@@ -77,7 +77,7 @@ export default {
         : 'saves the gene list as a comma separated, utf8 encoded csv file'
     },
     geneListJSON: function () {
-      return `data:text/plain;charset=utf-8,${JSON.stringify(this.selectedgenes)}`
+      return `data:text/plain;charset=utf-8,${JSON.stringify(this.selectedGenes)}`
     }
   },
   data: function () {
@@ -120,9 +120,10 @@ export default {
         console.error(`GeneSelector#fileChosen file selected !== 1`)
         return
       }
+      const file = ev.target.files[0]
       readFile(file)
         .then(text => {
-          
+
           /**
            * TODO
            * implement parse technique, such as
@@ -136,9 +137,9 @@ export default {
         .then(arr => {
           const validate = arr && Array.isArray(arr) && arr.every(item => typeof item === 'string')
           if (validate) return arr
-          else throw new Error('file was not validated')  
+          else throw new Error('file was not validated')
         })
-        .then(arr => this.selectedgenes = arr)
+        .then(arr => this.selectedGenes = arr)
         .then(() => {
           /**
            * TODO

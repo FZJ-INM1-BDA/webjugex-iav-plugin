@@ -99,7 +99,9 @@
           readonly="readonly">
       </div>
 
-      <input type="submit" class="btn btn-link w-100" value="Save to HBP jupyter hub">
+      <button type="submit" class="btn btn-secondary w-100 mt-1 mb-1">
+        Open in HBP jupyter hub
+      </button>
     </form>
 
     <!-- results container -->
@@ -296,7 +298,7 @@ export default {
         .then(res => res.json())
         .then(json => {
           const { analysis, ignoreCustomProbe,nPermutations,singleProbeMode, mode,threshold, selectedGenes, area1, area2, ...rest } = json
-          
+
           this.ignoreCustomProbe = ignoreCustomProbe
           this.singleProbeMode = singleProbeMode
           this.selectedGenes = selectedGenes
@@ -339,7 +341,7 @@ export default {
       return new Promise((resolve, reject) => {
         /**
          * in v2.0, data will no longer be defined
-         * instead, id will be used to query the status 
+         * instead, id will be used to query the status
          */
 
         this.fetching()
