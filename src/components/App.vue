@@ -307,10 +307,6 @@ export default {
         singleProbeMode,
         ignoreCustomProbe
       })
-      console.log({
-        error,
-        body
-      })
       this.initAnalysisFlag = true
       this.newAnalysis(body)
         .then(() => {

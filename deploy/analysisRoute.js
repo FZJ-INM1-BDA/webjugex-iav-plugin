@@ -149,10 +149,13 @@ router.post('/analysisCB/:randomToken', (req, res) => {
   if (!analysisId) return
   cbTokenToIdMap.delete(randomToken)
   const flag = map.get(analysisId)
+
+  const { error } = body
+  
   if (flag) result.set(analysisId, {
-    err: null,
+    err: error || null,
     resp: {
-      statusCode: 200
+      statusCode: (error && 400) || 200
     },
     body: JSON.stringify(body)
   })
@@ -197,8 +200,8 @@ router.post('/:analysisId', mutateWorkspaceMiddleWare, (req, res) => {
     },
     body: JSON.stringify(fixedBody)
   }, (err, resp, body) => {
-    if (err) console.error(`analysis#POST error`, err)
-    if (resp.statusCode >= 400) console.error(`analysis#POST statusCode ${resp.statusCode}`, body)
+    if (err) return console.error(`analysis#POST error`, err)
+    if (resp && resp.statusCode >= 400) console.error(`analysis#POST statusCode ${resp.statusCode}`, body)
     else console.log(`analysis#POST successful. waiting for reply`)
     /**
      * jugex request sent
