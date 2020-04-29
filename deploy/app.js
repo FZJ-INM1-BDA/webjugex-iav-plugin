@@ -55,8 +55,13 @@ app.use(session({
 }))
 
 setupAuth(app)
-  .then(() => console.log(`auth setup successfully`))
-  .catch(e => console.error(`auth setup failed`, e))
+  .then(() => {
+    console.log(`auth setup successfully`)
+  })
+  .catch(e => {
+    console.error(`auth setup failed`, e)
+    process.exit(1)
+  })
 
 app.set('BACKEND_URL', BACKEND_URL)
 app.set('HOSTNAME', HOSTNAME)
