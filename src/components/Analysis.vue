@@ -104,70 +104,72 @@
       </button>
     </form>
 
-    <!-- results container -->
-    <div class="mt-2" v-if="!error">
+    <div v-show="vueId">
+      <!-- results container -->
+      <div class="mt-2" v-if="!error">
 
-      <!-- if complete show result -->
-      <div v-if="analysisComplete">
-        <div class="input-group f-flex align-items-center">
+        <!-- if complete show result -->
+        <div v-if="analysisComplete">
+          <div class="input-group f-flex align-items-center">
           <span class="input-group-prepend p-2">
             Display probe locations
           </span>
-          <check-box v-model="displayProbeLocation"
-                     :flag = "displayProbeLocation"
-                     @togglecheckbox="toggleDisplayProbeLocation()"/>
-        </div>
+            <check-box v-model="displayProbeLocation"
+                       :flag="displayProbeLocation"
+                       @togglecheckbox="toggleDisplayProbeLocation()"/>
+          </div>
 
-        <div class="bg-dark pt-1">
-          <div class="w-100 d-flex justify-content-center">Download</div>
-          <div class="btn-group btn-block">
-            <div class="btn btn-default">
-              <a
-                      download="pval.tsv"
-                      @mouseenter="showPreviewPValData=true"
-                      @mouseleave="showPreviewPValData=false"
-                      class="position-relative"
-                      :href="'data:text/tsv;charset=utf-8,' + pvaldata">
-                p values
-                <div
-                        v-if="showPreviewPValData"
-                        class="position-absolute tsv-preview-container">
-                  <PreviewTsv class="tsv-preview" :tsv="pvaldata"/>
-                </div>
-              </a>
-            </div>
-            <div class="btn btn-default">
-              <a
-                      download="coord.tsv"
-                      @mouseenter="showPreviewCoordData=true"
-                      @mouseleave="showPreviewCoordData=false"
-                      class="position-relative"
-                      :href="'data:text/tsv;charset=utf-8,' + coorddata">
-                probe locations
-                <div
-                        v-if="showPreviewCoordData"
-                        class="position-absolute tsv-preview-container">
-                  <PreviewTsv class="tsv-preview" :tsv="coorddata"/>
-                </div>
-              </a>
+          <div class="bg-dark pt-1">
+            <div class="w-100 d-flex justify-content-center">Download</div>
+            <div class="btn-group btn-block">
+              <div class="btn btn-default">
+                <a
+                        download="pval.tsv"
+                        @mouseenter="showPreviewPValData=true"
+                        @mouseleave="showPreviewPValData=false"
+                        class="position-relative"
+                        :href="'data:text/tsv;charset=utf-8,' + pvaldata">
+                  p values
+                  <div
+                          v-if="showPreviewPValData"
+                          class="position-absolute tsv-preview-container">
+                    <PreviewTsv class="tsv-preview" :tsv="pvaldata"/>
+                  </div>
+                </a>
+              </div>
+              <div class="btn btn-default">
+                <a
+                        download="coord.tsv"
+                        @mouseenter="showPreviewCoordData=true"
+                        @mouseleave="showPreviewCoordData=false"
+                        class="position-relative"
+                        :href="'data:text/tsv;charset=utf-8,' + coorddata">
+                  probe locations
+                  <div
+                          v-if="showPreviewCoordData"
+                          class="position-absolute tsv-preview-container">
+                    <PreviewTsv class="tsv-preview" :tsv="coorddata"/>
+                  </div>
+                </a>
+              </div>
             </div>
           </div>
+
+
         </div>
 
-
-
+        <!-- if not complete, show spinner. introduce percentage in the turue -->
+        <div v-else>
+          <span>analysis in progress</span>
+          <div class="spinner">&bull;</div>
+        </div>
       </div>
 
-      <!-- if not complete, show spinner. introduce percentage in the turue -->
+      <!-- showing if there is an error -->
       <div v-else>
-        <span>analysis in progress</span>
-        <div class="spinner">&bull;</div>
+        Error: {{ error }}
       </div>
-    </div>
 
-    <!-- showing if there is an error -->
-    <div v-else>
-      Error: {{ error }}
     </div>
   </div>
 </template>
