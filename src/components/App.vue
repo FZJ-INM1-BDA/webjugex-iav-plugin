@@ -65,17 +65,23 @@
           v-show="showAdvancedMenu"/>
       </div>
 
-      <div
-              @click = "startAnalysis(), $refs.roi1Selector.deactivateScan(), $refs.roi2Selector.deactivateScan()"
-              :class="(initAnalysisFlag ? 'text-muted' : '') + ' btn btn-secondary w-100 mt-1 mb-1'">
-        {{ analysisBtnText }}
-        <span
-                v-if="!advancedIsDefault"
-                class="text-warning">
+      <div class="bg-dark">
+        <div>
+          Differential Analysis
+        </div>
+        <div @click = "startAnalysis(), $refs.roi1Selector.deactivateScan(), $refs.roi2Selector.deactivateScan()"
+          :class="(initAnalysisFlag ? 'text-muted' : '') + ' btn btn-secondary d-inline-block'">
+          <i class="fas fa-running"></i>
+          <span>
+            {{ analysisBtnText }}
+          </span>
+          <span v-if="!advancedIsDefault" class="text-warning">
             <i class="fas fa-exclamation-triangle"></i>
           </span>
-      </div>
+        </div>
 
+        <SaveNb class="d-inline-block" v-bind="saveNbObj"/>
+      </div>
 
       <!-- warning -->
       <transition name="fzj-xg-webjugex-fade">
@@ -110,6 +116,7 @@ import GeneSelector from './GeneSelector'
 import Advanced, { defaultConfig } from './Advanced'
 import DescBlock from './Desc'
 import PastAnalysis from './PastAnalysis'
+import SaveNb from './SaveNb'
 
 const fA = (arr) => (arr && arr.concat(
   ...arr.map(item =>item.children && item.children.length
@@ -132,6 +139,7 @@ export default {
     Advanced,
     DescBlock,
     PastAnalysis,
+    SaveNb,
   },
   
   /** 
@@ -146,13 +154,14 @@ export default {
     workspaceMixin
   ],
   props: {
-    formPostEndpoint: {
+    formPostEndpointRoot: {
       type: String,
       default: `${baseUrl}/user`
     }
   },
   data: function () {
     return {
+      refsReady: false,
 
       activeParcellationName: null,
       activeTemplateName: null,
@@ -316,30 +325,44 @@ export default {
     },
     newAnalysis: function (payload) {
       const { id, ...body } = payload
-      return new Promise((resolve, reject) => {
-        fetch(`${baseUrl}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        })
-                .then(() => this.analysisId = id)
-                .then(resolve)
-                .catch(reject)
-      })
+      return fetch(`${baseUrl}/analysis/${id}${this.workspaceMixin__queryParam || ''}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      }).then(() => this.analysisId = id)
     },
   },
-  filters: {
-    stringify: function (array) {
-      return JSON.stringify(array)
-    }
+  updated() {
+    const { roi1Selector, roi2Selector, geneSelector, advancedRef } = this.$refs
+    if (roi1Selector && roi2Selector && geneSelector) this.refsReady = true
   },
   computed: {
+    saveNbObj: function () {
+
+      if (!this.refsReady) return {}
+      
+      const { roi1Selector, roi2Selector, geneSelector, advancedRef } = this.$refs
+      const { 
+        nPermutations,
+        threshold,
+        singleProbeMode,
+        ignoreCustomProbe
+      } = advancedRef || defaultConfig
+
+      return {
+        roi1: roi1Selector && roi1Selector.selectedRois,
+        roi2: roi2Selector && roi2Selector.selectedRois,
+        genes: geneSelector && geneSelector.selectedGenes,
+        nPermutations: Number(nPermutations),
+        threshold: Number(threshold),
+      }
+    },
     analysisBtnText: function () {
       return this.initAnalysisFlag
-        ? 'Starting analysis  ...'
-        : 'Start Differential Analysis'
+        ? 'Running  ...'
+        : 'Run'
     },
     active: function () {
       return this.activeParcellationName && this.activeTemplateName

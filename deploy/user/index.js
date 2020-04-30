@@ -4,7 +4,7 @@ const { POST_BODY_TMP_STORE } = require('./constants')
 const { getNBFromPostReq } = require('./util')
 const { saveUserData, WEBJUGEX_DIR_NAME } = require('./store')
 
-const HBP_COLLAB_HOST = process.env.HBP_COLLAB_HOST || `https://jupyterhub-preview.apps-dev.hbp.eu`
+const HBP_COLLAB_HOST = process.env.HBP_COLLAB_HOST || `https://lab.ebrains.eu`
 const HBP_COLLAB_PATH = process.env.HBP_COLLAB_PATH || '/hub/user-redirect/lab/tree/drive/My%20Libraries/My%20Library/'
 
 const fs = require('fs')
@@ -48,5 +48,13 @@ const saveNb = async (req, res) => {
 router.get('/resume', saveNb)
 
 router.post('/', bodyParser.urlencoded({ extended: true }), authMiddleware, saveNb)
+
+router.post('/download', bodyParser.urlencoded({ extended: true }), (req, res) => {
+  const { body } = req
+  const nb = getNBFromPostReq({ body })
+  const date = new Date().toString()
+  res.setHeader('Content-Disposition', `attachment; filename="webjugex-${date}.ipynb"`)
+  res.status(200).send(nb)
+})
 
 module.exports = router

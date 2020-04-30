@@ -1,109 +1,6 @@
 <template>
   <div>
 
-<!--    ToDo Fully Remove?-->
-<!--     show experimental parameters regardless-->
-    <form method="POST" :action="formPostEndpoint" target="_blank" enctype="application/x-www-form-urlencoded">
-      <!-- id -->
-      <div class="input-group input-group-sm mt-1 d-none">
-        <div class="input-group-prepend">
-          <label for="webjugex-analysis-id" class="input-group-text">
-            id
-          </label>
-        </div>
-        <input
-          type="text"
-          id="webjugex-analysis-id"
-          name="webjugex-analysis-id"
-          class="form-control form-control-sm"
-          :value="vueId"
-          readonly="readonly">
-      </div>
-
-      <!-- roi1 -->
-      <div class="input-group input-group-sm mt-1 d-none">
-        <div class="input-group-prepend">
-          <label for="webjugex-analysis-roi1" class="input-group-text">
-            roi1
-          </label>
-        </div>
-        <input
-          type="text"
-          id="webjugex-analysis-roi1"
-          name="webjugex-analysis-roi1"
-          class="form-control form-control-sm"
-          :value="roi1 ? roi1.join(', ') : ''"
-          readonly="readonly">
-      </div>
-
-      <!-- roi2 -->
-      <div class="input-group input-group-sm mt-1 d-none">
-        <div class="input-group-prepend">
-          <label for="webjugex-analysis-roi2" class="input-group-text">
-            roi2
-          </label>
-        </div>
-        <input
-          type="text"
-          id="webjugex-analysis-roi2"
-          name="webjugex-analysis-roi2"
-          class="form-control form-control-sm"
-          :value="roi2 ? roi2.join(', ') : ''"
-          readonly="readonly">
-      </div>
-
-      <div class="input-group input-group-sm mt-1 d-none">
-        <div class="input-group-prepend">
-          <label for="webjugex-analysis-genes" class="input-group-text">
-            genes
-          </label>
-          <input
-            type="text"
-            id="webjugex-analysis-genes"
-            name="webjugex-analysis-genes"
-            class="form-control form-control-sm"
-            :value="genes | stringify"
-            readonly="readonly">
-        </div>
-      </div>
-
-      <!-- permutations -->
-      <div class="input-group input-group-sm mt-1 d-none">
-        <div class="input-group-prepend">
-          <label for="webjugex-analysis-permutations" class="input-group-text">
-            permutations
-          </label>
-        </div>
-        <input
-          type="text"
-          id="webjugex-analysis-permutations"
-          name="webjugex-analysis-permutations"
-          class="form-control form-control-sm"
-          :value="nPermutations"
-          readonly="readonly">
-      </div>
-
-      <!-- threshold -->
-      <div class="input-group input-group-sm mt-1 d-none">
-        <div class="input-group-prepend">
-          <label for="webjugex-analysis-threshold" class="input-group-text">
-            threshold
-          </label>
-        </div>
-        <input
-          type="text"
-          id="webjugex-analysis-threshold"
-          name="webjugex-analysis-threshold"
-          class="form-control form-control-sm"
-          :value="threshold"
-          readonly="readonly">
-      </div>
-
-      <button type="submit" class="btn btn-secondary w-100 mt-1 mb-1">
-        Open in HBP jupyter hub
-      </button>
-    </form>
-
     <!-- results container -->
     <div class="mt-2" v-if="!error">
 
@@ -114,48 +11,45 @@
             Display probe locations
           </span>
           <check-box v-model="displayProbeLocation"
-                     :flag = "displayProbeLocation"
-                     @togglecheckbox="toggleDisplayProbeLocation()"/>
+            :flag = "displayProbeLocation"
+            @togglecheckbox="toggleDisplayProbeLocation()"/>
         </div>
 
         <div class="bg-dark pt-1">
           <div class="w-100 d-flex justify-content-center">Download</div>
           <div class="btn-group btn-block">
             <div class="btn btn-default">
-              <a
-                      download="pval.tsv"
-                      @mouseenter="showPreviewPValData=true"
-                      @mouseleave="showPreviewPValData=false"
-                      class="position-relative"
-                      :href="'data:text/tsv;charset=utf-8,' + pvaldata">
-                p values
-                <div
-                        v-if="showPreviewPValData"
-                        class="position-absolute tsv-preview-container">
+              <a download="pval.tsv"
+                @mouseenter="showPreviewPValData=true"
+                @mouseleave="showPreviewPValData=false"
+                class="position-relative"
+                :href="'data:text/tsv;charset=utf-8,' + pvaldata">
+                <span>
+                  p values
+                </span>
+                <div v-if="showPreviewPValData"
+                  class="position-absolute tsv-preview-container">
                   <PreviewTsv class="tsv-preview" :tsv="pvaldata"/>
                 </div>
               </a>
             </div>
             <div class="btn btn-default">
-              <a
-                      download="coord.tsv"
-                      @mouseenter="showPreviewCoordData=true"
-                      @mouseleave="showPreviewCoordData=false"
-                      class="position-relative"
-                      :href="'data:text/tsv;charset=utf-8,' + coorddata">
-                probe locations
-                <div
-                        v-if="showPreviewCoordData"
-                        class="position-absolute tsv-preview-container">
+              <a download="coord.tsv"
+                @mouseenter="showPreviewCoordData=true"
+                @mouseleave="showPreviewCoordData=false"
+                class="position-relative"
+                :href="'data:text/tsv;charset=utf-8,' + coorddata">
+                <span>
+                  probe locations
+                </span>
+                <div v-if="showPreviewCoordData"
+                  class="position-absolute tsv-preview-container">
                   <PreviewTsv class="tsv-preview" :tsv="coorddata"/>
                 </div>
               </a>
             </div>
           </div>
         </div>
-
-
-
       </div>
 
       <!-- if not complete, show spinner. introduce percentage in the turue -->
@@ -207,7 +101,7 @@ const getCoord = (tsv) => tsv
 export default {
   components: {
     PreviewTsv,
-    CheckBox
+    CheckBox,
   },
   props: {
     vueId: null,
@@ -215,10 +109,6 @@ export default {
       type: Object,
       default: null
     },
-    formPostEndpoint: {
-      type: String,
-      default: `${baseUrl}/user`
-    }
   },
   mixins:[
     workspaceMixin
@@ -278,11 +168,6 @@ export default {
       return this.completionTime
         ? this.completionTime
         : `Not yet complete`
-    }
-  },
-  filters: {
-    stringify: function (array) {
-      return JSON.stringify(array)
     }
   },
   methods: {
