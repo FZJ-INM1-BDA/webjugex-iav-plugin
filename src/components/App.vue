@@ -1,6 +1,5 @@
 <template>
   <div>
-<!--    ToDo Move jupiter button to main-->
     <div
       v-if="active"
       @animationend = "animationend($event)"
@@ -81,7 +80,7 @@
       <!-- warning -->
       <transition name="fzj-xg-webjugex-fade">
         <div style="margin-top:0.5em" class="alert alert-danger" v-if="warning.length > 0">
-          <i class="glyphicon glyphicon-alert"></i> WARNING:
+          <i class="glyphicon glyphicon-alert"></i> WARNING: 
           <ul>
             <li :key="w" v-for="w in warning">
               {{ getWarning(w) }}
@@ -90,7 +89,7 @@
         </div>
       </transition>
 
-      <AnalysisCard :vue-id="analysisId"/>
+      <AnalysisCard v-show="this.analysisId" :vue-id="analysisId"/>
 
     </div>
     <h5
@@ -118,7 +117,7 @@ const fA = (arr) => (arr && arr.concat(
     : [])) || []
 )
 
-import { allowedParcellationName, allowedTemplateSpaces, baseUrl } from './constants'
+import { allowedParcellationName, allowedTemplateSpaces, baseUrl } from './constants' 
 import { workspaceMixin } from './mixin'
 
 export default {
@@ -134,10 +133,10 @@ export default {
     DescBlock,
     PastAnalysis,
   },
-
-  /**
+  
+  /** 
     * key values in non standard vue components (ie, not in data, or methods), can be accessed via this.$options[OPTION_NAME]
-    * the advantage is that these properties are non reactive. Thus Vue framework does not attach getters and setters.
+    * the advantage is that these properties are non reactive. Thus Vue framework does not attach getters and setters. 
     */
   nonReactive: {
     toastHandler: null,
@@ -159,7 +158,7 @@ export default {
       activeTemplateName: null,
 
       regionNamesUrlArray: [],
-
+      
       warning : [],
 
       /**
@@ -196,11 +195,11 @@ export default {
     this.launchPastAnalysis = ({ id, workspaceMixin__queryParam }) => fetch(`${baseUrl}/analysis/i-v-manifest/${id}${workspaceMixin__queryParam || ''}`)
       .then(res => res.json())
       .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
-
+    
     const toastHandler = interactiveViewer.uiHandle.getToastHandler()
     toastHandler.dismissable = false
     toastHandler.timeout = -1
-
+    
     this.$options.nonReactive.toastHandler = toastHandler
 
     this.$options.nonReactive.subscriptions.push(
@@ -274,9 +273,9 @@ export default {
     startAnalysis: function () {
 
       if (this.initAnalysisFlag) return
-
+      
       const { roi1Selector, roi2Selector, geneSelector, advancedRef } = this.$refs
-      const {
+      const { 
         nPermutations,
         threshold,
         singleProbeMode,
@@ -294,9 +293,9 @@ export default {
         genes
       })
       if (this.warning.length > 0) return
-
+      
       /**
-       * send the prepared payload to past analysis
+       * send the prepared payload to past analysis 
        */
       const [error, body] = prepareAnalysisBody({
         roi1s,
