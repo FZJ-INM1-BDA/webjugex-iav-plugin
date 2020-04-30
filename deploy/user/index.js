@@ -52,7 +52,7 @@ router.post('/', bodyParser.urlencoded({ extended: true }), authMiddleware, save
 router.post('/download', bodyParser.urlencoded({ extended: true }), (req, res) => {
   const { body } = req
   const nb = getNBFromPostReq({ body })
-  const date = new Date().toString()
+  const date = +(new Date())
   res.setHeader('Content-Disposition', `attachment; filename="webjugex-${date}.ipynb"`)
   res.status(200).send(nb)
 })
