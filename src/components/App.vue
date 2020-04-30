@@ -73,7 +73,7 @@
           :class="(initAnalysisFlag ? 'text-muted' : '') + ' btn btn-secondary d-inline-block'">
           <i class="fas fa-running"></i>
           <span>
-            {{ analysisBtnText }}
+            Run
           </span>
           <span v-if="!advancedIsDefault" class="text-warning">
             <i class="fas fa-exclamation-triangle"></i>
@@ -358,11 +358,6 @@ export default {
         nPermutations: Number(nPermutations),
         threshold: Number(threshold),
       }
-    },
-    analysisBtnText: function () {
-      return this.initAnalysisFlag
-        ? 'Running  ...'
-        : 'Run'
     },
     active: function () {
       return this.activeParcellationName && this.activeTemplateName
