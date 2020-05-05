@@ -28,7 +28,7 @@
         id="webjugex-analysis-roi1"
         name="webjugex-analysis-roi1"
         class="form-control form-control-sm"
-        :value="roi1 ? roi1.join(', ') : ''"
+        :value="roi1 | stringify"
         readonly="readonly">
     </div>
 
@@ -44,7 +44,7 @@
         id="webjugex-analysis-roi2"
         name="webjugex-analysis-roi2"
         class="form-control form-control-sm"
-        :value="roi2 ? roi2.join(', ') : ''"
+        :value="roi2 | stringify"
         readonly="readonly">
     </div>
 

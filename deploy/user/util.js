@@ -13,6 +13,17 @@ const getAreas = arr => JSON.stringify(JSON.stringify(arr))
   .replace(/^\"/, '')
   .replace(/\"$/, '')
 
+const getAreasFromStringV2 = value => {
+  const arr = JSON.parse(value)
+  return arr.map(v => {
+    const re = /(^.*?)\s-\s((left|right)\shemisphere)$/.exec(v)
+    return re && {
+      name: re[1],
+      hemisphere: re[2]
+    }
+  })
+} 
+
 const getAreasFromString = value => value
   .split(', ')
   .map(v => {
@@ -37,8 +48,8 @@ const getNBFromPostReq = ({ body }) => {
     if(!body[key]) throw new Error(`body[${key}] needs to be defined`)
   }
 
-  const areas1 = getAreasFromString(body['webjugex-analysis-roi1'])
-  const areas2 = getAreasFromString(body['webjugex-analysis-roi2'])
+  const areas1 = getAreasFromStringV2(body['webjugex-analysis-roi1'])
+  const areas2 = getAreasFromStringV2(body['webjugex-analysis-roi2'])
   const threshold = Number(body['webjugex-analysis-threshold'])
   const rep = Number(body['webjugex-analysis-permutations'])
 
