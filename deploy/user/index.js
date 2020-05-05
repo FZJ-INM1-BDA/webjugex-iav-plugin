@@ -28,13 +28,13 @@ const saveNb = async (req, res) => {
   const { user, session, body: _body } = req
   if (!user) return res.status(401).end()
 
-  const body = (_body && _body['webjugex-analysis-id'] && _body) || session[POST_BODY_TMP_STORE]
+  const body = _body || session[POST_BODY_TMP_STORE]
 
   if (!body) return res.status(400).send('either body is not defined or session item no longer exists')
   session[POST_BODY_TMP_STORE] = null
 
   const nb = getNBFromPostReq({ body })
-  const id = body['webjugex-analysis-id']
+  const id = body['webjugex-analysis-id'] || +(new Date())
 
   try {
     await saveUserData(user, nb, { filename: `webjugex-${id}.ipynb` })
