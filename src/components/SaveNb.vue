@@ -100,17 +100,10 @@
       @click="downloadNbFlag = false"
       aria-label="Upload to cloud service"
       class="btn btn-secondary d-inline-block">
-      <i class="fas fa-cloud-upload-alt"></i>
+      <i class="fas fa-book-open"></i>
       <span>
-        lab.ebrains.eu
+        jupyter notebook
       </span>
-    </button>
-    <button type="submit"
-      :disabled="!exportReady"
-      @click="downloadNbFlag = true"
-      aria-label="Download to local disk"
-      class="btn btn-secondary d-inline-block">
-      <i class="fas fa-download"></i>
     </button>
   </form>
 </template>
