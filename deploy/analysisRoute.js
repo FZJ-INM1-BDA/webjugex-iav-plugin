@@ -201,6 +201,7 @@ router.post('/:analysisId', mutateWorkspaceMiddleWare, (req, res) => {
     body: JSON.stringify(fixedBody)
   }, (err, resp, body) => {
     if (err) return console.error(`analysis#POST error`, err)
+
     if (resp && resp.statusCode >= 400) console.error(`analysis#POST statusCode ${resp.statusCode}`, body)
     else console.log(`analysis#POST successful. waiting for reply`)
     /**
