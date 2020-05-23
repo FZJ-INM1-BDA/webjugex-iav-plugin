@@ -17,28 +17,40 @@ const cb = (tokenset, {sub, given_name, family_name, ...rest}, done) => {
   })
 }
 
+const configureHbpOidcV2 = async app => {
+  const { oidcStrategy } = await configureAuth({
+    clientId,
+    clientSecret,
+    discoveryUrl,
+    redirectUri,
+    cb,
+    scope: 'openid email offline_access profile collab.drive',
+    clientConfig: {
+      redirect_uris: [ redirectUri ],
+      response_types: [ 'code' ]
+    }
+  })
+  
+  passport.use('hbp-oidc-v2', oidcStrategy)
+  app.get('/hbp-oidc-v2/auth', passport.authenticate('hbp-oidc-v2'))
+  app.get('/hbp-oidc-v2/cb', passport.authenticate('hbp-oidc-v2', {
+    successRedirect: `${HOST_PATHNAME}/`,
+    failureRedirect: `${HOST_PATHNAME}/`
+  }))
+}
+
 module.exports = async (app) => {
-  try {
-    const { oidcStrategy } = await configureAuth({
-      clientId,
-      clientSecret,
-      discoveryUrl,
-      redirectUri,
-      cb,
-      scope: 'openid email offline_access profile collab.drive',
-      clientConfig: {
-        redirect_uris: [ redirectUri ],
-        response_types: [ 'code' ]
-      }
-    })
-    
-    passport.use('hbp-oidc-v2', oidcStrategy)
-    app.get('/hbp-oidc-v2/auth', passport.authenticate('hbp-oidc-v2'))
-    app.get('/hbp-oidc-v2/cb', passport.authenticate('hbp-oidc-v2', {
-      successRedirect: `${HOST_PATHNAME}/`,
-      failureRedirect: `${HOST_PATHNAME}/`
-    }))
-  } catch (e) {
-    console.error(e)
-  }
+
+  let retry = 5
+  do {
+    try {
+      await configureHbpOidcV2(app)
+      break
+    } catch (e) {
+      retry --
+      if (retry === 0) throw new Error(`retry exhausted, could not auth`)
+      console.warn(`setup auth failed... retrying`)
+      await new Promise(rs => setTimeout(rs, 2000))
+    }
+  } while (retry > 0)
 }

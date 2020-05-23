@@ -1,6 +1,12 @@
 const { Seafile } = require('hbp-seafile')
 const { Readable } = require('stream')
 
+const LRU = require('lru-cache')
+const tempStore = new LRU({
+  max: 5e3, // 5k records 
+  maxAge: 1e3 * 60 * 60 * 24, // 24hrs
+})
+
 const WEBJUGEX_DIR_NAME = `webjugex`
 const WEBJUGEX_DIRECTORY = `/${WEBJUGEX_DIR_NAME}/`
 const WEBJUGEX_FILENAME = 'data.json'
@@ -50,8 +56,10 @@ const readUserData = async (user) => {
   }
 }
 
+
 module.exports = {
   saveUserData,
   readUserData,
-  WEBJUGEX_DIR_NAME
+  WEBJUGEX_DIR_NAME,
+  tempStore
 }

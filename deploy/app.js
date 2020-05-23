@@ -14,6 +14,7 @@ const MemoryStore = require('memorystore')(session)
 const setupAuth = require('./auth')
 const { createBundleRenderer } = require('vue-server-renderer')
 const { POST_BODY_TMP_STORE } = require('./user/constants')
+const { SIGNIN_REDIRECT } = require('./const')
 
 const OUTPUT_PATH = path.join(__dirname, 'distSsr')
 
@@ -23,6 +24,9 @@ const js = fs.readFileSync(path.join(OUTPUT_PATH, 'ssr-app.js'), 'utf-8')
 const app = express()
 app.use(cors())
 app.disable('x-powered-by')
+app.engine('mustache', require('mustache-express')())
+app.set('view engine', 'mustache')
+app.set('views', './views')
 
 const HOSTNAME = process.env.HOSTNAME || `http://localhost:3001`
 const PLUGIN_NAME = process.env.PLUGIN_NAME || `fzj.xg.webjugex`
@@ -55,15 +59,24 @@ app.use(session({
 }))
 
 setupAuth(app)
-  .then(() => console.log(`auth setup successfully`))
-  .catch(e => console.error(`auth setup failed`, e))
+  .then(() => {
+    console.log(`auth setup successfully`)
+  })
+  .catch(e => {
+    console.error(`auth setup failed`, e)
+    process.exit(1)
+  })
 
 app.set('BACKEND_URL', BACKEND_URL)
 app.set('HOSTNAME', HOSTNAME)
 
 app.get('/', (req, res) => {
   const { user, session } = req
-  if (user && session && session[POST_BODY_TMP_STORE]) return res.redirect('user/resume')
+  if (session[SIGNIN_REDIRECT]) {
+    const redirect = session[SIGNIN_REDIRECT]
+    session[SIGNIN_REDIRECT] = null
+    return res.redirect(redirect)
+  }
   if (user) res.status(200).send(`authenticated`)
   else res.status(401).send('not authenticated')
 })

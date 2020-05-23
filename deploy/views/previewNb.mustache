@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <script src="https://unpkg.com/prismjs@1.20.0/prism.js"></script>
+  <script src="https://unpkg.com/marked@1.1.0/marked.min.js"></script>
+  <script src="vendor/ansi_up.js"></script>
+  <script src="https://unpkg.com/notebookjs@0.4.2/notebook.js"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <title>{{ wjTitle }}</title>
+  <link rel="stylesheet" href="vendor/prism.css">
+  <script src="vendor/prism.js"></script>
+  <link rel="stylesheet" href="vendor/notebook.css">
+  <style>
+  .h-0
+  {
+    height: 0!important;
+  }
+  </style>
+</head>
+<body>
+  <div class="jumbotron jumbotron-fluid">
+    <div class="container">
+      <h1 class="display-4">
+        {{ wjHead }}
+      </h1>
+      <p class="lead">
+        {{ wjLead }}
+      </p>
+
+      <hr class="my-4">
+      
+      <!-- button container -->
+      <div class="d-inline-flex w-100 align-items-center">
+        <div class="flex-grow-0 flex-shrink-0 btn-group"
+          role="group">
+
+          <!-- download to local -->
+          <a href="getNb/{{wjNbId}}"
+            download="wj-nb-{{wjNbId}}.ipynb"
+            class="btn btn-outline-primary"
+            role="button">
+            <i class="fas fa-download"></i> 
+            <span>
+              Download
+            </span>
+          </a>
+
+          <!-- save to seafile -->
+          <button id="saveInDrive"
+            class="btn requires-login"
+            aria-text="Save in drive.ebrains.eu">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </button>
+
+          <!-- run on lab.ebrains.eu -->
+          <!-- TODO disabling running on jupyter lab as a result of sync issue between jupyterhub and seafile -->
+          <a href="getNb/{{wjNbId}}?target=jupyter"
+            class="btn disabled requires-login"
+            aria-text="Run in lab.ebrains.eu">
+            <i class="fas fa-play"></i>
+          </a>
+        </div>
+
+        <!-- padding -->
+        <div class="flex-grow-1 flex-shrink-1 d-inline-flex align-items-center pl-2 h-0">
+          {{#user}}
+          <i class="text-muted">
+            There is currently an issue running notebooks in lab.ebrains.eu . Issue tracking will be pasted here once available.
+          </i>
+          {{/user}}
+          {{^user}}
+          <i class="text-muted">
+            Signin to enable cloud features
+          </i>
+          {{/user}}
+        </div>
+
+        <!-- login banner -->
+        <div class="flex-grow-0 flex-shrink-0">
+          {{#user}}
+          <!-- user logged in -->
+          <span>
+            Logged in as {{ name }}
+          </span>
+    
+          <a href="logout"
+            class="btn btn-danger">
+            <i class="fas fa-sign-out-alt"></i>
+          </a>
+          {{/user}}
+    
+          {{^user}}
+          <!-- user not logged in -->
+          <span>
+            Not logged in
+          </span>
+    
+          <a href="login"
+            class="btn btn-primary"
+            role="button"
+            aria-text="login via iam.ebrains.eu">
+            <i class="fas fa-sign-in-alt"></i>
+          </a>
+          {{/user}}
+        </div>
+      </div>
+
+      <!-- warning container -->
+
+      <div id="mainContainer" class="mt-2 d-none d-inline-flex w-100">
+
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div id="renderNb"></div>
+  </div>
+  <script>
+    const loggedIn = {{ loggedIn }}
+
+    const wjNbId = `{{ wjNbId }}`
+
+    const nodes = document.querySelectorAll('.requires-login')
+    for (const node of nodes){
+      if (!loggedIn) node.classList.add('disabled')
+      node.classList.add(
+        loggedIn ? 'btn-outline-primary' : 'btn-outline-secondary'
+      )
+    }
+    
+    const postNb = target => new Promise((rs, rj) => {
+      const body = `target=${encodeURIComponent(target)}`
+      fetch(`postNb/${wjNbId}`, {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+        },
+        body
+      })
+        .then(res => {
+          if (res.status >= 400) rj(res.statusText)
+          else rs()
+        })
+        .catch(rj)
+    })
+
+    let cleanupWarning
+
+    const showWarning = (message, style = 'danger') => {
+      cleanupWarning && cleanupWarning()
+
+      const warningEl = document.createElement('div')
+      warningEl.classList.add('alert')
+      warningEl.classList.add(`alert-${style}`)
+      warningEl.innerHTML = message
+
+      const containerEl = document.getElementById('mainContainer')
+      containerEl.appendChild(warningEl)
+
+      cleanupWarning = () => {
+        containerEl.removeChild(warningEl)
+        cleanupWarning = null
+      }
+    }
+
+    const saveInDriveEl = document.getElementById('saveInDrive')
+    saveInDriveEl.addEventListener('click', async ev => {
+
+      saveInDriveEl.classList.add('disabled')
+      try {
+        await postNb('seafile')
+        showWarning(`Saved to seafile!`, 'success')
+      } catch (e) {
+        showWarning(e.toString())
+      }
+      saveInDriveEl.classList.remove('disabled')
+    })
+    const renderNbEl = document.getElementById('renderNb')
+    fetch(`getNb/${wjNbId}`)
+      .then(res => {
+        if (res.status === 404) throw new Error(`Notebook not found or expired.`)
+        else if (res.status >= 400) throw new Error(res.statusText)
+        return res.json()
+      })
+      .then(json => {
+        const notebook = nb.parse(json)
+        const rendered = notebook.render()
+        renderNbEl.appendChild(rendered)
+        Prism.highlightAll()
+      })
+      .catch(e => {
+        console.error('Error rendering notebook:', e)
+        showWarning(e.toString())
+      })
+  </script>
+</body>
+</html>
