@@ -4,7 +4,8 @@
   "description": "",
   "main": "analysisRoute.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,7 +14,9 @@
     "express": "^4.17.1",
     "express-session": "^1.17.0",
     "hbp-seafile": "0.0.7",
+    "lru-cache": "^5.1.1",
     "memorystore": "^1.6.1",
+    "mustache-express": "^1.3.0",
     "openid-client": "^3.9.0",
     "passport": "^0.4.1",
     "request": "^2.88.0",
