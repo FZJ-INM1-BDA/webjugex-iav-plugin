@@ -1,0 +1,5 @@
+const SIGNIN_REDIRECT = `SIGNIN_REDIRECT`
+
+module.exports = {
+  SIGNIN_REDIRECT
+}

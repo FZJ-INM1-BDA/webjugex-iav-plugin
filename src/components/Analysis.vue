@@ -1,136 +1,55 @@
 <template>
-  <div class="p-2">
+  <div>
 
-    <!-- show experimental parameters regardless -->
-    <div>
-      <!-- id -->
-      <div class="input-group input-group-sm mt-1">
-        <div class="input-group-prepend">
-          <label for="webjugex-analysis-id" class="input-group-text">
-            id
-          </label>
-        </div>
-        <input
-          type="text"
-          id="webjugex-analysis-id"
-          name="webjugex-analysis-id"
-          class="form-control form-control-sm"
-          :value="vueId"
-          readonly="readonly">
-      </div>
-
-      <!-- roi1 -->
-      <div class="input-group input-group-sm mt-1">
-        <div class="input-group-prepend">
-          <label for="webjugex-analysis-roi1" class="input-group-text">
-            roi1
-          </label>
-        </div>
-        <input
-          type="text"
-          id="webjugex-analysis-roi1"
-          name="webjugex-analysis-roi1"
-          class="form-control form-control-sm"
-          :value="roi1 ? roi1.join(', ') : ''"
-          readonly="readonly">
-      </div>
-
-      <!-- roi2 -->
-      <div class="input-group input-group-sm mt-1">
-        <div class="input-group-prepend">
-          <label for="webjugex-analysis-roi2" class="input-group-text">
-            roi2
-          </label>
-        </div>
-        <input
-          type="text"
-          id="webjugex-analysis-roi2"
-          name="webjugex-analysis-roi2"
-          class="form-control form-control-sm"
-          :value="roi2 ? roi2.join(', ') : ''"
-          readonly="readonly">
-      </div>
-
-      <!-- permutations -->
-      <div class="input-group input-group-sm mt-1">
-        <div class="input-group-prepend">
-          <label for="webjugex-analysis-permutations" class="input-group-text">
-            permutations
-          </label>
-        </div>
-        <input
-          type="text"
-          id="webjugex-analysis-permutations"
-          name="webjugex-analysis-permutations"
-          class="form-control form-control-sm"
-          :value="nPermutations"
-          readonly="readonly">
-      </div>
-
-      <!-- threshold -->
-      <div class="input-group input-group-sm mt-1">
-        <div class="input-group-prepend">
-          <label for="webjugex-analysis-threshold" class="input-group-text">
-            threshold
-          </label>
-        </div>
-        <input
-          type="text"
-          id="webjugex-analysis-threshold"
-          name="webjugex-analysis-threshold"
-          class="form-control form-control-sm"
-          :value="threshold"
-          readonly="readonly">
-      </div>
-    </div>
-    
     <!-- results container -->
     <div class="mt-2" v-if="!error">
 
       <!-- if complete show result -->
       <div v-if="analysisComplete">
-        <div class="btn-group btn-block">
-          <div
-            @click="showCoord"
-            class="btn btn-default">
-            show coord
-          </div>
-          <div
-            @click="destroyCoord"
-            class="btn btn-default">
-            hide coord
-          </div>
+        <div class="input-group f-flex align-items-center">
+          <span class="input-group-prepend p-2">
+            Display probe locations
+          </span>
+          <check-box v-model="displayProbeLocation"
+            :flag = "displayProbeLocation"
+            @togglecheckbox="toggleDisplayProbeLocation()"/>
         </div>
 
-        <a
-          download="pval.tsv"
-          @mouseenter="showPreviewPValData=true"
-          @mouseleave="showPreviewPValData=false"
-          class="position-relative"
-          :href="'data:text/tsv;charset=utf-8,' + pvaldata">
-          download pvals
-          <div
-            v-if="showPreviewPValData"
-            class="position-absolute tsv-preview-container">
-            <PreviewTsv class="tsv-preview" :tsv="pvaldata" />
+        <div class="bg-dark pt-1">
+          <div class="w-100 d-flex justify-content-center">Download</div>
+          <div class="btn-group btn-block">
+            <div class="btn btn-default">
+              <a download="pval.tsv"
+                @mouseenter="showPreviewPValData=true"
+                @mouseleave="showPreviewPValData=false"
+                class="position-relative"
+                :href="'data:text/tsv;charset=utf-8,' + pvaldata">
+                <span>
+                  p values
+                </span>
+                <div v-if="showPreviewPValData"
+                  class="position-absolute tsv-preview-container">
+                  <PreviewTsv class="tsv-preview" :tsv="pvaldata"/>
+                </div>
+              </a>
+            </div>
+            <div class="btn btn-default">
+              <a download="coord.tsv"
+                @mouseenter="showPreviewCoordData=true"
+                @mouseleave="showPreviewCoordData=false"
+                class="position-relative"
+                :href="'data:text/tsv;charset=utf-8,' + coorddata">
+                <span>
+                  probe locations
+                </span>
+                <div v-if="showPreviewCoordData"
+                  class="position-absolute tsv-preview-container">
+                  <PreviewTsv class="tsv-preview" :tsv="coorddata"/>
+                </div>
+              </a>
+            </div>
           </div>
-        </a>
-        
-        <br />
-        
-        <a
-          download="coord.tsv"
-          @mouseenter="showPreviewCoordData=true"
-          @mouseleave="showPreviewCoordData=false"
-          class="position-relative"
-          :href="'data:text/tsv;charset=utf-8,' + coorddata">
-          download coord data
-          <div
-            v-if="showPreviewCoordData"
-            class="position-absolute tsv-preview-container">
-            <PreviewTsv class="tsv-preview" :tsv="coorddata" />
-          </div>
-        </a>
+        </div>
       </div>
 
       <!-- if not complete, show spinner. introduce percentage in the turue -->
@@ -151,6 +70,7 @@ const POLLING_INTERVAL = 3000
 const DELIMITER = `\t`
 import { workspaceMixin } from './mixin'
 import PreviewTsv from './previewTsv'
+import { CheckBox } from 'vue-components'
 import { baseUrl } from './constants'
 
 const NO_RESULTS_YET = 'no results yet'
@@ -180,21 +100,31 @@ const getCoord = (tsv) => tsv
 
 export default {
   components: {
-    PreviewTsv
+    PreviewTsv,
+    CheckBox,
   },
   props: {
+    vueId: null,
     data: {
       type: Object,
       default: null
-    }
+    },
   },
   mixins:[
     workspaceMixin
   ],
+  watch: {
+    vueId: function (vueId) {
+      Object.assign(this.$data, this.$options.data.call(this))
+
+      this.getDataRunner()
+      this.vueId = vueId
+    },
+  },
   data: function () {
     return {
       showPreviewPValData: false,
-      showPreviewCoordData: false, 
+      showPreviewCoordData: false,
 
       showBody: false,
       analysisComplete: false,
@@ -211,13 +141,14 @@ export default {
        * polling
        */
       intervalId: null,
-      vueId: null,
+      // vueId: null,
 
       /**
        * expmt param
        */
       roi1: null,
       roi2: null,
+      genes: [],
       ignoreCustomProbe: null,
       singleProbeMode: null,
       nPermutations: null,
@@ -227,7 +158,9 @@ export default {
        * showing landmark(s)
        */
       coordShown: false,
-      shownLandmarks: []
+      shownLandmarks: [],
+
+      displayProbeLocation: null
     }
   },
   computed: {
@@ -250,7 +183,7 @@ export default {
         .then(res => res.json())
         .then(json => {
           const { analysis, ignoreCustomProbe,nPermutations,singleProbeMode, mode,threshold, selectedGenes, area1, area2, ...rest } = json
-          
+
           this.ignoreCustomProbe = ignoreCustomProbe
           this.singleProbeMode = singleProbeMode
           this.selectedGenes = selectedGenes
@@ -259,13 +192,14 @@ export default {
 
           this.roi1 = getRoiArray(area1)
           this.roi2 = getRoiArray(area2)
+          this.genes = selectedGenes
 
           if (analysis) {
             clearInterval(this.intervalId)
-            const {body, resp} = analysis
+            const { body, resp, err } = analysis
             const { statusCode } = resp
-            if (statusCode && statusCode >= 400) {
-              return Promise.reject(statusCode)
+            if (!!err) {
+              return Promise.reject(err)
             }
             return Promise.resolve(JSON.parse(body))
           } else {
@@ -273,11 +207,26 @@ export default {
           }
         })
     },
+    getDataRunner: function() {
+      this.getData()
+              .then(this.parseFetchedData)
+              .then(rjson => {
+                this.completionTime = new Date().toString()
+                this.analysisComplete = true
+                this.pvaldata = rjson.pval
+                this.coorddata = rjson.coord
+              })
+              .catch(e => {
+                console.error('error', e)
+                this.error = e
+                this.$emit('error', e)
+              })
+    },
     getData: function () {
       return new Promise((resolve, reject) => {
         /**
          * in v2.0, data will no longer be defined
-         * instead, id will be used to query the status 
+         * instead, id will be used to query the status
          */
 
         this.fetching()
@@ -329,6 +278,13 @@ export default {
         coord : stringTitledCoordFile
       }
     },
+    toggleDisplayProbeLocation: function() {
+      this.displayProbeLocation = !this.displayProbeLocation
+      if (this.displayProbeLocation)
+        this.showCoord()
+      if (!this.displayProbeLocation)
+        this.destroyCoord()
+    },
     showCoord: function () {
       if (this.shownLandmarks.length > 0) return
       if (this.coorddata) {
@@ -351,20 +307,8 @@ export default {
   },
   mounted: function () {
     // use mixin
-    this.vueId = this.$parent.queryId
-    this.getData()
-      .then(this.parseFetchedData)
-      .then(rjson => {
-        this.completionTime = new Date().toString()
-        this.analysisComplete = true
-        this.pvaldata = rjson.pval
-        this.coorddata = rjson.coord
-      })
-      .catch(e => {
-        console.error('error', e)
-        this.error = e
-        this.$emit('error', e)
-      })
+    // this.vueId = this.$parent.queryId
+    this.getDataRunner()
   },
   beforeDestroy: function () {
     /**

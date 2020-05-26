@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div class="p-1">
+    <div class="d-flex justify-content-between">
+    <span>Filter</span>
+
     <a
       class="fzj-xg-webjugex-hover-default"
       @click="resetToDefault"
@@ -7,44 +10,35 @@
       href="#">
       reset to default
     </a>
+    </div>
 
-    <div class="input-group">
-      <span class="input-group-prepend">
-        <span class="input-group-text">
+    <div class="input-group f-flex align-items-center">
+      <span class="input-group-prepend p-2">
           Probe Mode
-        </span>
       </span>
       <check-box
         :flag = "singleProbeMode"
         @togglecheckbox = "singleProbeMode = !singleProbeMode" />
-        <span class="input-group-append">
-          <span class="input-group-text">
+        <span class="input-group-append p-2">
             {{ singleProbeMode ? 'Single' : 'All' }}
-          </span>
         </span>
     </div>
   
-    <div class="input-group">
-      <span class="input-group-prepend">
-        <span class="input-group-text">
+    <div class="input-group f-flex align-items-center">
+      <span class="input-group-prepend p-2">
           Custom probe
-        </span>
       </span>
       <check-box
         :flag = "ignoreCustomProbe"
         @togglecheckbox = "ignoreCustomProbe = !ignoreCustomProbe" />
-        <span class="input-group-append">
-          <span class="input-group-text">
+        <span class="input-group-append p-2">
             {{ ignoreCustomProbe ? 'Ignore' : 'Use' }}
-          </span>
         </span>
     </div>
 
-    <div class="input-group">
-      <div class="input-group-prepend">
-        <label class="input-group-text" for="webjugex-threshold">
+    <div class="input-group f-flex align-items-center">
+      <div class="input-group-prepend p-2"  for="webjugex-threshold">
           Threshold
-        </label>
       </div>
       <input
         v-model="threshold"
@@ -55,10 +49,8 @@
         step="0.05"
         id="webjugex-threshold"
         name="webjugex-threshold">
-      <div class="input-group-append">
-        <span class="input-group-text">
+      <div class="input-group-append p-2">
           {{ threshold | numberFilter }}
-        </span>
       </div>
     </div>
     

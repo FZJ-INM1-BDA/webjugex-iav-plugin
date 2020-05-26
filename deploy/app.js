@@ -9,7 +9,12 @@ const path = require('path')
 const fs = require('fs')
 const request = require('request')
 const cors = require('cors')
+const session = require('express-session')
+const MemoryStore = require('memorystore')(session)
+const setupAuth = require('./auth')
 const { createBundleRenderer } = require('vue-server-renderer')
+const { POST_BODY_TMP_STORE } = require('./user/constants')
+const { SIGNIN_REDIRECT } = require('./const')
 
 const OUTPUT_PATH = path.join(__dirname, 'distSsr')
 
@@ -19,27 +24,64 @@ const js = fs.readFileSync(path.join(OUTPUT_PATH, 'ssr-app.js'), 'utf-8')
 const app = express()
 app.use(cors())
 app.disable('x-powered-by')
-
-
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-}
+app.engine('mustache', require('mustache-express')())
+app.set('view engine', 'mustache')
+app.set('views', './views')
 
 const HOSTNAME = process.env.HOSTNAME || `http://localhost:3001`
 const PLUGIN_NAME = process.env.PLUGIN_NAME || `fzj.xg.webjugex`
 const PLUGIN_DISPLAY_NAME = process.env.PLUGIN_DISPLAY_NAME || 'JuGEx differential gene expression analysis'
 const BACKEND_URL= process.env.BACKEND_URL || 'http://localhost:8003'
+const SECRET = process.env.SECRET || 'thisisnotaverygoodsecret' // needed to be set for cookie parser
 
 const manifest = {
   name: PLUGIN_NAME,
   displayName: PLUGIN_DISPLAY_NAME,
   templateURL: `${HOSTNAME}/template.html`,
   scriptURL: `${HOSTNAME}/vue-script.js`,
+  desc: 'WebJuGEx is a simple and intuitive graphical user interface for [JuGEx](https://pyjugex.readthedocs.io/) - a workflow for analyzing differential gene expressions in different regions of the JuBrain probabilistic cytoarchitectonic human brain atlas.',
+  homepage: 'https://webjugex-iav-plugin.readthedocs.io/',
+  authors: `BDA-INM1 <inm1-bda@fz-juelich.de>, Xiaoyun Gui <x.gui@fz-juelich.de>, Daviti Gogshelidze <d.gogshelidze@fz-juelich.de>`
 }
+
+const store = new MemoryStore({
+  checkPeriod: 1000 * 60 * 60 * 24
+})
+
+app.use(session({
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24
+  },
+  resave: false,
+  saveUninitialized: true,
+  store,
+  secret: SECRET
+}))
+
+setupAuth(app)
+  .then(() => {
+    console.log(`auth setup successfully`)
+  })
+  .catch(e => {
+    console.error(`auth setup failed`, e)
+    process.exit(1)
+  })
 
 app.set('BACKEND_URL', BACKEND_URL)
 app.set('HOSTNAME', HOSTNAME)
 
+app.get('/', (req, res) => {
+  const { user, session } = req
+  if (session[SIGNIN_REDIRECT]) {
+    const redirect = session[SIGNIN_REDIRECT]
+    session[SIGNIN_REDIRECT] = null
+    return res.redirect(redirect)
+  }
+  if (user) res.status(200).send(`authenticated`)
+  else res.status(401).send('not authenticated')
+})
+
+app.use('/user', require('./user'))
 app.use('/analysis', require('./analysisRoute'))
 app.get('/genelist', (req, res) => {
   request(BACKEND_URL)

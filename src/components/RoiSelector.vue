@@ -2,23 +2,18 @@
   <form
     autocomplete="off"
     class="p-1 bg-dark mb-2">
+    {{ label }}
     <div
       @keydown.stop
       @keydown.enter.prevent
       style = "z-index: 5"
       class="input-group">
-      <div class="input-group-prepend">
-        <div class="input-group-text">
-          {{ label }}
-        </div>
-      </div>
       <auto-complete
         ref="autocomplete"
         :warning="warning"
         class="form-control fzj.xg.webjugex.formcontrol fzj.xg.webjugexFrontend.autocomplete"
         @selectslice="selectSlice($event)"
-        :rawarray="autocompleteArray"
-        :placeholder="compuetdPlaceholderText"/>
+        :rawarray="autocompleteArray"/>
       <div class="input-group-append">
         <div
           :webjugex-tooltip="'toggle scan mode for ' + label"
@@ -47,7 +42,8 @@ export default {
     Pill
   },
   nonReactive: {
-    subscriptions: []
+    subscriptions: [],
+    selectRoiPromise: null
   },
   props:{
     warning:{
@@ -68,65 +64,44 @@ export default {
       }
     }
   },
+  mounted: function() {
+    const fnStr = window.interactiveViewer.uiHandle.getUserToSelectARegion.toString()
+    this.useV2 = !/this\.rejectUserSelectionMode/.test(fnStr)
+  },
   data: function () {
     return {
       selectedRois: [],
-      scanActive: false,
-      mouseoverRegion: null,
-      clickFlag: false
-    }
-  },
-  computed: {
-    compuetdPlaceholderText: function () {
-      return this.scanActive 
-        ? this.mouseoverRegion
-          ? this.mouseoverRegion.name
-          : 'Scanning ...'
-        : this.placeholderText
-    }
-  },
-  mounted: function () {
-    const { subscriptions } = this.$options.nonReactive
+      useV2: false,
+      v1ScanActive: false,
+      v2ScanActive: false,
+      clickFlag: false,
+      setRegionSelectionSubscription: null
 
-    subscriptions.push(
-      window.interactiveViewer.viewerHandle.mouseOverNehubaLayers.subscribe(layers => {
-        const suitableLayer = layers && layers.find(({ segment }) => !!segment)
-        if (!suitableLayer) return this.updateMouseOverRegion(null)
-        const { segment } = suitableLayer
-        this.updateMouseOverRegion(segment)
-      })
-    )
-
-    subscriptions.push(
-      window.interactiveViewer.viewerHandle.mouseEvent.subscribe(ev => {
-        if (this.scanActive) this.handleMouseEvent(ev)
-      })
-    )
-    
+    }
   },
   beforeDestroy: function () {
-    const { subscriptions } = this.$options.nonReactive
-    while (subscriptions.length > 0) {
-      subscriptions.pop().unsubscribe()
+    this.v1DeactivateScan()
+  },
+  computed: {
+    scanActive: {
+      get: function() {
+        return this.useV2 ? this.v2ScanActive : this.v1ScanActive
+      },
+      set: function (val) {
+        if (this.useV2) {
+          this.v2ScanActive = val
+        } else {
+          this.v1ScanActive = val
+        }
+      }
+    }
+  },
+  watch: {
+    scanActive: function(val) {
+      if (val) this.$emit('DisableRoi1scan', true)
     }
   },
   methods:{
-    handleMouseEvent: function (ev) {
-      const { eventName } = ev
-      if (eventName === 'mousedown') {
-        this.clickFlag = true
-        setTimeout(() => this.clickFlag = false, 200)
-        return
-      }
-      if (eventName === 'mouseup' && this.clickFlag && this.mouseoverRegion) {
-        const { name } = this.mouseoverRegion
-        this.selectRoi(name)
-        return
-      }
-    },
-    updateMouseOverRegion: function (roi) {
-      this.mouseoverRegion = roi
-    },
     selectRoi: function (name) {
       if (this.selectedRois.indexOf(name) < 0) this.selectedRois = this.selectedRois.concat(name)
     },
@@ -137,8 +112,81 @@ export default {
     removeRoi: function (name) {
       this.selectedRois = this.selectedRois.filter(roi => roi !== name)
     },
+
+    regionSelectionPromise() {
+      window.interactiveViewer.uiHandle
+              .getUserToSelectARegion(`Region Selection Mode for ${this.label}`)
+              .then(res => {
+                if (res) {
+                  res.forEach(r => this.selectRoi(r.name))
+                  this.regionSelectionPromise()
+                }
+              })
+              .catch(err => {})
+    },
+
     toggleScanMode: function () {
-      this.scanActive = !this.scanActive
+      if (this.useV2) {
+        if (!this.scanActive) this.v2ActivateScan() 
+        else {
+          this.v2DeactiveScan()
+        }
+      } else {
+        this.scanActive = !this.scanActive
+        if (this.scanActive) {
+          this.$emit('DisableRoi1scan', true)
+          this.regionSelectionPromise()
+
+        } else {
+          this.v1DeactivateScan()
+        }
+      }
+    },
+    deactivateScan(){
+      if (this.useV2) this.v2DeactiveScan()
+      else this.v1DeactivateScan()
+    },
+    v1DeactivateScan() {
+      window.interactiveViewer.uiHandle.cancelPromise(
+              window.interactiveViewer.uiHandle.getUserToSelectARegion
+      )
+      this.scanActive = false
+    },
+
+    v2ActivateScan(){
+      if(this.scanActive) throw new Error(`scan is already active`)
+      this.scanActive = true
+      if (this.$options.selectRoiPromise) window.interactiveViewer.uiHandle.cancelPromise(
+        this.$options.selectRoiPromise
+      )
+
+      const getSingleRegion = () => {
+        this.$options.selectRoiPromise = window.interactiveViewer.uiHandle.getUserToSelectARegion(`Select a region for ${this.label}`)
+        this.$options.selectRoiPromise
+          .then(obj => {
+            this.selectRoi(obj.segment.name)
+            getSingleRegion()
+          })
+          .catch(e => {
+            const { userInitiated } = e
+            this.v2DeactiveScan()
+          })
+      }
+      getSingleRegion()
+    },
+    v2DeactiveScan(){
+
+      this.scanActive = false
+      if (this.$options.selectRoiPromise) {
+        try {
+          window.interactiveViewer.uiHandle.cancelPromise(
+            this.$options.selectRoiPromise
+          )
+        } catch (e) {
+
+        }
+      }
+      this.$options.selectRoiPromise = null
     }
   }
 }

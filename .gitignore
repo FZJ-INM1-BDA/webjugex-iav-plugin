@@ -1,6 +1,10 @@
 node_modules
+package-lock.json
+.DS_Store
+.idea
 .env
 build.sh
 run.sh
 distSsr
+venv
 dist
