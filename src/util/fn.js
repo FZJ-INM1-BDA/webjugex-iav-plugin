@@ -42,7 +42,7 @@ export const validateGetError = ({ roi1s, roi2s, genes }) => {
 
 export const prepareAnalysisBody = ({ roi1s, roi2s, genes, ...rest }) => {
 
-  const PMAP_URL = (VUE_APP_PMAP_URL || 'https://pmap-pmap-service.apps-dev.hbp.eu') + '/multimerge_v2?filename=extension.nii.gz'
+  const PMAP_URL = (VUE_APP_PMAP_URL || 'https://pmap-pmap-service.apps-dev.hbp.eu') + '/multimerge?filename=extension.nii.gz'
       
   let errors = []
 
@@ -73,35 +73,40 @@ export const prepareAnalysisBody = ({ roi1s, roi2s, genes, ...rest }) => {
       return null
     }
   }
-  const v18Roi1 = roi1s
-    .map(getRoi)
-    .filter(removeNull)
-    .map(getActualAreaName)
-    .filter(removeNull)
 
-  const v18Roi2 = roi2s
-    .map(getRoi)
-    .filter(removeNull)
-    .map(getActualAreaName)
-    .filter(removeNull)
+  const getV24RegionObj = regionObj => {
+    const match = /^(.+)\s\(.+\)$/.exec(regionObj.name)
+    const regionName = match && match[1].replace(/\s/g, '-')
+    return regionName && {
+      name: regionName,
+      hemisphere: regionObj.hemisphere === 'left hemisphere'
+        ? 'left'
+        : regionObj.hemisphere === 'right hemisphere'
+          ? 'right'
+          : null
+    }
+  }
+
+  const v24Roi1 = roi1s.map(getV24RegionObj).filter(removeNull)
+  const v24Roi2 = roi2s.map(getV24RegionObj).filter(removeNull)
 
   const { threshold } = rest
       
   const body = {
     id: Date.now().toString(),
     area1: {
-      name: roi1s.join('-'),
+      name: v24Roi1.map(r => r.name).join('-'),
       PMapURL: PMAP_URL || null,
       body: {
-        areas:v18Roi1,
+        areas:v24Roi1,
         threshold: Number(threshold)
       }
     },
     area2: {
-      name: roi2s.join('-'),
+      name: v24Roi2.map(r => r.name).join('-'),
       PMapURL: PMAP_URL || null,
       body: {
-        areas:v18Roi2,
+        areas:v24Roi2,
         threshold: Number(threshold)
       }
     },
