@@ -19,7 +19,7 @@
         placeholderText="Search & Add ROI 1"
         @DisableRoi1scan="$refs.roi2Selector.deactivateScan()"
         :warning="roi1Warning"
-        :autocompleteArray="regionAutocompleteRawArray">
+        :regionsInput="regionsWithlabelIndicies">
       </RoiSelector>
 
       <RoiSelector
@@ -30,7 +30,7 @@
         placeholderText="Search & Add ROI 2"
         @DisableRoi1scan="$refs.roi1Selector.deactivateScan()"
         :warning="roi2Warning"
-        :autocompleteArray="regionAutocompleteRawArray">
+        :regionsInput="regionsWithlabelIndicies">
       </RoiSelector>
 
       <!-- genelist -->
@@ -124,7 +124,13 @@ const fA = (arr) => (arr && arr.concat(
     : [])) || []
 )
 
-import { allowedParcellationName, allowedTemplateSpaces, baseUrl } from './constants' 
+import {
+  allowedParcellationName,
+  allowedTemplateSpaces,
+  allowedParcIds,
+  allowedTmplSpcIds,
+  baseUrl,
+} from './constants' 
 import { workspaceMixin } from './mixin'
 
 export default {
@@ -163,10 +169,13 @@ export default {
     return {
       refsReady: false,
 
+      activeParcId: null,
+      activeTmplSpcId: null, 
+
       activeParcellationName: null,
       activeTemplateName: null,
 
-      regionNamesUrlArray: [],
+      private_regionsWithlabelIndicies: [],
       
       warning : [],
 
@@ -212,14 +221,16 @@ export default {
     this.$options.nonReactive.toastHandler = toastHandler
 
     this.$options.nonReactive.subscriptions.push(
-      interactiveViewer.metadata.selectedParcellationBSubject.subscribe(({ name, regions } = {}) => {
+      interactiveViewer.metadata.selectedParcellationBSubject.subscribe(({ name, regions, ['@id']: id } = {}) => {
         this.activeParcellationName = name
-        this.regionNamesUrlArray = fA(regions).filter(v => v.labelIndex).map(v => [v.name, v])
+        this.activeParcId = id
+        this.regionsWithlabelIndicies = fA(regions).filter(v => v.labelIndex)
       })
     )
 
     this.$options.nonReactive.subscriptions.push(
-      interactiveViewer.metadata.selectedTemplateBSubject.subscribe(({name} ={}) => {
+      interactiveViewer.metadata.selectedTemplateBSubject.subscribe(({ name, ['@id']:id } = {}) => {
+        this.activeTmplSpcId = id
         this.activeTemplateName = name
       })
     )
@@ -339,6 +350,14 @@ export default {
     if (roi1Selector && roi2Selector && geneSelector) this.refsReady = true
   },
   computed: {
+    regionsWithlabelIndicies: {
+      get: function(){
+        return this.private_regionsWithlabelIndicies
+      },
+      set: function(val) {
+        this.private_regionsWithlabelIndicies = JSON.parse(JSON.stringify(val))
+      }
+    },
     saveNbObj: function () {
 
       if (!this.refsReady) return {}
@@ -360,9 +379,9 @@ export default {
       }
     },
     active: function () {
-      return this.activeParcellationName && this.activeTemplateName
-        && allowedParcellationName.indexOf(this.activeParcellationName) >= 0
-        && allowedTemplateSpaces.indexOf(this.activeTemplateName) >= 0
+      return this.activeParcId && this.activeTmplSpcId
+        && allowedParcIds.indexOf(this.activeParcId) >= 0
+        && allowedTmplSpcIds.indexOf(this.activeTmplSpcId) >= 0
     },
     hemisphereWarning : function(){
       return this.warning.findIndex(v => v === 'hemisphere') >= 0
@@ -376,9 +395,6 @@ export default {
     selectedgenesWarning: function(){
       return this.warning.findIndex(v => v === 'selectedgenes') >= 0
     },
-    regionAutocompleteRawArray: function () {
-      return this.regionNamesUrlArray.map(v => v[0])
-    }
   },
   beforeDestroy: function () {
     window.interactiveViewer.uiHandle.cancelPromise(
