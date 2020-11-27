@@ -196,10 +196,15 @@ export default {
 
       launchPastAnalysis: null,
 
-      analysisId: null
+      analysisId: null,
+
+      useV2: false
     }
   },
   mounted: function () {
+
+    const fnStr = window.interactiveViewer.uiHandle.getUserToSelectARegion.toString()
+    this.useV2 = !/this\.rejectUserSelectionMode/.test(fnStr)
 
     this.getNewName = window.interactiveViewer.uiHandle.getUserInput
       ? val => window.interactiveViewer.uiHandle.getUserInput({
@@ -397,9 +402,11 @@ export default {
     },
   },
   beforeDestroy: function () {
-    window.interactiveViewer.uiHandle.cancelPromise(
-      window.interactiveViewer.uiHandle.getUserToSelectARegion
-    )
+    if (!this.useV2) {
+      window.interactiveViewer.uiHandle.cancelPromise(
+        window.interactiveViewer.uiHandle.getUserToSelectARegion
+      )
+    }
     this.$options.nonReactive.subscriptions.forEach(s => s.unsubscribe())
   }
 }

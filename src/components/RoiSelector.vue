@@ -82,7 +82,7 @@ export default {
     }
   },
   beforeDestroy: function () {
-    this.v1DeactivateScan()
+    this.deactivateScan()
   },
   computed: {
     /**
