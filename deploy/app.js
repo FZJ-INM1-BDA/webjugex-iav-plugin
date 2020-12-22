@@ -41,7 +41,16 @@ const manifest = {
   scriptURL: `${HOSTNAME}/vue-script.js`,
   desc: 'WebJuGEx is a simple and intuitive graphical user interface for [JuGEx](https://pyjugex.readthedocs.io/) - a workflow for analyzing differential gene expressions in different regions of the JuBrain probabilistic cytoarchitectonic human brain atlas.',
   homepage: 'https://webjugex-iav-plugin.readthedocs.io/',
-  authors: `BDA-INM1 <inm1-bda@fz-juelich.de>, Xiaoyun Gui <x.gui@fz-juelich.de>, Daviti Gogshelidze <d.gogshelidze@fz-juelich.de>`
+  authors: `BDA-INM1 <inm1-bda@fz-juelich.de>, Xiaoyun Gui <x.gui@fz-juelich.de>, Daviti Gogshelidze <d.gogshelidze@fz-juelich.de>`,
+  csp: {
+    'connect-src': [
+      HOSTNAME
+    ],
+    'script-src': [
+      HOSTNAME,
+      "'unsafe-eval'",
+    ]
+  }
 }
 
 const store = new MemoryStore({

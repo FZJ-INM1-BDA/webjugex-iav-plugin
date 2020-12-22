@@ -8,6 +8,15 @@ export const allowedTemplateSpaces = [
   `MNI 152 ICBM 2009c Nonlinear Asymmetric`
 ]
 
+export const allowedParcIds = [
+  'minds/core/parcellationatlas/v1.0.0/94c1125b-b87e-45e4-901c-00daee7f2579',
+  'minds/core/parcellationatlas/v1.0.0/94c1125b-b87e-45e4-901c-00daee7f2579-25'
+]
+
+export const allowedTmplSpcIds = [
+  'minds/core/referencespace/v1.0.0/dafcffc5-4826-4bf1-8ff6-46b8a31ff8e2'
+]
+
 export const hardcode = [
  'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Fp2_pub',
  'https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-Area-Fp1_pub',
