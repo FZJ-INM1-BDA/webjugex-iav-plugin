@@ -28,14 +28,17 @@
       <pill
         class="pill mt-1 mb-0 mw-100"
         @remove-pill="removeRoi(roi)"
-        :name="roi"
-        :key="roi"
+        :name="roi | xformRoiToDispl"
+        :key="roi | xformRoiToDispl"
         v-for="roi in selectedRois" />
     </div>
   </form>
 </template>
 <script>
 import { AutoComplete, Pill } from 'vue-components'
+
+const xformRoiToDispl = region => `${region.name} - ${region.status}`
+
 export default {
   components:{
     AutoComplete,
@@ -58,8 +61,8 @@ export default {
       type: String,
       default: 'Search for regions'
     },
-    autocompleteArray: {
-      default: function () {
+    regionsInput: {
+      default: function(){
         return []
       }
     }
@@ -70,19 +73,34 @@ export default {
   },
   data: function () {
     return {
-      selectedRois: [],
+      private_selectedRois: [],
       useV2: false,
       v1ScanActive: false,
       v2ScanActive: false,
       clickFlag: false,
       setRegionSelectionSubscription: null
-
     }
   },
   beforeDestroy: function () {
-    this.v1DeactivateScan()
+    this.deactivateScan()
   },
   computed: {
+    /**
+     * never reference IAV objects. or things gets messy very quickly
+     * in principle, IAV should return a deep copy, but this is a bandaid fix
+     * tracking issue: https://github.com/HumanBrainProject/interactive-viewer/issues/755
+     */
+    selectedRois: {
+      get: function(){
+        return this.private_selectedRois
+      },
+      set: function(val) {
+        this.private_selectedRois = JSON.parse(JSON.stringify(val))
+      }
+    },
+    autocompleteArray: function(){
+      return this.regionsInput.map(xformRoiToDispl)
+    },
     scanActive: {
       get: function() {
         return this.useV2 ? this.v2ScanActive : this.v1ScanActive
@@ -99,14 +117,19 @@ export default {
   watch: {
     scanActive: function(val) {
       if (val) this.$emit('DisableRoi1scan', true)
+    },
+    selectedRois: function(val) {
+      console.log(`selected rois changed`)
     }
   },
   methods:{
     selectRoi: function (name) {
       if (this.selectedRois.indexOf(name) < 0) this.selectedRois = this.selectedRois.concat(name)
     },
-    selectSlice: function (event){
-      this.selectRoi(event)
+    selectSlice: function (displName){
+      const reg = this.regionsInput.find(r => xformRoiToDispl(r) === displName)
+      if (reg) this.selectRoi(reg)
+      else console.warn(`cannot find ${displName}`)
       this.$refs.autocomplete.$refs.input.focus()
     },
     removeRoi: function (name) {
@@ -115,14 +138,14 @@ export default {
 
     regionSelectionPromise() {
       window.interactiveViewer.uiHandle
-              .getUserToSelectARegion(`Region Selection Mode for ${this.label}`)
-              .then(res => {
-                if (res) {
-                  res.forEach(r => this.selectRoi(r.name))
-                  this.regionSelectionPromise()
-                }
-              })
-              .catch(err => {})
+        .getUserToSelectARegion(`Region Selection Mode for ${this.label}`)
+        .then(res => {
+          if (res) {
+            res.forEach(r => this.selectRoi(r))
+            this.regionSelectionPromise()
+          }
+        })
+        .catch(err => {})
     },
 
     toggleScanMode: function () {
@@ -148,7 +171,7 @@ export default {
     },
     v1DeactivateScan() {
       window.interactiveViewer.uiHandle.cancelPromise(
-              window.interactiveViewer.uiHandle.getUserToSelectARegion
+        window.interactiveViewer.uiHandle.getUserToSelectARegion
       )
       this.scanActive = false
     },
@@ -164,7 +187,7 @@ export default {
         this.$options.selectRoiPromise = window.interactiveViewer.uiHandle.getUserToSelectARegion(`Select a region for ${this.label}`)
         this.$options.selectRoiPromise
           .then(obj => {
-            this.selectRoi(obj.segment.name)
+            this.selectRoi(obj.segment)
             getSingleRegion()
           })
           .catch(e => {
@@ -188,6 +211,9 @@ export default {
       }
       this.$options.selectRoiPromise = null
     }
+  },
+  filters:{
+    xformRoiToDispl: xformRoiToDispl
   }
 }
 </script>
