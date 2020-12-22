@@ -9,8 +9,9 @@ export const allowedTemplateSpaces = [
 ]
 
 export const allowedParcIds = [
-  'minds/core/parcellationatlas/v1.0.0/94c1125b-b87e-45e4-901c-00daee7f2579',
-  'minds/core/parcellationatlas/v1.0.0/94c1125b-b87e-45e4-901c-00daee7f2579-25'
+  // 'minds/core/parcellationatlas/v1.0.0/94c1125b-b87e-45e4-901c-00daee7f2579',
+  // 'minds/core/parcellationatlas/v1.0.0/94c1125b-b87e-45e4-901c-00daee7f2579-25',
+  'juelich/iav/atlas/v1.0.0/8' // only allow v1.18 for now
 ]
 
 export const allowedTmplSpcIds = [

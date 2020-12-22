@@ -101,7 +101,7 @@
     <h5
       class="p-2 text-muted"
       v-else>
-      JuGEx only works with JuBrain Cytoarchitectonic Atlas in MNI 152 ICBM 2009c Nonlinear Asymmetric template space.
+      JuGEx only works with JulichBrain Cytoarchitectonic Atlas v1.18 in MNI 152 ICBM 2009c Nonlinear Asymmetric template space (for now).
     </h5>
   </div>
 </template>
