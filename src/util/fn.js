@@ -74,21 +74,31 @@ export const prepareAnalysisBody = ({ roi1s, roi2s, genes, ...rest }) => {
     }
   }
 
+  const getV118RegionObj = regionObj => {
+    const match = /^([^()]+)(\s\(.+\))? - (left|right)\shemisphere$/.exec(regionObj.name)
+    
+    if (!match) return null
+    return {
+      name: match[1].replace(/\s/g, '-'),
+      hemisphere: match[3]
+    }
+  }
+
   const getV24RegionObj = regionObj => {
     const match = /^(.+)\s\(.+\)$/.exec(regionObj.name)
     const regionName = match && match[1].replace(/\s/g, '-')
     return regionName && {
-      name: regionName,
-      hemisphere: regionObj.hemisphere === 'left hemisphere'
+      name: regionName.replace(/\s/g, '-'),
+      hemisphere: regionObj.status === 'left hemisphere'
         ? 'left'
-        : regionObj.hemisphere === 'right hemisphere'
+        : regionObj.status === 'right hemisphere'
           ? 'right'
           : null
     }
   }
 
-  const v24Roi1 = roi1s.map(getV24RegionObj).filter(removeNull)
-  const v24Roi2 = roi2s.map(getV24RegionObj).filter(removeNull)
+  const v24Roi1 = roi1s.map(r => getV118RegionObj(r) || getV24RegionObj(r)).filter(removeNull)
+  const v24Roi2 = roi2s.map(r => getV118RegionObj(r) || getV24RegionObj(r)).filter(removeNull)
 
   const { threshold } = rest
       
