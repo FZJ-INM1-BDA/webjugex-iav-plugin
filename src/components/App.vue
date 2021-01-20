@@ -101,7 +101,7 @@
     <h5
       class="p-2 text-muted"
       v-else>
-      JuGEx only works with JulichBrain Cytoarchitectonic Atlas v1.18 in MNI 152 ICBM 2009c Nonlinear Asymmetric template space (for now).
+      JuGEx only works with JulichBrain Cytoarchitectonic Atlas v1.18 or v2.4 in MNI 152 ICBM 2009c Nonlinear Asymmetric template space (for now).
     </h5>
   </div>
 </template>
@@ -127,7 +127,7 @@ const fA = (arr) => (arr && arr.concat(
 import {
   allowedParcellationName,
   allowedTemplateSpaces,
-  allowedParcIds,
+  parcIdMap,
   allowedTmplSpcIds,
   baseUrl,
 } from './constants' 
@@ -153,7 +153,6 @@ export default {
     * the advantage is that these properties are non reactive. Thus Vue framework does not attach getters and setters. 
     */
   nonReactive: {
-    toastHandler: null,
     subscriptions: []
   },
   mixins:[
@@ -218,12 +217,6 @@ export default {
     this.launchPastAnalysis = ({ id, workspaceMixin__queryParam }) => fetch(`${baseUrl}/analysis/i-v-manifest/${id}${workspaceMixin__queryParam || ''}`)
       .then(res => res.json())
       .then(json => window.interactiveViewer.uiHandle.launchNewWidget(json))
-    
-    const toastHandler = interactiveViewer.uiHandle.getToastHandler()
-    toastHandler.dismissable = false
-    toastHandler.timeout = -1
-    
-    this.$options.nonReactive.toastHandler = toastHandler
 
     this.$options.nonReactive.subscriptions.push(
       interactiveViewer.metadata.selectedParcellationBSubject.subscribe(({ name, regions, ['@id']: id } = {}) => {
@@ -330,7 +323,9 @@ export default {
         nPermutations,
         threshold,
         singleProbeMode,
-        ignoreCustomProbe
+        ignoreCustomProbe,
+
+        selectedParcId: this.activeParcId
       })
       this.initAnalysisFlag = true
       this.newAnalysis(body)
@@ -385,7 +380,7 @@ export default {
     },
     active: function () {
       return this.activeParcId && this.activeTmplSpcId
-        && allowedParcIds.indexOf(this.activeParcId) >= 0
+        && parcIdMap.has(this.activeParcId)
         && allowedTmplSpcIds.indexOf(this.activeTmplSpcId) >= 0
     },
     hemisphereWarning : function(){

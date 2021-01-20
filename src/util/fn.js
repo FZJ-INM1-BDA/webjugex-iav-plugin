@@ -1,4 +1,4 @@
-import { hardcode } from '../components/constants'
+import { parcIdMap } from '../components/constants'
 
 export const sanitizeAreaName = (name) => name
   // remove synonym e.g. Area TE 1.1 (HESCHL) => Area TE 1.1
@@ -40,60 +40,41 @@ export const validateGetError = ({ roi1s, roi2s, genes }) => {
   return warning
 }
 
-export const prepareAnalysisBody = ({ roi1s, roi2s, genes, ...rest }) => {
+export const prepareAnalysisBody = ({ roi1s, roi2s, genes, selectedParcId, ...rest }) => {
 
-  const PMAP_URL = (VUE_APP_PMAP_URL || 'https://pmap-pmap-service.apps-dev.hbp.eu') + '/multimerge?filename=extension.nii.gz'
-      
+  const parc = parcIdMap.get(selectedParcId)
+  if (!parc) throw new Error(`parcId ${selectedParcId} not found in parcIdMap`)
+
+  const { version, name, id } = parc
+
   let errors = []
-
-  /**
-   * bandaid for JuBrain v18
-   */
-  const getRoi = (name) => {
-    const match = /^(.*?)\s\(.*?\s(left|right)\shemisphere$/.exec(name)
-    return (match && [ match[1], match[2] ]) || (errors.push(`Cannot getRoi for ${name}`), null)
-  }
 
   const removeNull = (entry) => !!entry
 
-  const getActualAreaName = ([name, hemisphere]) => {
-    // in order to prevent PF to match PFm
-    const regexString = name.replace(/\s/g, '-') + '_pub'
-    const regex = new RegExp(regexString, 'i')
-    const foundEntry = hardcode.find(entry => regex.test(entry))
-    if (foundEntry) {
-      return {
-        name: foundEntry
-          .replace('https://object.cscs.ch/v1/AUTH_227176556f3c4bb38df9feea4b91200c/hbp-d000001_jubrain-cytoatlas-', '')
-          .replace('_pub', ''),
-        hemisphere
-      }
-    } else {
-      errors.push(`Cannot getActualAreanName for ${name} ${hemisphere}`)
-      return null
-    }
-  }
-
   const getV118RegionObj = regionObj => {
-    const match = /^([^()]+)(\s\(.+\))? - (left|right)\shemisphere$/.exec(regionObj.name)
+    const match = /^(.+) - (left|right)\shemisphere$/.exec(regionObj.name)
     
     if (!match) return null
     return {
-      name: match[1].replace(/\s/g, '-'),
-      hemisphere: match[3]
+      name: match[1],
+      hemisphere: match[2],
+      atlas: {
+        name, version, id
+      }
     }
   }
 
   const getV24RegionObj = regionObj => {
-    const match = /^(.+)\s\(.+\)$/.exec(regionObj.name)
-    const regionName = match && match[1].replace(/\s/g, '-')
-    return regionName && {
-      name: regionName.replace(/\s/g, '-'),
+    return {
+      name: regionObj.name,
       hemisphere: regionObj.status === 'left hemisphere'
         ? 'left'
         : regionObj.status === 'right hemisphere'
           ? 'right'
-          : null
+          : null,
+      atlas: {
+        name, version, id
+      }
     }
   }
 
@@ -105,20 +86,12 @@ export const prepareAnalysisBody = ({ roi1s, roi2s, genes, ...rest }) => {
   const body = {
     id: Date.now().toString(),
     area1: {
-      name: v24Roi1.map(r => r.name).join('-'),
-      PMapURL: PMAP_URL || null,
-      body: {
-        areas:v24Roi1,
-        threshold: Number(threshold)
-      }
+      threshold: Number(threshold),
+      areas:v24Roi1,
     },
     area2: {
-      name: v24Roi2.map(r => r.name).join('-'),
-      PMapURL: PMAP_URL || null,
-      body: {
-        areas:v24Roi2,
-        threshold: Number(threshold)
-      }
+      threshold: Number(threshold),
+      areas: v24Roi2,
     },
     selectedGenes: genes,
 

@@ -28,7 +28,6 @@ module.exports = {
   plugins: [
     new VueLoaderPlugin(),
     new DefinePlugin({
-      VUE_APP_PMAP_URL: JSON.stringify(process.env.VUE_APP_PMAP_URL || 'https://pmap-pmap-service-new.apps.hbp.eu'),
       PLUGIN_NAME: JSON.stringify(process.env.PLUGIN_NAME || 'fzj.xg.webjugex-frontend'),
       VUE_APP_HOSTNAME: JSON.stringify(process.env.VUE_APP_HOSTNAME || 'http://localhost:3001'),
     })
