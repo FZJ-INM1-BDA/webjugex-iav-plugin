@@ -117,6 +117,9 @@ export default {
   ],
   watch: {
     vueId: function (vueId) {
+
+      // if coord is showing, destory it first
+      if (this.displayProbeLocation) this.toggleDisplayProbeLocation()
       Object.assign(this.$data, this.$options.data.call(this))
 
       this.getDataRunner()
