@@ -68,6 +68,8 @@
 <script>
 const POLLING_INTERVAL = 3000
 const DELIMITER = `\t`
+const escapeDelimiter = s => s
+const svTmpl = (strings, ...keys) => keys.map(k => escapeDelimiter(k)).join(DELIMITER)
 import { workspaceMixin } from './mixin'
 import PreviewTsv from './previewTsv'
 import { CheckBox } from 'vue-components'
@@ -115,6 +117,9 @@ export default {
   ],
   watch: {
     vueId: function (vueId) {
+
+      // if coord is showing, destory it first
+      if (this.displayProbeLocation) this.toggleDisplayProbeLocation()
       Object.assign(this.$data, this.$options.data.call(this))
 
       this.getDataRunner()
@@ -255,24 +260,33 @@ export default {
       })
     },
     parseFetchedData: function (json) {
-      const parseCoordToFile = (json) => {
-        return Object.keys(json).reduce((acc, curr) => {
-          const newRows = json[curr].map(item => {
-            return `${curr}${DELIMITER}${item.xyz.join(DELIMITER)}${DELIMITER}${item.winsorzed_mean.join(DELIMITER)}`
-          })
-          return acc.concat(newRows)
-        }, []).join('\n')
-      }
+
+      const parseAreaToFile = arr => arr.map(({ name, hemisphere, probes }) => 
+        probes.map(({ position, probe_properties }) => 
+          svTmpl([],
+            `${name}: ${hemisphere}`,
+            ...position,
+            ...Object.keys(probe_properties).map(probP => probe_properties[probP])
+          )
+        ).join('\n')
+      ).join('\n')
 
       const parsePvalToFile = (json) => {
-        return Object.keys(json).map(key => `${key}${DELIMITER}${json[key]}`).join('\n')
+        return Object.keys(json).map(key => svTmpl`${key}${json[key]}`).join('\n')
       }
 
-      const pval = json[1]
-      const coord = json[0]
-      const stringCoordFile = parseCoordToFile(coord)
-      const stringPvalFile = parsePvalToFile(pval)
-      const stringTitledCoordFile = `Area name${DELIMITER}x${DELIMITER}y${DELIMITER}z${DELIMITER}`+Object.keys(pval).join(DELIMITER).concat('\n').concat(stringCoordFile)
+      const { result, Areas } = json
+      
+      const stringCoordFile = parseAreaToFile(Areas)
+      const stringPvalFile = parsePvalToFile(result)
+      const stringTitledCoordFile = svTmpl([],
+        'Area name',
+        'x',
+        'y',
+        'z',
+        ...Object.keys(Areas[0].probes[0].probe_properties)
+      ).concat('\n', stringCoordFile)
+      
       return {
         pval : stringPvalFile,
         coord : stringTitledCoordFile
