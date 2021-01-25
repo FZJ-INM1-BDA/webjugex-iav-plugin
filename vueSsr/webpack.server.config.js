@@ -32,7 +32,6 @@ module.exports = {
     new DefinePlugin({
       HOSTNAME: JSON.stringify(process.env.HOSTNAME || 'http://localhost:3001'),
       VUE_APP_HOSTNAME: JSON.stringify(process.env.VUE_APP_HOSTNAME || 'http://localhost:3001'),
-      VUE_APP_PMAP_URL: JSON.stringify(process.env.VUE_APP_PMAP_URL || 'https://pmap-pmap-service.apps-dev.hbp.eu'),
       PLUGIN_NAME: JSON.stringify(process.env.PLUGIN_NAME || 'fzj.xg.webjugex-frontend')
     }),
     new VueSSRServerPlugin()
