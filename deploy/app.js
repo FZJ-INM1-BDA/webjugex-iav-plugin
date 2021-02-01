@@ -39,7 +39,9 @@ const manifest = {
   displayName: PLUGIN_DISPLAY_NAME,
   templateURL: `${HOSTNAME}/template.html`,
   scriptURL: `${HOSTNAME}/vue-script.js`,
-  desc: 'WebJuGEx is a simple and intuitive graphical user interface for [JuGEx](https://pyjugex.readthedocs.io/) - a workflow for analyzing differential gene expressions in different regions of the JuBrain probabilistic cytoarchitectonic human brain atlas.',
+  desc: `WebJuGEx is a simple and intuitive graphical user interface for [JuGEx](https://pyjugex.readthedocs.io/) - a workflow for analyzing differential gene expressions in different regions of the JuBrain probabilistic cytoarchitectonic human brain atlas.
+
+For retrieving microarray data, brainscapes connects to the web API of the Allen Brain Atlas (© 2015 Allen Institute for Brain Science), available from https://brain-map.org/api/index.html. Any use of the microarray data needs to be in accordance with their terms of use, as specified at https://alleninstitute.org/legal/terms-use/.`,
   homepage: 'https://webjugex-iav-plugin.readthedocs.io/',
   authors: `BDA-INM1 <inm1-bda@fz-juelich.de>, Xiaoyun Gui <x.gui@fz-juelich.de>, Daviti Gogshelidze <d.gogshelidze@fz-juelich.de>`,
   csp: {
