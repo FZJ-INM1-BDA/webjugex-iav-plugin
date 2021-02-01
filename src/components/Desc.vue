@@ -14,7 +14,7 @@
         After the analysis is finished, the genes and their calculated p values are displayed. There is also an option of downloading the gene names and their p values and the roi coordinates used in the analysis.
       </p>
       <p>
-        <sup>[1]</sup> &copy; 2015 Allen Institute for Brain Science. Allen Brain Atlas API. Available from: <a target = "_blank" href = "brain-map.org/api/index.html">brain-map.org/api/index.html</a>
+        <sup>[1]</sup> For retrieving microarray data, brainscapes connects to the web API of the Allen Brain Atlas (© 2015 Allen Institute for Brain Science), available from <a href="https://brain-map.org/api/index.html">https://brain-map.org/api/index.html</a>. Any use of the microarray data needs to be in accordance with their terms of use, as specified at <a href="https://alleninstitute.org/legal/terms-use/">https://alleninstitute.org/legal/terms-use/</a>.
       </p>
       <a @click.prevent="descReadmore = false" href="#"> readless </a>
     </small>
