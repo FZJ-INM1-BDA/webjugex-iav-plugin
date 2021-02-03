@@ -59,8 +59,8 @@ const getNBFromPostReq = ({ body }) => {
     .replace(/^\"/, '')
     .replace(/\"$/, '')
 
-  const area1Replace = getAreas(areas1)
-  const area2Replace = getAreas(areas2)
+  const area1Replace = getAreas(areas1[0])
+  const area2Replace = getAreas(areas2[0])
   
   return template
     .replace(/\$AREA1\$/g, area1Replace)
