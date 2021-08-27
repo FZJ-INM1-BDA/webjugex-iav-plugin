@@ -45,13 +45,13 @@ For retrieving microarray data, brainscapes connects to the web API of the Allen
   homepage: 'https://webjugex-iav-plugin.readthedocs.io/',
   authors: `BDA-INM1 <inm1-bda@fz-juelich.de>, Xiaoyun Gui <x.gui@fz-juelich.de>, Daviti Gogshelidze <d.gogshelidze@fz-juelich.de>`,
   csp: {
-    'connect-src': [
-      HOSTNAME
-    ],
-    'script-src': [
-      HOSTNAME,
-      "'unsafe-eval'",
-    ]
+    // 'connect-src': [
+    //   HOSTNAME
+    // ],
+    // 'script-src': [
+    //   HOSTNAME,
+    //   "'unsafe-eval'",
+    // ]
   }
 }
 

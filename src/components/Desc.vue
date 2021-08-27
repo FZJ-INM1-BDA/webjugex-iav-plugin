@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-dark p-2">
+  <div class=" p-2">
     <small v-if="descReadmore">
       <p>
         Find a set of differentially expressed genes between two user defined volumes of interest based on JuBrain maps.

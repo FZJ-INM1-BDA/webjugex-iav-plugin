@@ -17,6 +17,7 @@
         class="position-relative"
         style="z-index:6"
         placeholderText="Search & Add ROI 1"
+        @WarningMessage="catchError($event.message)"
         @DisableRoi1scan="$refs.roi2Selector.deactivateScan()"
         :warning="roi1Warning"
         :regionsInput="regionsWithlabelIndicies">
@@ -28,6 +29,7 @@
         class="position-relative"
         style="z-index:5"
         placeholderText="Search & Add ROI 2"
+        @WarningMessage="catchError($event.message)"
         @DisableRoi1scan="$refs.roi1Selector.deactivateScan()"
         :warning="roi2Warning"
         :regionsInput="regionsWithlabelIndicies">
@@ -61,11 +63,11 @@
           @updateIsDefault="advancedIsDefault = $event"
           ref="advancedRef"
           style="z-index:3"
-          class="bg-dark p-3 w-100"
+          class=" p-3 w-100"
           v-show="showAdvancedMenu"/>
       </div>
 
-      <div class="bg-dark">
+      <div class="">
         <div>
           Differential Analysis
         </div>

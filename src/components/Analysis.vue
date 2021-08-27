@@ -15,7 +15,7 @@
             @togglecheckbox="toggleDisplayProbeLocation()"/>
         </div>
 
-        <div class="bg-dark pt-1">
+        <div class=" pt-1">
           <div class="w-100 d-flex justify-content-center">Download</div>
           <div class="btn-group btn-block">
             <div class="btn btn-default">
