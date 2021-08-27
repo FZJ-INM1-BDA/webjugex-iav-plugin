@@ -1,7 +1,7 @@
 <template>
   <form
     autocomplete="off"
-    class="p-1 bg-dark mb-2">
+    class="p-1  mb-2">
     {{ label }}
     <div
       @keydown.stop
@@ -37,7 +37,7 @@
 <script>
 import { AutoComplete, Pill } from 'vue-components'
 
-const xformRoiToDispl = region => `${region.name} - ${region.status}`
+const xformRoiToDispl = region => region.name
 
 export default {
   components:{
@@ -124,7 +124,18 @@ export default {
   },
   methods:{
     selectRoi: function (name) {
-      if (this.selectedRois.indexOf(name) < 0) this.selectedRois = this.selectedRois.concat(name)
+      if (this.selectedRois.indexOf(name) < 0) {
+        /**
+         * pyjugex currently can only allow 1 roi defined at a time
+         * merge pmap is currently not supported
+         */
+        if (this.selectedRois.length > 0) {
+          this.$emit('WarningMessage', {
+            message: `Only a single ROI can be selected at a time. Merging of probabilistic maps has not yet been implemented. Replacing previous selection.`
+          })
+        }
+        this.selectedRois = [ name ]
+      }
     },
     selectSlice: function (displName){
       const reg = this.regionsInput.find(r => xformRoiToDispl(r) === displName)

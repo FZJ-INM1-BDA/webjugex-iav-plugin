@@ -1,5 +1,5 @@
 <template>
-  <form autocomplete="off" class="p1 bg-dark mb-2 p-1">
+  <form autocomplete="off" class="p1  mb-2 p-1">
     {{label}}
     <div
       @keydown.enter.prevent

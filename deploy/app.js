@@ -55,14 +55,6 @@ For retrieving microarray data, brainscapes connects to the web API of the Allen
   }
 }
 
-app.get('/template.html', (req, res) => {
-  res.send(`We are currently reworking JuGEx. It will become available shortly.`)
-})
-
-app.get('/vue-script.js', (req, res) => {
-  res.send(``)
-})
-
 const store = new MemoryStore({
   checkPeriod: 1000 * 60 * 60 * 24
 })
@@ -77,14 +69,14 @@ app.use(session({
   secret: SECRET
 }))
 
-// setupAuth(app)
-//   .then(() => {
-//     console.log(`auth setup successfully`)
-//   })
-//   .catch(e => {
-//     console.error(`auth setup failed`, e)
-//     process.exit(1)
-//   })
+setupAuth(app)
+  .then(() => {
+    console.log(`auth setup successfully`)
+  })
+  .catch(e => {
+    console.error(`auth setup failed`, e)
+    process.exit(1)
+  })
 
 app.set('BACKEND_URL', BACKEND_URL)
 app.set('HOSTNAME', HOSTNAME)
