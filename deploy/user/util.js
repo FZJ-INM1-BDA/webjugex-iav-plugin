@@ -50,8 +50,8 @@ const getNBFromPostReq = ({ body }) => {
     if(!body[key]) throw new Error(`body[${key}] needs to be defined`)
   }
 
-  const areas1 = getAreasFromStringV2(body['webjugex-analysis-roi1']).map(v => v && `${v.name} - ${v.hemisphere}`)
-  const areas2 = getAreasFromStringV2(body['webjugex-analysis-roi2']).map(v => v && `${v.name} - ${v.hemisphere}`)
+  const areas1 = getAreasFromStringV2(body['webjugex-analysis-roi1']).map(v => v && v.name)
+  const areas2 = getAreasFromStringV2(body['webjugex-analysis-roi2']).map(v => v && v.name)
   const threshold = Number(body['webjugex-analysis-threshold'])
   const rep = Number(body['webjugex-analysis-permutations'])
 
