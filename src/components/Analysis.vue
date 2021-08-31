@@ -20,10 +20,11 @@
           <div class="btn-group btn-block">
             <div class="btn btn-default">
               <a download="pval.tsv"
+                v-if="pvalUrl"
                 @mouseenter="showPreviewPValData=true"
                 @mouseleave="showPreviewPValData=false"
                 class="position-relative"
-                :href="'data:text/tsv;charset=utf-8,' + pvaldata">
+                :href="pvalUrl">
                 <span>
                   p values
                 </span>
@@ -35,10 +36,11 @@
             </div>
             <div class="btn btn-default">
               <a download="coord.tsv"
+                v-if="coordUrl"
                 @mouseenter="showPreviewCoordData=true"
                 @mouseleave="showPreviewCoordData=false"
                 class="position-relative"
-                :href="'data:text/tsv;charset=utf-8,' + coorddata">
+                :href="coordUrl">
                 <span>
                   probe locations
                 </span>
@@ -100,6 +102,40 @@ const getCoord = (tsv) => tsv
     }
   })
 
+  function parseFetchedData(json) {
+
+    const parseAreaToFile = arr => arr.map(({ name, hemisphere, probes }) => 
+      probes.map(({ position, probe_properties }) => 
+        svTmpl([],
+          `${name}${hemisphere ? (': ' + hemisphere) : ''}`,
+          ...position,
+          ...Object.keys(probe_properties).map(probP => probe_properties[probP])
+        )
+      ).join('\n')
+    ).join('\n')
+
+    const parsePvalToFile = (json) => {
+      return Object.keys(json).map(key => svTmpl`${key}${json[key]}`).join('\n')
+    }
+
+    const { result, Areas } = json
+    
+    const stringCoordFile = parseAreaToFile(Areas)
+    const stringPvalFile = parsePvalToFile(result)
+    const stringTitledCoordFile = svTmpl([],
+      'Area name',
+      'x',
+      'y',
+      'z',
+      ...Object.keys(Areas[0].probes[0].probe_properties)
+    ).concat('\n', stringCoordFile)
+    
+    return {
+      pval : stringPvalFile,
+      coord : stringTitledCoordFile
+    }
+  }
+
 export default {
   components: {
     PreviewTsv,
@@ -140,7 +176,9 @@ export default {
        * download data
        */
       pvaldata: null,
+      pvalUrl: null,
       coorddata: null,
+      coordUrl: null,
 
       /**
        * polling
@@ -214,18 +252,40 @@ export default {
     },
     getDataRunner: function() {
       this.getData()
-              .then(this.parseFetchedData)
-              .then(rjson => {
-                this.completionTime = new Date().toString()
-                this.analysisComplete = true
-                this.pvaldata = rjson.pval
-                this.coorddata = rjson.coord
-              })
-              .catch(e => {
-                console.error('error', e)
-                this.error = e
-                this.$emit('error', e)
-              })
+        .then(parseFetchedData)
+        .then(rjson => {
+          this.completionTime = new Date().toString()
+          this.analysisComplete = true
+          
+          this.pvaldata = rjson.pval
+          this.coorddata = rjson.coord
+
+          this.cleanupUrl()
+          const coordBlob = new Blob([rjson.coord], { type: 'data:text/tsv' })
+          this.coordUrl = URL.createObjectURL(coordBlob)
+          
+          const pvalBlob = new Blob([ rjson.pval ], { type: 'data:text/tsv' })
+          this.pvalUrl = URL.createObjectURL(pvalBlob)
+        })
+        .catch(e => {
+          console.error('error', e)
+          this.error = e
+          this.$emit('error', e)
+        })
+    },
+    /**
+     * called on destroy
+     * also called when new urls are about to be generated
+     */
+    cleanupUrl: function() {
+      if (this.coordUrl) {
+        URL.revokeObjectURL(this.coordUrl)
+        this.coordUrl = null
+      }
+      if (this.pvalUrl) {
+        URL.revokeObjectURL(this.pvalUrl)
+        this.pvalUrl = null
+      }
     },
     getData: function () {
       return new Promise((resolve, reject) => {
@@ -258,39 +318,6 @@ export default {
             }
           })
       })
-    },
-    parseFetchedData: function (json) {
-
-      const parseAreaToFile = arr => arr.map(({ name, hemisphere, probes }) => 
-        probes.map(({ position, probe_properties }) => 
-          svTmpl([],
-            `${name}: ${hemisphere}`,
-            ...position,
-            ...Object.keys(probe_properties).map(probP => probe_properties[probP])
-          )
-        ).join('\n')
-      ).join('\n')
-
-      const parsePvalToFile = (json) => {
-        return Object.keys(json).map(key => svTmpl`${key}${json[key]}`).join('\n')
-      }
-
-      const { result, Areas } = json
-      
-      const stringCoordFile = parseAreaToFile(Areas)
-      const stringPvalFile = parsePvalToFile(result)
-      const stringTitledCoordFile = svTmpl([],
-        'Area name',
-        'x',
-        'y',
-        'z',
-        ...Object.keys(Areas[0].probes[0].probe_properties)
-      ).concat('\n', stringCoordFile)
-      
-      return {
-        pval : stringPvalFile,
-        coord : stringTitledCoordFile
-      }
     },
     toggleDisplayProbeLocation: function() {
       this.displayProbeLocation = !this.displayProbeLocation
@@ -330,6 +357,7 @@ export default {
      */
     if (this.intervalId) clearInterval(this.intervalId)
     this.destroyCoord()
+    this.cleanupUrl()
   }
 }
 </script>
