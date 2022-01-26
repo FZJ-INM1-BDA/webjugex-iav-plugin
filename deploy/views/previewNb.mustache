@@ -19,6 +19,10 @@
   {
     height: 0!important;
   }
+  .w-0
+  {
+    width: 0!important;
+  }
   </style>
 </head>
 <body>
@@ -58,20 +62,18 @@
 
           <!-- run on lab.ebrains.eu -->
           <!-- TODO disabling running on jupyter lab as a result of sync issue between jupyterhub and seafile -->
-          <a href="getNb/{{wjNbId}}?target=jupyter"
-            class="btn disabled requires-login"
-            aria-text="Run in lab.ebrains.eu">
-            <i class="fas fa-play"></i>
-          </a>
+          <form target="_blank" method="post" action="postNb/{{wjNbId}}">
+            <input class="d-none" type="text" value="jupyter" name="target" class="invisible">
+            <button class="btn requires-login"
+              type="submit"
+              aria-text="Run in lab.ebrains.eu">
+              <i class="fas fa-play"></i>
+            </button>
+          </form>
         </div>
 
         <!-- padding -->
         <div class="flex-grow-1 flex-shrink-1 d-inline-flex align-items-center pl-2 h-0">
-          {{#user}}
-          <i class="text-muted">
-            There is currently an issue running notebooks in lab.ebrains.eu . Issue tracking will be pasted here once available.
-          </i>
-          {{/user}}
           {{^user}}
           <i class="text-muted">
             Signin to enable cloud features
