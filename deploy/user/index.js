@@ -6,9 +6,17 @@ const { SIGNIN_REDIRECT } = require('../const')
 const { getNBFromPostReq } = require('./util')
 const { saveUserData, WEBJUGEX_DIR_NAME, tempStore } = require('./store')
 const { v4: uuidV4 } = require('uuid')
+const { URL } = require("url")
+const { Branches, RepositoryFiles, Projects } = require("@gitbeaker/node")
 
 const HBP_COLLAB_HOST = process.env.HBP_COLLAB_HOST || `https://lab.ebrains.eu`
 const HBP_COLLAB_PATH = process.env.HBP_COLLAB_PATH || '/hub/user-redirect/lab/tree/drive/My%20Libraries/My%20Library/'
+
+const {
+  HBP_GITLAB_HOST = "https://gitlab.ebrains.eu",
+  HBP_GITLAB_TOKEN,
+  HBP_GITLAB_PROJECT_ID,
+} = process.env
 
 const fs = require('fs')
 const path = require('path')
@@ -113,7 +121,40 @@ router.post('/postNb/:nbId', bodyParser.urlencoded({ extended: true }), async (r
   }
 
   if (target === 'jupyter') {
-    return res.status(405).end()
+    if (!user) {
+      return res.status(401).send("You need to be authenticated for this operation")
+    }
+    const filename = "webjugex.ipynb"
+
+    if (!(HBP_GITLAB_HOST && HBP_GITLAB_TOKEN && HBP_GITLAB_PROJECT_ID)) {
+      return res.status(405).end()
+    }
+    const commonConfig = {
+      host: HBP_GITLAB_HOST,
+      token: HBP_GITLAB_TOKEN,
+      version: 4,
+    }
+    try {
+      const projectApi = new Projects(commonConfig)
+      const { path_with_namespace: nameSpacedPath } = await projectApi.show(HBP_GITLAB_PROJECT_ID)
+      const branchApi = new Branches(commonConfig)
+      const branchName = `tmp_${uuidV4().slice(0,6)}`
+      await branchApi.create(HBP_GITLAB_PROJECT_ID, branchName, "main")
+      const fileApi = new RepositoryFiles(commonConfig)
+      await fileApi.create(HBP_GITLAB_PROJECT_ID, filename, branchName, nb, "add file content")
+      
+      // NB the targetPath is specifically set to random uuid
+      // if not randomised, gitpuller will attempt to git fetch rather than git clone, which will result in broken pipeline
+      // cluttering user's default cwd is not an issue, since it's wiped after the container is destroyed (24h inactivation)
+      const redirectUrl = new URL(`${HBP_COLLAB_HOST}/hub/user-redirect/git-pull`)
+      redirectUrl.searchParams.set("repo", `${HBP_GITLAB_HOST.replace(/\/$/, '')}/${nameSpacedPath}.git`)
+      redirectUrl.searchParams.set("urlpath", `lab/tree/${branchName}/${filename}`)
+      redirectUrl.searchParams.set("branch", branchName)
+      redirectUrl.searchParams.set("targetPath", branchName)
+      return res.redirect(redirectUrl.toString())
+    } catch (e) {
+      return res.status(500).send(`Ops, some parts of our service is broken. ${e.toString()}`)
+    }
   }
 
   return res.status(400).send(`target needs to be specified`)
