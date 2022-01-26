@@ -1,3 +1,7 @@
+# NB
+
+This repository is archived, and will be incorporated into a newer/maintained repository.
+
 # Interactive Viewer Plugin Template
 ![](https://github.com/fzj-inm1-bda/webjugex-iav-plugin/workflows/Unit%20Tests/badge.svg)
 
